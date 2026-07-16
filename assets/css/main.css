@@ -965,6 +965,110 @@ body::after {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
+/* ============================================================
+   ORBO MOBILE — app shell (phones only; desktop untouchable).
+   The phone composes as a native app: a minimal 52px top bar
+   (logo only) and a floating glass tab bar under the thumb —
+   home / services / contact + the ambience toggle. Everything
+   lives inside the 767px media (story.js's `mobile` = <768).
+   ============================================================ */
+.tab-bar { display: none; }
+
+@media (max-width: 767px) {
+  :root { --header-h: 52px; --tabbar-h: 62px; }
+
+  /* minimal top bar: the logo alone; nav + audio moved to the tab bar.
+     Safe-area padding so a notch never eats the wordmark (the dock
+     target is measured live from the logo rect — computeDock follows). */
+  .site-header {
+    padding-top: env(safe-area-inset-top, 0px);
+    height: calc(var(--header-h) + env(safe-area-inset-top, 0px));
+  }
+  .site-header .nav-toggle,
+  .site-header .audio-toggle { display: none; }
+  .main-nav { display: none; }
+  .logo-mark { width: 26px; height: 26px; }
+  .logo-text { font-size: 0.92rem; }
+
+  /* the tab bar: one floating glass pill, thumb-height items */
+  .tab-bar {
+    position: fixed;
+    z-index: 110;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    inset-inline: 14px;
+    display: flex;
+    align-items: stretch;
+    height: var(--tabbar-h);
+    padding: 6px;
+    background: rgba(250, 250, 249, 0.80);
+    -webkit-backdrop-filter: blur(20px) saturate(1.4);
+    backdrop-filter: blur(20px) saturate(1.4);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    box-shadow: 0 12px 40px -12px rgba(20, 18, 31, 0.30);
+    transform: translateY(0);
+    transition: transform 0.35s var(--ease-out);
+  }
+  /* device-jank fallback (MOBILE-PLAN 6.3): no backdrop-filter -> solid fill */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .tab-bar { background: rgba(250, 250, 249, 0.96); }
+  }
+  /* app pattern: the bar ducks away while scrolling down, returns on
+     scroll-up / idle (main.js toggles the class, phones only) */
+  html.tabbar-hidden .tab-bar {
+    transform: translateY(calc(100% + 14px + env(safe-area-inset-bottom, 0px)));
+  }
+
+  .tab-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-height: 44px;
+    border-radius: 16px;
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: var(--ink-soft);
+    transition: color 0.25s, background-color 0.25s;
+  }
+  .tab-item svg { width: 22px; height: 22px; }
+  .tab-item.active { color: var(--accent); background: var(--accent-soft); font-weight: 700; }
+  .tab-item:active { background: var(--accent-soft); }
+
+  /* the ambience toggle rides the tab bar (audio.js binds every
+     [data-audio-toggle]; the header's copy is hidden above) */
+  .tab-audio .at-on { display: none; }
+  .tab-audio[aria-pressed="true"] { color: var(--accent); }
+  .tab-audio[aria-pressed="true"] .at-on { display: block; }
+  .tab-audio[aria-pressed="true"] .at-off { display: none; }
+  .tab-audio[hidden] { display: none; }
+  .no-js .tab-audio { display: none; }
+
+  /* content never rests under the floating bar */
+  .site-footer { padding-bottom: calc(var(--tabbar-h) + 28px + env(safe-area-inset-bottom, 0px)); }
+
+  /* ORBO MOBILE (M4): the footer collapses into a compact "about +
+     contact chips" block — the tab bar already owns navigation */
+  .site-footer { padding-top: 40px; }
+  .footer-inner { grid-template-columns: 1fr; gap: 20px; padding-bottom: 30px; }
+  .footer-nav { display: none; }
+  .footer-contact { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  .footer-label { width: 100%; }
+  .footer-mail {
+    font-size: 0.9rem;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-pill);
+    padding: 0.55em 1.2em;
+    background: var(--bg);
+    box-shadow: var(--shadow-sm);
+    text-align: start;
+  }
+  .footer-bottom { justify-content: center; text-align: center; row-gap: 4px; }
+}
+
 /* ---------- Reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

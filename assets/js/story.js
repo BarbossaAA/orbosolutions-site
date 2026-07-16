@@ -142,9 +142,18 @@
      weave flips to arc TOWARD the icon side. Formations are built once from
      the load-time aspect (a rotation mid-story keeps the load-time staging). */
   var narrow = innerWidth / innerHeight < 0.8;
-  var ICON_X = narrow ? 2.0 : 6.2;
-  var ICON_Y = narrow ? 4.2 : 0.6;
-  var ICON_S = narrow ? 3.6 : 5.2;
+  /* ORBO MOBILE (M2): on PHONES every beat is composed like an app
+     screen — the formation owns the upper ~55%, the words own the
+     lower ~45% (index.html bottom-anchors the beat copy under 768).
+     Icons pull near center (the camera weave arcs a full ±1.0 toward
+     the icon side at beat centers, so ±1.2 projects almost centered)
+     and grow a step now that the text column is out of their way.
+     appNarrow gates on BOTH flags — a portrait desktop/tablet window
+     (narrow but not mobile) keeps the V5 staging untouched. */
+  var appNarrow = mobile && narrow;
+  var ICON_X = appNarrow ? 1.2 : (narrow ? 2.0 : 6.2);
+  var ICON_Y = appNarrow ? 4.4 : (narrow ? 4.2 : 0.6);
+  var ICON_S = appNarrow ? 3.8 : (narrow ? 3.6 : 5.2);
 
   /* the visible half-frame at sculpture depth (~23u ahead of the camera;
      load-time aspect, same convention as the icon staging above; ×1.06
@@ -511,7 +520,8 @@
      easing compresses the tail; V3/V4 lesson) */
   var FORMS = [
     { name: 'cloud0', pts: buildCloud(0, 0, -20, 13, 6.5, 16), tint: VIOLET },
-    { name: 'star1', pts: buildStar(0, 0.6, -22, 4.4), tint: VIOLET },
+    /* app screens (M2): the opening star rises above the bottom-anchored copy */
+    { name: 'star1', pts: buildStar(0, appNarrow ? 1.6 : 0.6, -22, 4.4), tint: VIOLET },
     { name: 'river', pts: buildRiver(), tint: DEEP },
     { name: 'browser', pts: buildIcon(iconBrowser(), -ICON_X, ICON_Y, -174, ICON_S), tint: VIOLET },
     { name: 'phone', pts: buildIcon(iconPhone(), ICON_X, ICON_Y, -190.5, ICON_S), tint: CYAN },
@@ -519,8 +529,10 @@
     { name: 'neural', pts: buildIcon(iconNeural(), ICON_X, ICON_Y, -251, ICON_S), tint: DEEP },
     { name: 'controller', pts: buildIcon(iconController(), -ICON_X, ICON_Y, -279.6, ICON_S * 1.08), tint: CYAN },
     { name: 'lifebuoy', pts: buildIcon(iconLifebuoy(), ICON_X, ICON_Y, -295.7, ICON_S * 0.88), tint: ROSE },
-    /* narrow: drop the dense core below the centered text column (QA) */
-    { name: 'orbit', pts: buildOrbit(0, narrow ? -2.5 : 0, -337), tint: VIOLET },
+    /* narrow: drop the dense core below the centered text column (QA).
+       On phones (M2 app screens) the copy moved to the BOTTOM, so the
+       core rises back into the formation zone instead. */
+    { name: 'orbit', pts: buildOrbit(0, appNarrow ? 1.2 : (narrow ? -2.5 : 0), -337), tint: VIOLET },
     { name: 'gates', pts: buildGates(), tint: CYAN },
     /* the finale: forms as B10's words arrive and holds to p=1 —
        no burst / second star after it (V5.1 user directive) */
@@ -686,8 +698,11 @@
     '  float lag = seed.y;',
     /* V5.5 (user: "brush 30% of what we have now"): tight personal
        angular reach ~2.2..4.1deg — an intimate liquid poke, not a wide
-       gravity well */
-    '  float ang = 0.039 + 0.033*seed.z;',
+       gravity well. ORBO MOBILE (M3): a THUMB is wider than a cursor
+       and covers its own dimple — phones get ×1.35 reach. The desktop
+       line stays byte-identical (hard law: desktop untouched). */
+    mobile ? '  float ang = (0.039 + 0.033*seed.z) * 1.35;'
+           : '  float ang = 0.039 + 0.033*seed.z;',
     '  float f1 = 1.0 - smoothstep(0.0, t1 * ang, length(pp1));',
     '  float f2 = 1.0 - smoothstep(0.0, t2 * ang, length(pp2));',
     '  float ff = mix(f1, f2, lag);',      /* slow reactors chase where the ray WAS */
@@ -869,7 +884,10 @@
            directly — a resting pointer holds a dimple, a fast pointer
            splashes, and release snaps straight back home */
         '  p += rayForce(p, aSeed, uRayO, uRayD, uRayDPrev, uHover, uPush,',
-        '                1.1 + aSeed.x*1.6, 0.25 + aSeed.x*1.6, 0.2*(aSeed.z - 0.5))',
+        /* ORBO MOBILE (M3): the brush must be FELT under the thumb —
+           phone gains run hotter; desktop line byte-identical */
+        mobile ? '                (1.1 + aSeed.x*1.6) * 1.8, (0.25 + aSeed.x*1.6) * 1.7, 0.2*(aSeed.z - 0.5))'
+               : '                1.1 + aSeed.x*1.6, 0.25 + aSeed.x*1.6, 0.2*(aSeed.z - 0.5))',
         '       * (1.0 - uSolid * 0.85);', /* sealed inside the aquarium */
         '  p = uDockPos + (p - vec3(0.0, 0.4, -444.0)) * uDockScale;', /* travels with the glass */
         VERT_TAIL
@@ -988,8 +1006,12 @@
            clear ~0.5-1u dent on formed strokes (QA 2026-07-16 — the
            first gain read as sub-perceptual in the field pins) */
         '  vel += rayForce(wp, seed, uRayO, uRayD, uRayDPrev, uHover, uPush,',
-        '                  (0.022 + 0.055*seed.x) * uDt,',
-        '                  (0.010 + 0.034*seed.x) * uDt,',
+        /* ORBO MOBILE (M3): thumb-strength dimple + splash on phones;
+           desktop lines byte-identical (hard law) */
+        mobile ? '                  (0.022 + 0.055*seed.x) * 1.8 * uDt,'
+               : '                  (0.022 + 0.055*seed.x) * uDt,',
+        mobile ? '                  (0.010 + 0.034*seed.x) * 1.7 * uDt,'
+               : '                  (0.010 + 0.034*seed.x) * uDt,',
         /* V5.5 liquid swirl: less than half the gain of the first cut */
         '                  (0.005 + 0.013*seed.z) * (seed.z - 0.5) * uDt);',
         /* damping ~0.94 (heavier once formed, so sculptures hold crisp;
@@ -1320,18 +1342,44 @@
       var q = Math.round(o * 40) / 40;
       if (q !== bt.state) {
         bt.state = q;
-        bt.el.style.opacity = q;
-        bt.el.style.transform = 'translateY(' + ((1 - q) * 12).toFixed(1) + 'px)';
+        /* ORBO MOBILE (M2): on phones the entrance is a CLASS-DRIVEN
+           spring (index.html: 300ms translateY+opacity on .live) — an
+           app screen arriving, not a scroll-scrubbed fade. Inline
+           writes would override that CSS, so they are desktop-only.
+           Scrub-safety survives: the class is still a pure function
+           of p, and removing it plays the same spring out. */
+        if (!mobile) {
+          bt.el.style.opacity = q;
+          bt.el.style.transform = 'translateY(' + ((1 - q) * 12).toFixed(1) + 'px)';
+        }
         bt.el.classList.toggle('live', q > 0.5);
       }
     }
     if (hint) hint.style.opacity = Math.max(0, 1 - p * 14);
   }
 
+  /* CHAPTER DOTS (ORBO MOBILE M2): 11 beats read as 7 app chapters —
+     opening / the way / capabilities in pairs / running+process /
+     finale. One class write per chapter change. */
+  var dotsWrap = document.querySelector('.story-dots');
+  var dotEls = dotsWrap ? dotsWrap.children : null;
+  var DOT_EDGES = [0.10, 0.205, 0.365, 0.525, 0.695, 0.90];
+  var lastDot = 0; /* markup ships with dot 0 on */
+  function updateDots(p) {
+    if (!dotEls || dotEls.length < 7) return;
+    var d = 0;
+    while (d < DOT_EDGES.length && p >= DOT_EDGES[d]) d++;
+    if (d !== lastDot) {
+      dotEls[lastDot].classList.remove('on');
+      dotEls[d].classList.add('on');
+      lastDot = d;
+    }
+  }
+
   /* ---------- go live ---------- */
   /* version stamp — lets remote debugging confirm which engine build a
      machine is actually running (stale-cache hunts, V5.19 lesson) */
-  console.info('Orbo engine v75 | tier ' + gpuTier + (mobile ? ' mobile' : ' desktop') + (simInfo ? ' sim' : ' stateless'));
+  console.info('Orbo engine v76 | tier ' + gpuTier + (mobile ? ' mobile' : ' desktop') + (simInfo ? ' sim' : ' stateless'));
   document.documentElement.classList.add('story-live');
   document.documentElement.classList.add('story-light');
   var header = document.getElementById('siteHeader');
@@ -1345,6 +1393,7 @@
   var overMatch = /[?&]over=([0-9.]+)/.exec(location.search);
   var overPin = overMatch ? Math.min(1, Math.max(0, parseFloat(overMatch[1]))) : null;
   var overS = overPin !== null ? overPin : 0;
+  var overV = 0; /* rubber-band spring velocity (M3, phones only) */
 
   /* cursor -> a RAY through the world (V5.4). `hover` is PRESENCE: it
      ramps to 1 while the pointer is over the page and holds there —
@@ -1364,8 +1413,14 @@
   }, { passive: true });
   document.documentElement.addEventListener('mouseleave', function () { hoverTarget = 0; });
   window.addEventListener('blur', function () { hoverTarget = 0; });
+  /* ORBO MOBILE (M2): touchDown gates the magnetic chapters — the
+     magnet may only steer the scroll AFTER the finger lifts and the
+     momentum dies; a touching finger always wins instantly. */
+  var touchDown = false;
   window.addEventListener('touchstart', function (e) {
     if (!e.touches.length) return;
+    touchDown = true;
+    magT = -1; magCalm = 0;
     ndc.x = (e.touches[0].clientX / innerWidth) * 2 - 1;
     ndc.y = -(e.touches[0].clientY / innerHeight) * 2 + 1;
     lastNdc.copy(ndc);
@@ -1380,8 +1435,60 @@
   }, { passive: true });
   /* only the LAST finger leaving drops presence — a resting finger keeps
      its dimple even while other fingers tap/lift elsewhere (QA 2026-07-16) */
-  window.addEventListener('touchend', function (e) { if (e.touches.length) return; hoverTarget = 0; });
-  window.addEventListener('touchcancel', function (e) { if (e.touches.length) return; hoverTarget = 0; });
+  window.addEventListener('touchend', function (e) { if (e.touches.length) return; hoverTarget = 0; touchDown = false; magCalm = 0; });
+  window.addEventListener('touchcancel', function (e) { if (e.touches.length) return; hoverTarget = 0; touchDown = false; magCalm = 0; });
+
+  /* ============================================================
+     MAGNETIC CHAPTERS (ORBO MOBILE M2) — phones only. The journey
+     stays fully scroll-driven (p is still a pure function of
+     scrollY — scrub-safe both ways); the magnet only STEERS the
+     resting point: once touch momentum dies inside the story, the
+     scroll eases to the nearest FORMED state (the ANCHORS' p values
+     — each beat's text is live and its formation complete there),
+     so a swipe reads as "one chapter arrives". Inside the footer
+     overscroll it parks the dock at either end (open or closed) so
+     the handover never rests mid-crossfade. CSS scroll-snap cannot
+     do this — it fights the 1100vh/800vh track and the overscroll
+     dock (MOBILE-PLAN 3.1). */
+  var MAG_P = [0, 0.06, 0.14, 0.2325, 0.3125, 0.3925, 0.4725, 0.5525, 0.6325, 0.735, 0.84, 0.925, 1.0];
+  var magT = -1, magCalm = 0, magLastY = -1;
+  function magnetize(dtn) {
+    var sy = window.scrollY;
+    if (magLastY < 0) magLastY = sy;
+    var v = sy - magLastY;
+    magLastY = sy;
+    if (touchDown || pPin !== null || overPin !== null) { magT = -1; magCalm = 0; return; }
+    if (magT < 0) {
+      /* momentum watch: a few near-still frames = the flick is over */
+      magCalm = Math.abs(v) < 1.6 ? magCalm + 1 : 0;
+      if (magCalm < 3 || trackH <= 0) return;
+      var ty;
+      if (sy <= trackH) {
+        var pNow = sy / trackH, best = 0, bd = 9;
+        for (var mi = 0; mi < MAG_P.length; mi++) {
+          var md = Math.abs(MAG_P[mi] - pNow);
+          if (md < bd) { bd = md; best = mi; }
+        }
+        ty = Math.round(MAG_P[best] * trackH);
+      } else {
+        /* overscroll: the dock is a switch, not a slider */
+        ty = (sy - trackH) > (maxScroll - trackH) * 0.5 ? maxScroll : trackH;
+      }
+      if (Math.abs(ty - sy) > 3) magT = ty; else magCalm = 0;
+      return;
+    }
+    /* glide: eased approach with a 1px floor so the tail never stalls
+       on scroll-position rounding */
+    var step = (magT - sy) * Math.min(1, 0.085 * dtn);
+    if (Math.abs(step) < 1) step = (magT > sy ? 1 : -1) * Math.min(1, Math.abs(magT - sy));
+    var ny = sy + step;
+    if (Math.abs(magT - ny) < 0.75) { ny = magT; magT = -1; magCalm = 0; }
+    /* behavior:'instant' — the page CSS sets scroll-behavior:smooth,
+       which would turn every per-frame write into a competing
+       animation; the magnet IS the animation */
+    window.scrollTo({ top: ny, left: 0, behavior: 'instant' });
+    magLastY = window.scrollY; /* our own write is not user velocity */
+  }
 
   /* cache the track height — reading offsetHeight every frame while also
      writing --sp (a layout-affecting property on the header) forces a
@@ -1496,9 +1603,20 @@
 
   var lookTarget = new THREE.Vector3();
   var dockV = new THREE.Vector3();
+  /* ORBO MOBILE (M5) idle throttle: when the phone is fully at rest —
+     scroll converged, no finger, no push energy, dock settled, magnet
+     parked — render every 2nd frame. Halves the GPU bill at rest;
+     imperceptible (twinkle periods are >1s). The skipped frame's dt
+     rolls into the next one (dtn≈2 — the sim integrates it exactly);
+     the governor is fed only on un-throttled frames so 33ms idle
+     frames never read as overload. QA pins are never throttled. */
+  var idleSettled = false, idleFlip = false;
   function frame(t) {
     requestAnimationFrame(frame);
     if (document.hidden) return;
+    idleFlip = !idleFlip;
+    if (idleSettled && idleFlip) return;
+    var wasIdle = idleSettled;
     /* cap dt: a tab-hide rAF gap must not read as 90 slow frames and trip
        the governor (permanent quality drop after one tab switch) */
     var dt = lastT ? Math.min(100, t - lastT) : 16.7;
@@ -1509,6 +1627,7 @@
     pSmooth += (p - pSmooth) * 0.085;
     mx += (ndc.x * 0.5 - mx) * 0.04;
     my += (-ndc.y * 0.5 - my) * 0.04;
+    if (mobile) magnetize(dtn);
 
     gradeUpdate(pSmooth);
     applyLeg(pSmooth);
@@ -1529,7 +1648,22 @@
        by tens of px on some machine; the resting state is then the
        REAL header mark, which by definition cannot be misplaced */
     if (overRaw > 0.9) overRaw = 1;
-    overS += (overRaw - overS) * Math.min(1, 0.10 * dtn);
+    /* ORBO MOBILE (M3): on phones the dock has a RUBBER BAND — an
+       underdamped spring (ζ≈0.6, ~10% overshoot, settles ~1.2s) so
+       the landing arrives with a springy little settle instead of a
+       flat exponential. The dock/flatten/crossfade smoothsteps clamp
+       internally, so a brief overS past 1 only deepens the pose it
+       already reached; bottom is pinned hard at 0. Desktop keeps the
+       V5 lerp exactly. */
+    if (mobile) {
+      overV += (overRaw - overS) * 0.016 * dtn;
+      overV *= Math.pow(0.86, dtn);
+      overS += overV * dtn;
+      if (overS < 0) { overS = 0; overV = 0; }
+      if (overS > 1.12) { overS = 1.12; overV = 0; }
+    } else {
+      overS += (overRaw - overS) * Math.min(1, 0.10 * dtn);
+    }
 
     /* camera FIRST (V5.15 — moved above the dock block so the dock
        anchor is projected through THIS frame's matrices, not last
@@ -1553,7 +1687,9 @@
        parallax lives through the finale again and dies only with the
        dock. The landing stays exact regardless: the V5.15 unproject
        maps the anchor through the FULL camera pose every frame. */
-    var calm = 1 - overS;
+    /* clamped: the M3 phone rubber-band lets overS overshoot 1 briefly —
+       calm must floor at 0, never flip sign (identity on desktop) */
+    var calm = Math.max(0, 1 - overS);
     camera.position.set((sway * 0.4 + weave + mx * 1.0) * calm, (Math.sin(pSmooth * 9) * 0.35 - my * 0.75) * calm, z);
     lookTarget.set(mx * 2.2 * calm, -my * 1.6 * calm, z - 46);
     camera.lookAt(lookTarget);
@@ -1645,10 +1781,12 @@
     }
 
     /* pointer speed -> push impulse; decay heals the liquid closed.
-       normalized by dtn so the splash feels the same at 60/120/165 Hz */
+       normalized by dtn so the splash feels the same at 60/120/165 Hz.
+       ORBO MOBILE (M3): a fast flick must leave a VISIBLE wake — the
+       phone impulse runs hotter and caps higher (desktop values exact) */
     var speed = Math.hypot(ndc.x - lastNdc.x, ndc.y - lastNdc.y);
     lastNdc.copy(ndc);
-    push += Math.min(1.2, (speed / dtn) * 28) * 0.4 * dtn;
+    push += Math.min(mobile ? 1.6 : 1.2, (speed / dtn) * 28) * (mobile ? 0.62 : 0.4) * dtn;
     push *= Math.pow(0.92, dtn);
     /* presence ramps smoothly — arrival blooms in, leaving heals out */
     hover += (hoverTarget - hover) * Math.min(1, 0.10 * dtn);
@@ -1678,6 +1816,7 @@
     if (sim) runSim();
 
     updateBeats(pSmooth);
+    if (mobile) updateDots(pSmooth);
     /* write --sp only when the displayed value actually changes — it feeds a
        width calc on the header, so an unconditional write costs a reflow */
     var spq = Math.round(pSmooth * 500);
@@ -1685,8 +1824,15 @@
       lastSp = spq;
       header.style.setProperty('--sp', (spq / 500).toFixed(3));
     }
+    /* M5: decide the NEXT frame's throttle from this frame's settled
+       state (phones only, never at QA pins) */
+    idleSettled = mobile && pPin === null && overPin === null &&
+      !touchDown && magT < 0 &&
+      Math.abs(p - pSmooth) < 1e-4 &&
+      hover < 0.01 && push < 0.01 &&
+      Math.abs(overRaw - overS) < 1e-3;
     renderFrame();
-    govern(dt);
+    if (!wasIdle) govern(dt);
   }
   /* warm the finale material at load (QA 2026-07-16): otherwise it
      compiles synchronously on the FIRST frame it becomes visible — a

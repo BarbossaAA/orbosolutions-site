@@ -16,8 +16,9 @@
 <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@300..900&display=swap">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@300..900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/main.css?v=75">
+<link rel="stylesheet" href="assets/css/main.css?v=76">
 <style>
   /* ---- services page only ---- */
   .anchor-nav a { display: inline-flex; align-items: center; gap: 0.6em; }
@@ -111,6 +112,80 @@
       margin-top: 24px;
     }
   }
+
+  /* ============================================================
+     ORBO MOBILE (M4) — the six worlds as a horizontal snap
+     CAROUSEL of app cards (phones only; the long-form sections
+     stay below for depth/SEO). Each card: the world's wireframe
+     scene as whisper art, number chip, title, one approved line,
+     and the whole card links to its full section.
+     ============================================================ */
+  .svc-carousel { display: none; }
+  @media (max-width: 767px) {
+    .svc-carousel { display: block; padding-block: 4px 30px; }
+    .svc-cards {
+      display: flex;
+      gap: 14px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      padding: 6px 20px 18px;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    .svc-cards::-webkit-scrollbar { display: none; }
+    .svc-card {
+      position: relative;
+      flex: 0 0 82vw;
+      max-width: 330px;
+      min-height: 190px;
+      scroll-snap-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      padding: 22px 22px 18px;
+      overflow: hidden;
+    }
+    .svc-card:active { border-color: rgba(91, 76, 245, 0.35); }
+    .svc-card-art {
+      position: absolute;
+      top: -34px;
+      inset-inline-start: -52px;
+      width: 215px;
+      height: 215px;
+      color: var(--accent);
+      opacity: 0.14;
+      pointer-events: none;
+    }
+    .svc-card-num {
+      font-family: var(--font-display);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      color: var(--accent);
+      direction: ltr;
+      align-self: flex-start;
+    }
+    .svc-card h3 { font-size: 1.14rem; font-weight: 700; position: relative; }
+    .svc-card p { font-size: 0.92rem; color: var(--ink-soft); flex-grow: 1; position: relative; }
+    .svc-card-more {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+    .svc-card-more svg { width: 15px; height: 15px; }
+    /* the hero chip list retires on phones — the carousel IS the
+       overview; the same element still returns as the floating
+       wayfinding bar once the long-form begins */
+    .anchor-nav { display: none; }
+    .anchor-nav.nav-floating { display: flex; }
+  }
 </style>
 </head>
 <body>
@@ -170,6 +245,108 @@
         <a href="#rescue"><span class="anchor-num">06</span>הצלה ומודרניזציה</a>
         <a href="#ongoing"><span class="anchor-num">07</span>ליווי עסקים פעילים</a>
       </nav>
+    </div>
+  </section>
+
+  <!-- ORBO MOBILE (M4): app-card carousel of the worlds (phones only) -->
+  <section class="svc-carousel" aria-label="סקירת השירותים">
+    <div class="svc-cards">
+
+      <a class="svc-card" href="#web">
+        <svg class="svc-card-art" viewBox="0 0 240 240" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
+          <path d="M50 92 l69 -40 l69 40 l-69 40 Z"/>
+          <path d="M50 130 l69 -40 l69 40 l-69 40 Z"/>
+          <path d="M50 168 l69 -40 l69 40 l-69 40 Z"/>
+          <path d="M50 92 V168 M119 132 V208 M188 92 V168"/>
+          <path d="M119 74 l26 10 -11 4 -4 11 z"/>
+        </svg>
+        <span class="svc-card-num">01</span>
+        <h3>אתרים וחוויות דיגיטליות</h3>
+        <p>אתרים שאי אפשר לשכוח.</p>
+        <span class="svc-card-more">עוד<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg></span>
+      </a>
+
+      <a class="svc-card" href="#apps">
+        <svg class="svc-card-art" viewBox="0 0 240 240" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
+          <path d="M78 90 l52 -30 a8 8 0 0 1 12 5 V150 a10 10 0 0 1 -5 8 l-52 30 a8 8 0 0 1 -12 -5 V98 a10 10 0 0 1 5 -8 Z"/>
+          <path d="M96 84 l18 -10"/>
+          <path d="M92 178 l14 -8"/>
+          <path d="M150 120 l40 -23 l22 13 -40 23 Z"/>
+          <path d="M158 148 l30 -17 l16 9 -30 17 Z"/>
+        </svg>
+        <span class="svc-card-num">02</span>
+        <h3>אפליקציות ותוכנה</h3>
+        <p>מהגרסה הראשונה ועד מוצר שלם שרץ בענן.</p>
+        <span class="svc-card-more">עוד<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg></span>
+      </a>
+
+      <a class="svc-card" href="#systems">
+        <svg class="svc-card-art" viewBox="0 0 240 240" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
+          <path d="M60 160 l52 -30 m0 0 l52 -30 M60 100 l52 -30 m0 0 l52 -30 M60 100 v60 M112 70 v60 M164 40 v60"/>
+          <path d="M60 160 l52 30 l52 -30 M112 130 l52 30 M164 100 l52 30"/>
+          <circle cx="60" cy="100" r="5"/><circle cx="112" cy="70" r="5"/><circle cx="164" cy="40" r="5"/>
+          <circle cx="60" cy="160" r="5"/><circle cx="112" cy="130" r="5"/><circle cx="164" cy="100" r="5"/>
+          <circle cx="112" cy="190" r="5"/><circle cx="164" cy="160" r="5"/><circle cx="216" cy="130" r="5"/>
+        </svg>
+        <span class="svc-card-num">03</span>
+        <h3>מערכות עסקיות</h3>
+        <p>מערכת אחת שמסדרת הכול: לקוחות, תפעול, כסף ודוחות.</p>
+        <span class="svc-card-more">עוד<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg></span>
+      </a>
+
+      <a class="svc-card" href="#ai">
+        <svg class="svc-card-art" viewBox="0 0 240 240" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
+          <path d="M65 90 L120 60 M120 60 L178 92 M65 90 L92 150 M92 150 L120 60 M92 150 L160 160 M178 92 L160 160 M65 90 L45 145 M45 145 L92 150"/>
+          <circle cx="120" cy="60" r="6"/><circle cx="65" cy="90" r="6"/><circle cx="178" cy="92" r="6"/>
+          <circle cx="92" cy="150" r="6"/><circle cx="160" cy="160" r="6"/><circle cx="45" cy="145" r="6"/>
+          <path d="M196 48 l2.2 8.8 8.8 2.2 -8.8 2.2 -2.2 8.8 -2.2 -8.8 -8.8 -2.2 8.8 -2.2 Z"/>
+        </svg>
+        <span class="svc-card-num">04</span>
+        <h3>AI ואוטומציה</h3>
+        <p>העסק ממשיך לעבוד גם כשאתם ישנים.</p>
+        <span class="svc-card-more">עוד<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg></span>
+      </a>
+
+      <a class="svc-card" href="#interactive">
+        <svg class="svc-card-art" viewBox="0 0 240 240" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
+          <path d="M120 40 L172 70 L172 130 L120 160 L68 130 L68 70 Z"/>
+          <path d="M120 40 L120 100 M68 70 L120 100 M172 70 L120 100 M68 130 L120 100 M172 130 L120 100 M120 160 L120 100"/>
+          <circle cx="196" cy="180" r="17"/>
+          <path d="M196 180 V150"/>
+          <circle cx="196" cy="143" r="7"/>
+        </svg>
+        <span class="svc-card-num">05</span>
+        <h3>משחקים וחוויות אינטראקטיביות</h3>
+        <p>לקוחות שהופכים לשחקנים.</p>
+        <span class="svc-card-more">עוד<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg></span>
+      </a>
+
+      <a class="svc-card" href="#rescue">
+        <svg class="svc-card-art" viewBox="0 0 240 240" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
+          <path d="M68 60 l52 -30 l52 30 l-52 30 Z"/>
+          <path d="M60 110 l52 30 v56 l-52 -30 Z"/>
+          <path d="M180 110 l-52 30 v56 l52 -30 Z"/>
+          <path d="M120 96 v30 M96 76 l-24 22 M144 76 l24 22" stroke-dasharray="2 5"/>
+        </svg>
+        <span class="svc-card-num">06</span>
+        <h3>הצלה ומודרניזציה</h3>
+        <p>פרויקט תקוע? מייצבים, משדרגים, מחזירים שליטה.</p>
+        <span class="svc-card-more">עוד<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg></span>
+      </a>
+
+      <a class="svc-card" href="#ongoing">
+        <svg class="svc-card-art" viewBox="0 0 240 240" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
+          <ellipse cx="120" cy="120" rx="62" ry="24" transform="rotate(-14 120 120)"/>
+          <ellipse cx="120" cy="120" rx="82" ry="31" transform="rotate(-26 120 120)"/>
+          <circle cx="120" cy="120" r="11"/>
+          <circle cx="181" cy="103" r="5"/><circle cx="58" cy="139" r="5"/><circle cx="146" cy="66" r="4"/>
+        </svg>
+        <span class="svc-card-num">07</span>
+        <h3>ליווי עסקים פעילים</h3>
+        <p>תחזוקה, שיפורים ומערכות שגדלות איתכם.</p>
+        <span class="svc-card-more">עוד<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg></span>
+      </a>
+
     </div>
   </section>
 
@@ -542,6 +719,45 @@
     <span class="footer-made">Digital Product &amp; Automation Studio</span>
   </div>
 </footer>
+
+<nav class="tab-bar" aria-label="ניווט מהיר">
+  <a href="index.html" class="tab-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M4.6 10.6 12 4.3l7.4 6.3"/>
+      <path d="M6.6 9.2V19a.9.9 0 0 0 .9.9h9a.9.9 0 0 0 .9-.9V9.2"/>
+      <path d="M10.3 19.9v-4.6h3.4v4.6"/>
+    </svg>
+    <span>בית</span>
+  </a>
+  <a href="services.html" class="tab-item active" aria-current="page">
+    <svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <path d="M16 3 L18.6 13.4 L29 16 L18.6 18.6 L16 29 L13.4 18.6 L3 16 L13.4 13.4 Z" fill="url(#tbs2)" stroke="url(#tbs)" stroke-width="1.8" stroke-linejoin="round"/>
+      <circle cx="16" cy="16" r="4.2" fill="url(#tbs3)"/>
+      <defs>
+        <linearGradient id="tbs" x1="6" y1="4" x2="26" y2="28" gradientUnits="userSpaceOnUse"><stop stop-color="#9d8bff"/><stop offset="0.5" stop-color="#7e63ff"/><stop offset="1" stop-color="#5a46d6"/></linearGradient>
+        <radialGradient id="tbs2" cx="16" cy="16" r="14" gradientUnits="userSpaceOnUse"><stop stop-color="#b9a6ff" stop-opacity="0.08"/><stop offset="1" stop-color="#8f74ff" stop-opacity="0.26"/></radialGradient>
+        <radialGradient id="tbs3" cx="16" cy="16" r="4.2" gradientUnits="userSpaceOnUse"><stop stop-color="#ffffff" stop-opacity="0.95"/><stop offset="1" stop-color="#e6deff" stop-opacity="0"/></radialGradient>
+      </defs>
+    </svg>
+    <span>שירותים</span>
+  </a>
+  <a href="contact.html" class="tab-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="3" y="5.2" width="18" height="13.6" rx="3"/>
+      <path d="M4.5 7.6l6.2 4.6a2.2 2.2 0 0 0 2.6 0l6.2-4.6"/>
+    </svg>
+    <span>צור קשר</span>
+  </a>
+  <button class="tab-item tab-audio" data-audio-toggle aria-pressed="false" aria-label="מוזיקת רקע">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M11.5 5.5 7 9H3.8v6H7l4.5 3.5z"/>
+      <path class="at-on" d="M14.8 9.4a4 4 0 0 1 0 5.2"/>
+      <path class="at-on" d="M17.4 7a7.4 7.4 0 0 1 0 10"/>
+      <path class="at-off" d="M15.2 9.8l4.4 4.4m0-4.4l-4.4 4.4"/>
+    </svg>
+    <span>מוזיקה</span>
+  </button>
+</nav>
 
 <script src="assets/js/lumen-gl.js" defer></script>
 <script src="assets/js/pagehero-gl.js" defer></script>

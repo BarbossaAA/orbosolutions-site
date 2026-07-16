@@ -49,6 +49,29 @@
   var year = document.getElementById('year');
   if (year) year.textContent = String(new Date().getFullYear());
 
+  /* ORBO MOBILE shell: the tab bar ducks away while scrolling down and
+     returns on scroll-up or after a short idle (standard app pattern).
+     Attached ONLY under 768px — desktop gets no listener at all. */
+  var tabBar = document.querySelector('.tab-bar');
+  if (tabBar && window.matchMedia('(max-width: 767px)').matches) {
+    var tbLastY = window.scrollY, tbIdle = null, tbHidden = false;
+    var tbSet = function (h) {
+      if (h === tbHidden) return;
+      tbHidden = h;
+      document.documentElement.classList.toggle('tabbar-hidden', h);
+    };
+    window.addEventListener('scroll', function () {
+      var y = window.scrollY;
+      var dy = y - tbLastY;
+      tbLastY = y;
+      if (y < 40) tbSet(false);
+      else if (dy > 6) tbSet(true);
+      else if (dy < -6) tbSet(false);
+      clearTimeout(tbIdle);
+      tbIdle = setTimeout(function () { tbSet(false); }, 900);
+    }, { passive: true });
+  }
+
   /* Close only one FAQ at a time */
   var faqs = document.querySelectorAll('.faq-item');
   faqs.forEach(function (item) {

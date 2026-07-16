@@ -16,8 +16,9 @@
 <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@300..900&display=swap">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@300..900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/main.css?v=75">
+<link rel="stylesheet" href="assets/css/main.css?v=76">
 <style>
   /* ——— index.html: the story ——— */
 
@@ -235,12 +236,68 @@
   }
   html.story-live .beat-cap .beat-inner::before { content: none; }
 
+  /* ORBO MOBILE (M1): on phones the story progress is CHAPTER DOTS
+     under the top bar (the header's --sp light retires there), and the
+     swipe hint rises above the tab bar. Dots are wired by story.js;
+     the first dot is on at load. */
+  .story-dots { display: none; }
+  @media (max-width: 767px) {
+    html.story-live .story-dots {
+      display: flex;
+      position: fixed;
+      top: calc(var(--header-h) + env(safe-area-inset-top, 0px) + 10px);
+      inset-inline: 0;
+      justify-content: center;
+      gap: 7px;
+      z-index: 3;
+      pointer-events: none;
+    }
+    .story-dots i {
+      width: 6px;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(20, 18, 31, 0.18);
+      transition: width 0.3s var(--ease-out), background-color 0.3s;
+    }
+    .story-dots i.on { width: 18px; background: var(--accent); }
+    html.story-live #siteHeader::after { display: none; }
+    html.story-live .story-hint { bottom: calc(86px + env(safe-area-inset-bottom, 0px)); }
+  }
+
+  /* ORBO MOBILE (M2): the story as an app flow. A shorter thumb
+     journey (800vh), and every beat composed as an app SCREEN — the
+     formation owns the upper part of the frame, the words sit in the
+     thumb zone above the tab bar. The entrance is a 300ms spring on
+     .live (transform+opacity only — the V5.19 no-reflow law), driven
+     by story.js toggling the class instead of scrub-fading inline. */
+  @media (max-width: 767px) {
+    html.story-live .story-track { height: 800vh; }
+    html.story-live .beat {
+      place-items: end center;
+      padding: 20px 20px calc(112px + env(safe-area-inset-bottom, 0px));
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.3s var(--ease-out), transform 0.36s cubic-bezier(0.3, 1.36, 0.44, 1);
+    }
+    html.story-live .beat.live { opacity: 1; transform: translateY(0); }
+    /* thumb-zone buttons: real app tap targets (MOBILE-PLAN 2.4) */
+    .beat-actions .btn { min-height: 52px; }
+    /* the docked star lands with a single success pulse — the app
+       completing (transform-only, plays once per dock) */
+    html.story-live.star-docked .site-header .logo-mark { animation: dock-pulse 0.55s var(--ease-out) 1; }
+  }
+  @keyframes dock-pulse {
+    0% { transform: scale(1); }
+    38% { transform: scale(1.28); }
+    100% { transform: scale(1); }
+  }
+
   /* V5.21 mobile design pass (owner: "everything smaller, tidier,
      adapted"): the story scales down as one system on phones — type,
      spacing, chips, buttons */
   @media (max-width: 640px) {
     .beat-actions .btn { width: 100%; }
-    html.story-live .beat { padding: 20px; }
+    /* (the beat padding now lives in the M2 767px app-screen block above) */
     html.story-live .beat .display-xl { font-size: clamp(2.3rem, 9.4vw, 2.9rem); }
     html.story-live .beat .display-lg { font-size: clamp(1.75rem, 7.2vw, 2.15rem); }
     .beat .beat-sub { font-size: 0.98rem; max-width: 30em; }
@@ -402,6 +459,8 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 9.75l5.5 5.5 5.5-5.5"/></svg>
   </div>
 
+  <div class="story-dots" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
   <div class="story-track" aria-hidden="true"></div>
 </main>
 
@@ -441,8 +500,48 @@
   </div>
 </footer>
 
+<nav class="tab-bar" aria-label="ניווט מהיר">
+  <a href="index.html" class="tab-item active" aria-current="page">
+    <svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <path d="M16 3 L18.6 13.4 L29 16 L18.6 18.6 L16 29 L13.4 18.6 L3 16 L13.4 13.4 Z" fill="url(#tbi2)" stroke="url(#tbi)" stroke-width="1.8" stroke-linejoin="round"/>
+      <circle cx="16" cy="16" r="4.2" fill="url(#tbi3)"/>
+      <defs>
+        <linearGradient id="tbi" x1="6" y1="4" x2="26" y2="28" gradientUnits="userSpaceOnUse"><stop stop-color="#9d8bff"/><stop offset="0.5" stop-color="#7e63ff"/><stop offset="1" stop-color="#5a46d6"/></linearGradient>
+        <radialGradient id="tbi2" cx="16" cy="16" r="14" gradientUnits="userSpaceOnUse"><stop stop-color="#b9a6ff" stop-opacity="0.08"/><stop offset="1" stop-color="#8f74ff" stop-opacity="0.26"/></radialGradient>
+        <radialGradient id="tbi3" cx="16" cy="16" r="4.2" gradientUnits="userSpaceOnUse"><stop stop-color="#ffffff" stop-opacity="0.95"/><stop offset="1" stop-color="#e6deff" stop-opacity="0"/></radialGradient>
+      </defs>
+    </svg>
+    <span>בית</span>
+  </a>
+  <a href="services.html" class="tab-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="4" y="4" width="6.6" height="6.6" rx="1.8"/>
+      <rect x="13.4" y="4" width="6.6" height="6.6" rx="1.8"/>
+      <rect x="4" y="13.4" width="6.6" height="6.6" rx="1.8"/>
+      <rect x="13.4" y="13.4" width="6.6" height="6.6" rx="1.8"/>
+    </svg>
+    <span>שירותים</span>
+  </a>
+  <a href="contact.html" class="tab-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="3" y="5.2" width="18" height="13.6" rx="3"/>
+      <path d="M4.5 7.6l6.2 4.6a2.2 2.2 0 0 0 2.6 0l6.2-4.6"/>
+    </svg>
+    <span>צור קשר</span>
+  </a>
+  <button class="tab-item tab-audio" data-audio-toggle aria-pressed="false" aria-label="מוזיקת רקע">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M11.5 5.5 7 9H3.8v6H7l4.5 3.5z"/>
+      <path class="at-on" d="M14.8 9.4a4 4 0 0 1 0 5.2"/>
+      <path class="at-on" d="M17.4 7a7.4 7.4 0 0 1 0 10"/>
+      <path class="at-off" d="M15.2 9.8l4.4 4.4m0-4.4l-4.4 4.4"/>
+    </svg>
+    <span>מוזיקה</span>
+  </button>
+</nav>
+
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js" defer></script>
-<script src="assets/js/story.js?v=75" defer></script>
+<script src="assets/js/story.js?v=76" defer></script>
 <script src="assets/js/audio.js?v=74" defer></script>
 <script src="assets/js/main.js" defer></script>
 </body>
