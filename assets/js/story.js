@@ -111,14 +111,15 @@
      1.5 cap upscaled ~33% on HiDPI screens — every mote read as BLUR.
      Capable GPUs now render native up to DPR 2.0; the governor's DPR
      ladder starts from here and can shed it right back down. */
+  /* V5.21 (owner: "not bright and sharp enough" on phones): fewer,
+     BIGGER, SHARPER motes — DPR back up for crispness, the budget
+     paid for by killing phone smoke (fill-rate) and thinning counts */
   var DPR_CAP = mobile
-    ? (gpuTier === 2 ? 1.4 : 1.15)   /* V5.20: phones render fewer px */
+    ? (gpuTier === 2 ? 1.75 : 1.3)
     : (gpuTier === 2 ? 2.0 : gpuTier === 1 ? 1.5 : 1.25);
   var DPR = Math.min(window.devicePixelRatio || 1, DPR_CAP);
-  /* base mote size (multiplied by DPR wherever uSize is written);
-     slightly larger on phones to keep the swarm's presence at the
-     lower resolution */
-  var SIZE0 = mobile ? 1.65 : 1.8;
+  /* base mote size (multiplied by DPR wherever uSize is written) */
+  var SIZE0 = mobile ? 1.85 : 1.8;
   renderer.setPixelRatio(DPR);
   renderer.setSize(innerWidth, innerHeight, false);
 
@@ -185,17 +186,17 @@
     else if (testType(THREE.HalfFloatType)) type = THREE.HalfFloatType;
     if (!type) return null;
     /* sim texture side by GPU tier: the swarm budget IS W*H.
-       V5.20: phone budgets trimmed (144² = ~20.7k, 112² = ~12.5k) —
-       smoothness IS the mobile experience */
+       V5.21: phones run FEW, big, crisp motes (120² = 14.4k, 96² =
+       9.2k) — smoothness and clarity over mass */
     var W = mobile
-      ? (gpuTier >= 1 ? 144 : 112)
+      ? (gpuTier >= 1 ? 120 : 96)
       : (gpuTier === 2 ? 256 : gpuTier === 1 ? 208 : 144);
     return { type: type, W: W, H: W, rtOpts: rtOpts };
   }
   var simInfo = detectSim();
 
   var N = simInfo ? simInfo.W * simInfo.H
-    : mobile ? (gpuTier >= 1 ? 20000 : 11000)
+    : mobile ? (gpuTier >= 1 ? 14000 : 9000)
     : (gpuTier === 2 ? 60000 : gpuTier === 1 ? 43000 : 22000);
 
   function jit(a) { return (Math.random() - 0.5) * a; }
@@ -227,7 +228,9 @@
      (the brand icon language); 1-in-8 motes are always "halo dust"
      scattered around the formation so sculptures breathe.
      ============================================================ */
-  function isHalo(i) { return (i & 7) === 7; }
+  /* V5.21 (owner: "stray background particles dirty the screen" on
+     phones): halo/sky dust thinned 1-in-8 -> 1-in-16 on mobile */
+  function isHalo(i) { return mobile ? (i & 15) === 15 : (i & 7) === 7; }
 
   function circlePts(cx, cy, r, n) {
     var pts = [];
@@ -1097,7 +1100,10 @@
   }
   var smokes = [];
   (function () {
-    var count = mobile ? 6 : 22; /* V5.20: fewer smoke sprites on phones */
+    /* V5.21: ZERO smoke on phones — each sprite is a near-fullscreen
+       translucent quad, and that overdraw was most of the mobile
+       fill-rate bill; the bg grade carries the atmosphere there */
+    var count = mobile ? 0 : 22;
     for (var i = 0; i < count; i++) {
       var z = 8 - (i + 0.5) / count * 500 + (Math.random() - 0.5) * 10;
       var x = (i % 2 ? 1 : -1) * (7 + Math.random() * 10);
@@ -1325,7 +1331,7 @@
   /* ---------- go live ---------- */
   /* version stamp — lets remote debugging confirm which engine build a
      machine is actually running (stale-cache hunts, V5.19 lesson) */
-  console.info('Orbo engine v74 | tier ' + gpuTier + (mobile ? ' mobile' : ' desktop') + (simInfo ? ' sim' : ' stateless'));
+  console.info('Orbo engine v75 | tier ' + gpuTier + (mobile ? ' mobile' : ' desktop') + (simInfo ? ' sim' : ' stateless'));
   document.documentElement.classList.add('story-live');
   document.documentElement.classList.add('story-light');
   var header = document.getElementById('siteHeader');

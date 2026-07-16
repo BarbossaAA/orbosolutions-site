@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@300..900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/main.css?v=71">
+<link rel="stylesheet" href="assets/css/main.css?v=75">
 <style>
   /* ——— index.html: the story ——— */
 
@@ -235,8 +235,24 @@
   }
   html.story-live .beat-cap .beat-inner::before { content: none; }
 
+  /* V5.21 mobile design pass (owner: "everything smaller, tidier,
+     adapted"): the story scales down as one system on phones — type,
+     spacing, chips, buttons */
   @media (max-width: 640px) {
     .beat-actions .btn { width: 100%; }
+    html.story-live .beat { padding: 20px; }
+    html.story-live .beat .display-xl { font-size: clamp(2.3rem, 9.4vw, 2.9rem); }
+    html.story-live .beat .display-lg { font-size: clamp(1.75rem, 7.2vw, 2.15rem); }
+    .beat .beat-sub { font-size: 0.98rem; max-width: 30em; }
+    .beat-cap h2 { font-size: 1.45rem; }
+    .beat-cap .cap-num { font-size: 0.82rem; margin-bottom: 8px; }
+    .beat .eyebrow { font-size: 0.72rem; margin-bottom: 16px; }
+    .beat h1, .beat h2 { margin-bottom: 12px; }
+    .beat-actions { gap: 10px; margin-top: 22px; }
+    .beat-actions .btn-lg { padding: 13px 20px; font-size: 0.98rem; }
+    .beat-micro { font-size: 0.78rem; margin-top: 14px; }
+    .beat-steps { gap: 9px 16px; margin-top: 20px; }
+    .beat-steps span { font-size: 0.88rem; }
   }
 </style>
 </head>
@@ -426,7 +442,7 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js" defer></script>
-<script src="assets/js/story.js?v=74" defer></script>
+<script src="assets/js/story.js?v=75" defer></script>
 <script src="assets/js/audio.js?v=74" defer></script>
 <script src="assets/js/main.js" defer></script>
 </body>
