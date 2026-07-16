@@ -112,11 +112,13 @@
      Capable GPUs now render native up to DPR 2.0; the governor's DPR
      ladder starts from here and can shed it right back down. */
   var DPR_CAP = mobile
-    ? (gpuTier === 2 ? 1.5 : 1.25)
+    ? (gpuTier === 2 ? 1.4 : 1.15)   /* V5.20: phones render fewer px */
     : (gpuTier === 2 ? 2.0 : gpuTier === 1 ? 1.5 : 1.25);
   var DPR = Math.min(window.devicePixelRatio || 1, DPR_CAP);
-  /* base mote size (multiplied by DPR wherever uSize is written) */
-  var SIZE0 = mobile ? 1.5 : 1.8;
+  /* base mote size (multiplied by DPR wherever uSize is written);
+     slightly larger on phones to keep the swarm's presence at the
+     lower resolution */
+  var SIZE0 = mobile ? 1.65 : 1.8;
   renderer.setPixelRatio(DPR);
   renderer.setSize(innerWidth, innerHeight, false);
 
@@ -182,16 +184,18 @@
     if (testType(THREE.FloatType)) type = THREE.FloatType;
     else if (testType(THREE.HalfFloatType)) type = THREE.HalfFloatType;
     if (!type) return null;
-    /* sim texture side by GPU tier: the swarm budget IS W*H */
+    /* sim texture side by GPU tier: the swarm budget IS W*H.
+       V5.20: phone budgets trimmed (144² = ~20.7k, 112² = ~12.5k) —
+       smoothness IS the mobile experience */
     var W = mobile
-      ? (gpuTier >= 1 ? 160 : 128)
+      ? (gpuTier >= 1 ? 144 : 112)
       : (gpuTier === 2 ? 256 : gpuTier === 1 ? 208 : 144);
     return { type: type, W: W, H: W, rtOpts: rtOpts };
   }
   var simInfo = detectSim();
 
   var N = simInfo ? simInfo.W * simInfo.H
-    : mobile ? (gpuTier >= 1 ? 26000 : 14000)
+    : mobile ? (gpuTier >= 1 ? 20000 : 11000)
     : (gpuTier === 2 ? 60000 : gpuTier === 1 ? 43000 : 22000);
 
   function jit(a) { return (Math.random() - 0.5) * a; }
@@ -1093,7 +1097,7 @@
   }
   var smokes = [];
   (function () {
-    var count = mobile ? 10 : 22;
+    var count = mobile ? 6 : 22; /* V5.20: fewer smoke sprites on phones */
     for (var i = 0; i < count; i++) {
       var z = 8 - (i + 0.5) / count * 500 + (Math.random() - 0.5) * 10;
       var x = (i % 2 ? 1 : -1) * (7 + Math.random() * 10);
@@ -1319,6 +1323,9 @@
   }
 
   /* ---------- go live ---------- */
+  /* version stamp — lets remote debugging confirm which engine build a
+     machine is actually running (stale-cache hunts, V5.19 lesson) */
+  console.info('Orbo engine v74 | tier ' + gpuTier + (mobile ? ' mobile' : ' desktop') + (simInfo ? ' sim' : ' stateless'));
   document.documentElement.classList.add('story-live');
   document.documentElement.classList.add('story-light');
   var header = document.getElementById('siteHeader');
@@ -1379,9 +1386,19 @@
 
   var mx = 0, my = 0;
   var rt = null;
+  var lastRW = innerWidth, lastRH = innerHeight;
   window.addEventListener('resize', function () {
     clearTimeout(rt);
     rt = setTimeout(function () {
+      /* V5.20 (owner: "very stuck on the phone"): the mobile URL bar
+         shows/hides DURING scroll and fires resize with a small
+         height-only delta — rebuilding the render pipeline for that
+         janked every scroll direction change. Height-only wiggles
+         refresh the scroll math ONLY; the full rebuild runs just for
+         real resizes (rotation, window drag, width change). */
+      var hOnly = innerWidth === lastRW && Math.abs(innerHeight - lastRH) < 160;
+      lastRW = innerWidth; lastRH = innerHeight;
+      if (hOnly) { relayout(); return; }
       camera.aspect = innerWidth / innerHeight;
       camera.updateProjectionMatrix();
       /* refresh DPR too — dragging to another monitor / browser zoom changes

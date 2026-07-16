@@ -10,12 +10,13 @@
 (function () {
   'use strict';
 
-  /* V5.19 (owner: "a bit louder, fits the site better"): level up
-     0.06 -> 0.105, a 55Hz sub drone under the pad (cosmic floor), the
-     filter opened 850 -> 1150 (glassier air), noise-air and shimmer
-     more present, a second high sparkle voice. */
+  /* V5.20 (owner: "a deep fitting melody with some bass, and max
+     volume ~40% of before"): LEVEL 0.105 -> 0.042; a slow A-minor
+     pentatonic motif breathes over a pulsing sub-bass line (audio-
+     clock scheduler, everything still procedural), the pad sits
+     quieter underneath. */
   var KEY = 'lumen-audio';
-  var LEVEL = 0.105;
+  var LEVEL = 0.042;
   var btns = [].slice.call(document.querySelectorAll('[data-audio-toggle]'));
   if (!btns.length) return;
   var AC = window.AudioContext || window.webkitAudioContext;
@@ -38,17 +39,18 @@
       o.start(t0);
       return o;
     }
-    /* a deep floor + five voices on an airy sus2 stack
-       (A1 | A2 E3 A3 B3 E4), each a detuned pair */
-    var freqs = [55, 110, 164.81, 220, 246.94, 329.63];
-    var gains = [0.26, 0.30, 0.24, 0.18, 0.13, 0.09];
+    /* five voices on an airy sus2 stack (A2 E3 A3 B3 E4), each a
+       detuned pair — the moving bass LINE below replaces the old
+       static sub drone */
+    var freqs = [110, 164.81, 220, 246.94, 329.63];
+    var gains = [0.24, 0.19, 0.14, 0.10, 0.07];
     for (var i = 0; i < freqs.length; i++) {
       var vg = ctx.createGain();
       /* slow independent breathing per voice */
       lfo(0.02 + i * 0.011, gains[i] * 0.35, vg.gain, gains[i]);
       for (var d = -1; d <= 1; d += 2) {
         var o = ctx.createOscillator();
-        o.type = (i > 0 && i < 3) ? 'triangle' : 'sine';
+        o.type = i < 2 ? 'triangle' : 'sine';
         o.frequency.value = freqs[i];
         o.detune.value = d * (2 + i);
         o.connect(vg);
@@ -90,6 +92,44 @@
       sh.connect(sg); sg.connect(out);
       sh.start(t0);
     }
+    /* THE DEEP LAYER (V5.20): a pulsing sub-bass line + a slow
+       pentatonic motif, scheduled ahead on the audio clock. The bass
+       is one continuous sine gliding between root notes; each step
+       swells in and sighs out. Melody notes are short-lived sines
+       with soft attacks — a motif, not a lead. */
+    var BASS = [55, 55, 43.65, 49];               /* A1 A1 F1 G1 */
+    var MEL = [220, 261.63, 329.63, 392, 440, 392, 329.63, 261.63]; /* Am pent */
+    var bassOsc = ctx.createOscillator();
+    bassOsc.type = 'sine';
+    bassOsc.frequency.value = BASS[0];
+    var bassG = ctx.createGain();
+    bassG.gain.value = 0;
+    bassOsc.connect(bassG); bassG.connect(out);
+    bassOsc.start(t0);
+    var step = 0, nextT = ctx.currentTime + 0.15;
+    setInterval(function () {
+      if (!ctx || ctx.state !== 'running') return;
+      while (nextT < ctx.currentTime + 3.5) {
+        bassOsc.frequency.setTargetAtTime(BASS[step % BASS.length], nextT, 0.18);
+        bassG.gain.setTargetAtTime(0.55, nextT, 0.4);
+        bassG.gain.setTargetAtTime(0.07, nextT + 1.7, 0.85);
+        for (var k = 0; k < 2; k++) {
+          var nt = nextT + k * 1.6 + 0.25;
+          var mo = ctx.createOscillator();
+          mo.type = 'sine';
+          mo.frequency.value = MEL[(step * 2 + k) % MEL.length];
+          var mg = ctx.createGain();
+          mg.gain.value = 0;
+          mg.gain.setTargetAtTime(0.11, nt, 0.5);
+          mg.gain.setTargetAtTime(0, nt + 1.05, 0.6);
+          mo.connect(mg); mg.connect(out);
+          mo.start(nt);
+          mo.stop(nt + 3.4);
+        }
+        step++;
+        nextT += 3.2;
+      }
+    }, 700);
   }
 
   function build() {
