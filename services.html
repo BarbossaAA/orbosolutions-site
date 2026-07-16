@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl" class="no-js">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>השירותים שלנו | Orbo Solutions</title>
+<meta name="description" content="שישה עולמות של יצירה דיגיטלית: אתרים, אפליקציות, מערכות עסקיות, AI ואוטומציה, חוויות אינטראקטיביות והצלת פרויקטים.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Orbo Solutions">
+<meta property="og:title" content="השירותים שלנו | Orbo Solutions">
+<meta property="og:description" content="שישה עולמות של יצירה, וכל שילוב ביניהם. כל שירות נבנה בהתאמה מלאה לעסק שלכם.">
+<meta property="og:url" content="https://orbosolutions.com/services.html">
+<meta property="og:image" content="https://orbosolutions.com/ad/ad-1080x1350.png">
+<meta property="og:locale" content="he_IL">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@300..900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/main.css?v=71">
+<style>
+  /* ---- services page only ---- */
+  .anchor-nav a { display: inline-flex; align-items: center; gap: 0.6em; }
+  .anchor-num {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    direction: ltr;
+    transition: color 0.3s;
+  }
+  .anchor-nav a:hover .anchor-num { color: rgba(255, 255, 255, 0.88); }
+
+  /* — chip cascade: each chip enters from the right, staggered by services.js — */
+  .anchor-nav a {
+    opacity: 0;
+    transform: translateX(14px);
+    transition: opacity 0.5s var(--ease-out) var(--d, 0s), transform 0.5s var(--ease-out) var(--d, 0s),
+      background-color 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
+  }
+  .anchor-nav.reveal.in a { opacity: 1; transform: none; }
+  .no-js .anchor-nav a { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) { .anchor-nav a { opacity: 1; transform: none; } }
+
+  /* — scroll-spy active chip — */
+  .anchor-nav a.active {
+    background: var(--grad-accent);
+    color: #fff;
+    border-color: transparent;
+    box-shadow: var(--shadow-accent);
+  }
+  .anchor-nav a.active .anchor-num { color: rgba(255, 255, 255, 0.88); }
+
+  /* — floating wayfinding bar once the hero scrolls away (services.js) — */
+  .anchor-nav.nav-floating {
+    position: fixed;
+    top: calc(var(--header-h) + 10px);
+    inset-inline: max(24px, calc((100vw - var(--container)) / 2));
+    z-index: 90;
+    margin-top: 0;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    background: rgba(10, 9, 16, 0.72);
+    backdrop-filter: blur(14px) saturate(1.3);
+    -webkit-backdrop-filter: blur(14px) saturate(1.3);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-pill);
+    padding: 8px;
+    box-shadow: var(--shadow-sm);
+    animation: navFloatIn 0.4s var(--ease-out);
+  }
+  .anchor-nav.nav-floating::-webkit-scrollbar { display: none; }
+  .anchor-nav.nav-floating a { white-space: nowrap; flex-shrink: 0; }
+  @keyframes navFloatIn { from { transform: translateY(-14px); opacity: 0; } }
+
+  /* bar bows out over the CTA band / footer (stays fixed = zero layout shift) */
+  .anchor-nav.nav-floating { transition: opacity 0.3s, transform 0.3s; }
+  .anchor-nav.nav-floating.nav-hidden { opacity: 0; transform: translateY(-14px); pointer-events: none; }
+
+  /* — ambient wireframe scenes: one whisper-light isometric sketch per world — */
+  .service-detail { position: relative; overflow: hidden; }
+  .service-inner { position: relative; z-index: 1; }
+  .svc-scene {
+    position: absolute;
+    inset-inline-end: -120px;
+    top: 50%;
+    margin-top: -340px;
+    width: 680px;
+    height: 680px;
+    color: var(--accent);
+    opacity: 0.17;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .service-detail:nth-child(even) .svc-scene { opacity: 0.22; }
+  @media (max-width: 860px) { .svc-scene { display: none; } }
+
+  .service-side h2 { margin-top: 2px; }
+
+  /* hairline under the sticky side block, desktop only */
+  @media (min-width: 1021px) {
+    .service-side::after {
+      content: '';
+      display: block;
+      width: 44px;
+      height: 3px;
+      border-radius: 3px;
+      background: var(--grad-accent);
+      opacity: 0.35;
+      margin-top: 24px;
+    }
+  }
+</style>
+</head>
+<body>
+<script>document.documentElement.classList.remove('no-js')</script>
+
+<header class="site-header" id="siteHeader">
+  <div class="container header-inner">
+    <a href="index.html" class="logo" aria-label="Orbo Solutions, דף הבית">
+      <svg class="logo-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <circle cx="16" cy="16" r="11.5" fill="url(#lgh3)"/>
+        <path d="M16 3 L18.6 13.4 L29 16 L18.6 18.6 L16 29 L13.4 18.6 L3 16 L13.4 13.4 Z" fill="url(#lgh4)" stroke="url(#lgh)" stroke-width="1.5" stroke-linejoin="round"/>
+        <circle cx="16" cy="16" r="4.6" fill="url(#lgh2)"/>
+        <defs>
+          <linearGradient id="lgh" x1="6" y1="4" x2="26" y2="28" gradientUnits="userSpaceOnUse"><stop stop-color="#9d8bff"/><stop offset="0.5" stop-color="#7e63ff"/><stop offset="1" stop-color="#5a46d6"/></linearGradient>
+          <radialGradient id="lgh2" cx="16" cy="16" r="4.6" gradientUnits="userSpaceOnUse"><stop stop-color="#ffffff" stop-opacity="0.95"/><stop offset="1" stop-color="#e6deff" stop-opacity="0"/></radialGradient>
+          <radialGradient id="lgh3" cx="16" cy="16" r="11.5" gradientUnits="userSpaceOnUse"><stop stop-color="#8f7bff" stop-opacity="0.28"/><stop offset="1" stop-color="#8f7bff" stop-opacity="0"/></radialGradient>
+          <radialGradient id="lgh4" cx="16" cy="16" r="14" gradientUnits="userSpaceOnUse"><stop stop-color="#b9a6ff" stop-opacity="0.05"/><stop offset="0.8" stop-color="#8f74ff" stop-opacity="0.14"/><stop offset="1" stop-color="#8f74ff" stop-opacity="0.22"/></radialGradient>
+        </defs>
+      </svg>
+      <span class="logo-text">ORBO<span class="logo-sep">·</span>SOLUTIONS</span>
+    </a>
+    <nav class="main-nav" id="mainNav" aria-label="ניווט ראשי">
+      <a href="index.html">בית</a>
+      <a href="services.html" aria-current="page">שירותים</a>
+      <a href="contact.html">צור קשר</a>
+    </nav>
+    <div class="header-actions">
+      <button class="audio-toggle" data-audio-toggle aria-pressed="false" aria-label="מוזיקת רקע">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M11.5 5.5 7 9H3.8v6H7l4.5 3.5z"/>
+          <path class="at-on" d="M14.8 9.4a4 4 0 0 1 0 5.2"/>
+          <path class="at-on" d="M17.4 7a7.4 7.4 0 0 1 0 10"/>
+          <path class="at-off" d="M15.2 9.8l4.4 4.4m0-4.4l-4.4 4.4"/>
+        </svg>
+      </button>
+      <a href="contact.html" class="btn btn-primary btn-sm">שיחת היכרות חינם</a>
+      <button class="nav-toggle" id="navToggle" aria-label="פתיחת תפריט" aria-expanded="false"><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- Page hero -->
+  <section class="page-hero">
+    <div class="page-hero-bg" aria-hidden="true"><canvas class="pageHeroCanvas"></canvas></div>
+    <div class="container">
+      <span class="eyebrow reveal">השירותים שלנו</span>
+      <h1 class="display-xl reveal" style="--d:.08s">שישה עולמות של יצירה.</h1>
+      <p class="lead reveal" style="--d:.16s">שישה עולמות של יצירה, וכל שילוב ביניהם. כל שירות נבנה בהתאמה מלאה, לפי מה שהעסק שלכם באמת צריך.</p>
+      <nav class="anchor-nav reveal" style="--d:.24s" aria-label="ניווט בין השירותים">
+        <a href="#web"><span class="anchor-num">01</span>אתרים וחוויות דיגיטליות</a>
+        <a href="#apps"><span class="anchor-num">02</span>אפליקציות ותוכנה</a>
+        <a href="#systems"><span class="anchor-num">03</span>מערכות עסקיות</a>
+        <a href="#ai"><span class="anchor-num">04</span>AI ואוטומציה</a>
+        <a href="#interactive"><span class="anchor-num">05</span>משחקים וחוויות אינטראקטיביות</a>
+        <a href="#rescue"><span class="anchor-num">06</span>הצלה ומודרניזציה</a>
+        <a href="#ongoing"><span class="anchor-num">07</span>ליווי עסקים פעילים</a>
+      </nav>
+    </div>
+  </section>
+
+  <!-- 01 · Web -->
+  <section class="service-detail" id="web">
+    <svg class="svc-scene" viewBox="0 0 240 240" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
+      <g data-rate="0.9" opacity=".5">
+        <path d="M30 60 l69 -40 l69 40 l-69 40 Z" vector-effect="non-scaling-stroke"/>
+        <circle cx="200" cy="150" r="22" vector-effect="non-scaling-stroke"/>
+      </g>
+      <g data-rate="1">
+        <path d="M50 92 l69 -40 l69 40 l-69 40 Z" vector-effect="non-scaling-stroke"/>
+        <path d="M50 130 l69 -40 l69 40 l-69 40 Z" vector-effect="non-scaling-stroke"/>
+        <path d="M50 168 l69 -40 l69 40 l-69 40 Z" vector-effect="non-scaling-stroke"/>
+        <path d="M50 92 V168 M119 132 V208 M188 92 V168" vector-effect="non-scaling-stroke"/>
+        <path d="M62 92 l10 -6 M76 84 l10 -6" vector-effect="non-scaling-stroke"/>
+        <path d="M119 74 l26 10 -11 4 -4 11 z" vector-effect="non-scaling-stroke"/>
+      </g>
+    </svg>
+    <div class="container service-inner">
+      <div class="service-side reveal">
+        <span class="service-num"><span class="num-roll">01</span></span>
+        <div class="service-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="4" width="18" height="16" rx="3"/>
+            <path d="M3 8.7h18"/>
+            <path d="M17.3 6.35h.01M14.7 6.35h.01"/>
+            <path d="M10 11.3l7 2.6-3.1 1.2-1.2 3.1z"/>
+          </svg>
+        </div>
+        <h2>אתרים וחוויות דיגיטליות</h2>
+      </div>
+      <div class="service-body">
+        <p class="reveal" style="--d:.1s">אתר הוא לא כרטיס ביקור. הוא מערכת המכירה החשובה ביותר שלכם. אנחנו בונים אתרים ברמה של חברות הטכנולוגיה המובילות בעולם: מהירים, מדויקים בעיצוב, עם אינטראקציות שגורמות ללקוחות להישאר, ולחזור.</p>
+        <ul class="chips reveal" style="--d:.18s" role="list">
+          <li class="chip">אתרי תדמית פרימיום</li>
+          <li class="chip">דפי נחיתה ממירים</li>
+          <li class="chip">אתרים אינטראקטיביים</li>
+          <li class="chip">אנימציה וגלילה קולנועית</li>
+          <li class="chip">תלת־ממד ו־WebGL</li>
+          <li class="chip">אתרי השקה למוצרים</li>
+          <li class="chip">מחשבונים חיים</li>
+          <li class="chip">דשבורדים בתוך האתר</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 · Apps -->
+  <section class="service-detail" id="apps">
+    <svg class="svc-scene" viewBox="0 0 240 240" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
+      <g data-rate="0.9" opacity=".5">
+        <circle cx="60" cy="70" r="26" stroke-dasharray="3 5" vector-effect="non-scaling-stroke"/>
+        <path d="M170 40 l30 -17 l14 8 -30 17 Z" vector-effect="non-scaling-stroke"/>
+      </g>
+      <g data-rate="1">
+        <path d="M78 90 l52 -30 a8 8 0 0 1 12 5 V150 a10 10 0 0 1 -5 8 l-52 30 a8 8 0 0 1 -12 -5 V98 a10 10 0 0 1 5 -8 Z" vector-effect="non-scaling-stroke"/>
+        <path d="M96 84 l18 -10" vector-effect="non-scaling-stroke"/>
+        <path d="M92 178 l14 -8" vector-effect="non-scaling-stroke"/>
+        <path d="M150 120 l40 -23 l22 13 -40 23 Z" vector-effect="non-scaling-stroke"/>
+        <path d="M158 148 l30 -17 l16 9 -30 17 Z" vector-effect="non-scaling-stroke"/>
+      </g>
+    </svg>
+    <div class="container service-inner">
+      <div class="service-side reveal">
+        <span class="service-num"><span class="num-roll">02</span></span>
+        <div class="service-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="7" y="2.6" width="10" height="18.8" rx="2.6"/>
+            <path d="M10.8 5.5h2.4"/>
+            <path d="M10.6 10.1l-1.7 1.9 1.7 1.9"/>
+            <path d="M13.4 10.1l1.7 1.9-1.7 1.9"/>
+            <path d="M10.9 18.5h2.2"/>
+          </svg>
+        </div>
+        <h2>אפליקציות ותוכנה</h2>
+      </div>
+      <div class="service-body">
+        <p class="reveal" style="--d:.1s">יש לכם רעיון? אנחנו הופכים אותו למוצר עובד. אפיון, UX/UI, פיתוח, תשלומים, לוח ניהול ופריסה לענן . גרסה ראשונה שאפשר להשיק, ובסיס איתן להמשך.</p>
+        <ul class="chips reveal" style="--d:.18s" role="list">
+          <li class="chip">MVP מלא לסטארטאפים</li>
+          <li class="chip">אפליקציות iOS &amp; Android</li>
+          <li class="chip">מערכות SaaS</li>
+          <li class="chip">הרשמה, תשלומים והרשאות</li>
+          <li class="chip">לוחות ניהול</li>
+          <li class="chip">API ואינטגרציות</li>
+          <li class="chip">העלאת קבצים ומסמכים</li>
+          <li class="chip">פריסה לענן</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 · Systems -->
+  <section class="service-detail" id="systems">
+    <svg class="svc-scene" viewBox="0 0 240 240" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
+      <g data-rate="0.9" opacity=".5">
+        <path d="M20 190 l60 -35 M20 130 l60 -35" vector-effect="non-scaling-stroke"/>
+        <circle cx="20" cy="130" r="4" vector-effect="non-scaling-stroke"/>
+      </g>
+      <g data-rate="1">
+        <path d="M60 160 l52 -30 m0 0 l52 -30 M60 100 l52 -30 m0 0 l52 -30 M60 100 v60 M112 70 v60 M164 40 v60" vector-effect="non-scaling-stroke"/>
+        <path d="M60 160 l52 30 l52 -30 M112 130 l52 30 M164 100 l52 30" vector-effect="non-scaling-stroke"/>
+        <circle cx="60" cy="100" r="5" vector-effect="non-scaling-stroke"/>
+        <circle cx="112" cy="70" r="5" vector-effect="non-scaling-stroke"/>
+        <circle cx="164" cy="40" r="5" vector-effect="non-scaling-stroke"/>
+        <circle cx="60" cy="160" r="5" vector-effect="non-scaling-stroke"/>
+        <circle cx="112" cy="130" r="5" vector-effect="non-scaling-stroke"/>
+        <circle cx="164" cy="100" r="5" vector-effect="non-scaling-stroke"/>
+        <circle cx="112" cy="190" r="5" vector-effect="non-scaling-stroke"/>
+        <circle cx="164" cy="160" r="5" vector-effect="non-scaling-stroke"/>
+        <circle cx="216" cy="130" r="5" vector-effect="non-scaling-stroke"/>
+      </g>
+    </svg>
+    <div class="container service-inner">
+      <div class="service-side reveal">
+        <span class="service-num"><span class="num-roll">03</span></span>
+        <div class="service-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="4" width="18" height="16" rx="3"/>
+            <path d="M15.2 4v16"/>
+            <path d="M3 12.2h12.2"/>
+            <path d="M6.6 17.2v-2M9.2 17.2v-3.4M11.8 17.2v-1.2"/>
+            <path d="M18.1 7.4h.01M18.1 9.9h.01"/>
+          </svg>
+        </div>
+        <h2>מערכות עסקיות</h2>
+      </div>
+      <div class="service-body">
+        <p class="reveal" style="--d:.1s">וואטסאפ, אקסל, מיילים ופתקים? אנחנו מאחדים את כל התפעול למערכת אחת שנבנתה סביב האופן שבו העסק שלכם באמת עובד, מהליד הראשון ועד הדוח החודשי למנהל.</p>
+        <ul class="chips reveal" style="--d:.18s" role="list">
+          <li class="chip">CRM מותאם אישית</li>
+          <li class="chip">ניהול עבודות ומשימות</li>
+          <li class="chip">הצעות מחיר חכמות</li>
+          <li class="chip">ניהול לידים</li>
+          <li class="chip">מלאי והזמנות</li>
+          <li class="chip">פורטל לקוחות</li>
+          <li class="chip">דוחות אוטומטיים</li>
+          <li class="chip">דשבורדים למנהלים</li>
+          <li class="chip">מ־Excel לתוכנה אמיתית</li>
+          <li class="chip">ניהול צוותי שטח</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 · AI -->
+  <section class="service-detail" id="ai">
+    <svg class="svc-scene" viewBox="0 0 240 240" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
+      <g data-rate="0.9" opacity=".5">
+        <ellipse cx="120" cy="120" rx="95" ry="42" stroke-dasharray="3 6" transform="rotate(-18 120 120)" vector-effect="non-scaling-stroke"/>
+      </g>
+      <g data-rate="1">
+        <path d="M65 90 L120 60 M120 60 L178 92 M65 90 L92 150 M92 150 L120 60 M92 150 L160 160 M178 92 L160 160 M65 90 L45 145 M45 145 L92 150" vector-effect="non-scaling-stroke"/>
+        <circle cx="120" cy="60" r="6" vector-effect="non-scaling-stroke"/>
+        <circle cx="65" cy="90" r="6" vector-effect="non-scaling-stroke"/>
+        <circle cx="178" cy="92" r="6" vector-effect="non-scaling-stroke"/>
+        <circle cx="92" cy="150" r="6" vector-effect="non-scaling-stroke"/>
+        <circle cx="160" cy="160" r="6" vector-effect="non-scaling-stroke"/>
+        <circle cx="45" cy="145" r="6" vector-effect="non-scaling-stroke"/>
+        <path d="M196 48 l2.2 8.8 8.8 2.2 -8.8 2.2 -2.2 8.8 -2.2 -8.8 -8.8 -2.2 8.8 -2.2 Z" vector-effect="non-scaling-stroke"/>
+      </g>
+    </svg>
+    <div class="container service-inner">
+      <div class="service-side reveal">
+        <span class="service-num"><span class="num-roll">04</span></span>
+        <div class="service-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 4.1c.55 4.3 3.55 7.3 7.85 7.85-4.3.55-7.3 3.55-7.85 7.85-.55-4.3-3.55-7.3-7.85-7.85 4.3-.55 7.3-3.55 7.85-7.85z"/>
+            <circle cx="19.4" cy="4.6" r="1.3"/>
+            <circle cx="4.6" cy="19.4" r="1.3"/>
+          </svg>
+        </div>
+        <h2>AI ואוטומציה</h2>
+      </div>
+      <div class="service-body">
+        <p class="reveal" style="--d:.1s">לא עוד צ׳אטבוט גנרי. אוטומציות שעושות עבודה אמיתית: ליד נכנס ← נבדקת התאמה ← נשלחת הצעה ← נפתח פרויקט ← הלקוח מעודכן. הכול מתועד, עם אישור אנושי בנקודות שחשוב.</p>
+        <ul class="chips reveal" style="--d:.18s" role="list">
+          <li class="chip">סוכני AI שמכירים את העסק</li>
+          <li class="chip">אוטומציית תהליכי עבודה</li>
+          <li class="chip">עיבוד מסמכים ו־PDF</li>
+          <li class="chip">מיון פניות אוטומטי</li>
+          <li class="chip">טיוטות דוחות והצעות</li>
+          <li class="chip">חיבור בין מערכות</li>
+          <li class="chip">התראות ועדכונים חכמים</li>
+          <li class="chip">בקרת אדם בנקודות קריטיות</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 · Interactive -->
+  <section class="service-detail" id="interactive">
+    <svg class="svc-scene" viewBox="0 0 240 240" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
+      <g data-rate="0.9" opacity=".5">
+        <path d="M30 190 q60 -36 120 0" stroke-dasharray="3 6" vector-effect="non-scaling-stroke"/>
+      </g>
+      <g data-rate="1">
+        <path d="M120 40 L172 70 L172 130 L120 160 L68 130 L68 70 Z" vector-effect="non-scaling-stroke"/>
+        <path d="M120 40 L120 100 M68 70 L120 100 M172 70 L120 100 M68 130 L120 100 M172 130 L120 100 M120 160 L120 100" vector-effect="non-scaling-stroke"/>
+        <circle cx="196" cy="180" r="17" vector-effect="non-scaling-stroke"/>
+        <path d="M196 180 V150" vector-effect="non-scaling-stroke"/>
+        <circle cx="196" cy="143" r="7" vector-effect="non-scaling-stroke"/>
+      </g>
+    </svg>
+    <div class="container service-inner">
+      <div class="service-side reveal">
+        <span class="service-num"><span class="num-roll">05</span></span>
+        <div class="service-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="2.9" y="7.3" width="18.2" height="10.2" rx="5.1"/>
+            <path d="M8.1 10.6v3.6M6.3 12.4h3.6"/>
+            <circle cx="15.5" cy="11.2" r="1.05"/>
+            <circle cx="17.7" cy="13.6" r="1.05"/>
+          </svg>
+        </div>
+        <h2>משחקים וחוויות אינטראקטיביות</h2>
+      </div>
+      <div class="service-body">
+        <p class="reveal" style="--d:.1s">הדרך הכי חזקה לגרום ללקוח להבין מוצר היא לתת לו לשחק בו. משחקים, סימולטורים וקונפיגורטורים שהופכים התלבטות להחלטה, וקמפיין לחוויה שמדברים עליה.</p>
+        <ul class="chips reveal" style="--d:.18s" role="list">
+          <li class="chip">משחקי מותג לקמפיינים</li>
+          <li class="chip">סימולטורים עסקיים</li>
+          <li class="chip">מחשבוני ROI ותמחור</li>
+          <li class="chip">קונפיגורטורים תלת־ממדיים</li>
+          <li class="chip">״בנה את ה־X שלך״</li>
+          <li class="chip">הדרכות אינטראקטיביות</li>
+          <li class="chip">חוויות מכירה</li>
+          <li class="chip">משחקים לאירועים</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 · Rescue -->
+  <section class="service-detail" id="rescue">
+    <svg class="svc-scene" viewBox="0 0 240 240" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
+      <g data-rate="0.9" opacity=".5">
+        <path d="M60 210 l60 -35 l60 35 l-60 35 Z" vector-effect="non-scaling-stroke"/>
+      </g>
+      <g data-rate="1">
+        <path d="M68 60 l52 -30 l52 30 l-52 30 Z" vector-effect="non-scaling-stroke"/>
+        <path d="M60 110 l52 30 v56 l-52 -30 Z" vector-effect="non-scaling-stroke"/>
+        <path d="M180 110 l-52 30 v56 l52 -30 Z" vector-effect="non-scaling-stroke"/>
+        <path d="M120 96 v30 M96 76 l-24 22 M144 76 l24 22" stroke-dasharray="2 5" vector-effect="non-scaling-stroke"/>
+      </g>
+    </svg>
+    <div class="container service-inner">
+      <div class="service-side reveal">
+        <span class="service-num"><span class="num-roll">06</span></span>
+        <div class="service-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="8.7"/>
+            <circle cx="12" cy="12" r="3.7"/>
+            <path d="M5.85 5.85l2.53 2.53M18.15 5.85l-2.53 2.53M5.85 18.15l2.53-2.53M18.15 18.15l-2.53-2.53"/>
+          </svg>
+        </div>
+        <h2>הצלה ומודרניזציה</h2>
+      </div>
+      <div class="service-body">
+        <p class="reveal" style="--d:.1s">המפתח נעלם? המערכת קורסת? הפרויקט נתקע באמצע? אנחנו נכנסים, ממפים את המצב, מייצבים, ואז משדרגים לטכנולוגיות מתקדמות. בלי שיפוטיות, עם תוכנית ברורה ומחיר סגור.</p>
+        <ul class="chips reveal" style="--d:.18s" role="list">
+          <li class="chip">הצלת פרויקטים תקועים</li>
+          <li class="chip">ייצוב ותיקון באגים</li>
+          <li class="chip">סקירת קוד מקיפה</li>
+          <li class="chip">שדרוג מערכות ישנות</li>
+          <li class="chip">מ־Excel ו־Access למערכת ווב</li>
+          <li class="chip">מעבר לענן</li>
+          <li class="chip">שיפור ביצועים</li>
+          <li class="chip">חיזוק אבטחה</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 · Ongoing -->
+  <section class="service-detail" id="ongoing">
+    <svg class="svc-scene" viewBox="0 0 240 240" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
+      <g data-rate="0.9" opacity=".5">
+        <ellipse cx="120" cy="120" rx="100" ry="38" transform="rotate(-14 120 120)" stroke-dasharray="3 6" vector-effect="non-scaling-stroke"/>
+      </g>
+      <g data-rate="1">
+        <ellipse cx="120" cy="120" rx="62" ry="24" transform="rotate(-14 120 120)" vector-effect="non-scaling-stroke"/>
+        <ellipse cx="120" cy="120" rx="82" ry="31" transform="rotate(-26 120 120)" vector-effect="non-scaling-stroke"/>
+        <circle cx="120" cy="120" r="11" vector-effect="non-scaling-stroke"/>
+        <circle cx="181" cy="103" r="5" vector-effect="non-scaling-stroke"/>
+        <circle cx="58" cy="139" r="5" vector-effect="non-scaling-stroke"/>
+        <circle cx="146" cy="66" r="4" vector-effect="non-scaling-stroke"/>
+      </g>
+    </svg>
+    <div class="container service-inner">
+      <div class="service-side reveal">
+        <span class="service-num"><span class="num-roll">07</span></span>
+        <div class="service-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="3"/>
+            <ellipse cx="12" cy="12" rx="9.5" ry="4.2" transform="rotate(-18 12 12)"/>
+            <circle cx="20" cy="9.4" r="1.15"/>
+          </svg>
+        </div>
+        <h2>ליווי עסקים פעילים</h2>
+      </div>
+      <div class="service-body">
+        <p class="reveal" style="--d:.1s">העסק כבר רץ? אנחנו נדאג שימשיך לרוץ, ואפילו מהר יותר. תחזוקה שוטפת, שיפורים, אינטגרציות ומערכות שגדלות יחד איתכם, לפי הצורך ובקצב שלכם.</p>
+        <ul class="chips reveal" style="--d:.18s" role="list">
+          <li class="chip">תחזוקה ותמיכה שוטפת</li>
+          <li class="chip">שיפור ביצועים</li>
+          <li class="chip">פיצ׳רים ושדרוגים</li>
+          <li class="chip">אינטגרציות חדשות</li>
+          <li class="chip">ניטור ודוחות</li>
+          <li class="chip">ליווי טכנולוגי קבוע</li>
+          <li class="chip">צמיחה לפי הצורך</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-band reveal" data-scene>
+        <canvas class="cta-canvas" aria-hidden="true"></canvas>
+        <svg class="cta-star" style="inset-inline-start:6%;top:10%;width:280px;height:280px;opacity:.12" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <path d="M16 3 L18.6 13.4 L29 16 L18.6 18.6 L16 29 L13.4 18.6 L3 16 L13.4 13.4 Z" stroke="rgba(157,140,255,.35)" stroke-width="0.4" stroke-linejoin="round"/>
+        </svg>
+        <h2 class="display-lg">רעיונות יש לכולם.<br><span class="accent-text">אנחנו הופכים אותם למציאות.</span></h2>
+        <p class="cta-line">ספרו לנו על המטרה שלכם, ואנחנו נבנה את הדרך אליה.</p>
+        <a href="contact.html" class="btn btn-primary btn-lg" data-magnetic>
+          לתיאום שיחת היכרות חינם
+          <svg class="btn-arrow" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="footer-brand">
+      <a href="index.html" class="logo" aria-label="Orbo Solutions, דף הבית">
+        <svg class="logo-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <circle cx="16" cy="16" r="11.5" fill="url(#lgf3)"/>
+          <path d="M16 3 L18.6 13.4 L29 16 L18.6 18.6 L16 29 L13.4 18.6 L3 16 L13.4 13.4 Z" fill="url(#lgf4)" stroke="url(#lgf)" stroke-width="1.5" stroke-linejoin="round"/>
+          <circle cx="16" cy="16" r="4.6" fill="url(#lgf2)"/>
+          <defs>
+            <linearGradient id="lgf" x1="6" y1="4" x2="26" y2="28" gradientUnits="userSpaceOnUse"><stop stop-color="#9d8bff"/><stop offset="0.5" stop-color="#7e63ff"/><stop offset="1" stop-color="#5a46d6"/></linearGradient>
+            <radialGradient id="lgf2" cx="16" cy="16" r="4.6" gradientUnits="userSpaceOnUse"><stop stop-color="#ffffff" stop-opacity="0.95"/><stop offset="1" stop-color="#e6deff" stop-opacity="0"/></radialGradient>
+            <radialGradient id="lgf3" cx="16" cy="16" r="11.5" gradientUnits="userSpaceOnUse"><stop stop-color="#8f7bff" stop-opacity="0.28"/><stop offset="1" stop-color="#8f7bff" stop-opacity="0"/></radialGradient>
+            <radialGradient id="lgf4" cx="16" cy="16" r="14" gradientUnits="userSpaceOnUse"><stop stop-color="#b9a6ff" stop-opacity="0.05"/><stop offset="0.8" stop-color="#8f74ff" stop-opacity="0.14"/><stop offset="1" stop-color="#8f74ff" stop-opacity="0.22"/></radialGradient>
+          </defs>
+        </svg>
+        <span class="logo-text">ORBO<span class="logo-sep">·</span>SOLUTIONS</span>
+      </a>
+      <p class="footer-tagline">סטודיו למוצרים דיגיטליים ואוטומציה.<br>מתכננים, מעצבים ובונים, מהרעיון ועד המציאות.</p>
+    </div>
+    <nav class="footer-nav" aria-label="ניווט תחתון">
+      <a href="index.html">בית</a>
+      <a href="services.html">שירותים</a>
+      <a href="contact.html">צור קשר</a>
+    </nav>
+    <div class="footer-contact">
+      <span class="footer-label">דברו איתנו</span>
+      <a href="mailto:contact@orbosolutions.com" class="footer-mail">contact@orbosolutions.com</a>
+      <a href="tel:+972528463293" class="footer-mail">052-846-3293</a>
+    </div>
+  </div>
+  <div class="container footer-bottom">
+    <span>© <span id="year">2026</span> Orbo Solutions. כל הזכויות שמורות.</span>
+    <span class="footer-made">Digital Product &amp; Automation Studio</span>
+  </div>
+</footer>
+
+<script src="assets/js/lumen-gl.js" defer></script>
+<script src="assets/js/pagehero-gl.js" defer></script>
+<script src="assets/js/cta-gl.js" defer></script>
+<script src="assets/js/audio.js?v=72" defer></script>
+<script src="assets/js/main.js" defer></script>
+<script src="assets/js/motion.js" defer></script>
+<script src="assets/js/services.js" defer></script>
+</body>
+</html>

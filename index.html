@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl" class="no-js">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orbo Solutions | כל מה שהעסק שלכם צריך</title>
+<meta name="description" content="סטודיו דיגיטלי לעסקים: אתרים, אפליקציות, מערכות ואוטומציה, עם ליווי אמיתי מהרעיון ועד המציאות.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Orbo Solutions">
+<meta property="og:title" content="Orbo Solutions | כל מה שהעסק שלכם צריך">
+<meta property="og:description" content="סטודיו דיגיטלי לעסקים: אתרים, אפליקציות, מערכות ואוטומציה, עם ליווי אמיתי מהרעיון ועד המציאות.">
+<meta property="og:url" content="https://orbosolutions.com/">
+<meta property="og:image" content="https://orbosolutions.com/ad/ad-1080x1350.png">
+<meta property="og:locale" content="he_IL">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@300..900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/main.css?v=71">
+<style>
+  /* ——— index.html: the story ——— */
+
+  body { background: var(--bg); }
+
+  /* static tier (default, .no-js, no-WebGL, reduced-motion): a readable light site.
+     story-live mode (added by story.js on successful WebGL init) turns the page
+     into a fixed 3D journey. */
+
+  #storyCanvas { display: none; }
+  .story-track { display: none; }
+  .story-hint { display: none; }
+
+  .story-beats { position: relative; z-index: 2; }
+  .beat {
+    max-width: 860px;
+    margin-inline: auto;
+    padding: clamp(56px, 9vh, 110px) 24px;
+    text-align: center;
+  }
+  .beat:first-child { padding-top: calc(var(--header-h) + clamp(70px, 12vh, 140px)); }
+  .beat .eyebrow { margin-bottom: 24px; }
+  .beat h1, .beat h2 { margin-bottom: 18px; }
+  /* V5.5 legibility directive: headlines were fine, the lines BELOW them
+     were not — sublines step up to a solid weight and near-ink color */
+  .beat .beat-sub {
+    font-size: clamp(1.08rem, 1.65vw, 1.3rem);
+    font-weight: 400;
+    color: #333047;
+    max-width: 34em;
+    margin-inline: auto;
+  }
+  .beat .accent-text { display: inline-block; }
+  .beat-cap h2 { font-size: clamp(1.6rem, 3vw, 2.4rem); }
+  .beat-cap .cap-num {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.18em;
+    color: var(--accent);
+    direction: ltr;
+    display: inline-block;
+    margin-bottom: 12px;
+  }
+  .beat-actions { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; margin-top: 34px; }
+  .beat-micro { margin-top: 26px; font-size: 0.9rem; color: var(--ink-soft); font-weight: 500; }
+
+  .beat-steps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 30px;
+    justify-content: center;
+    margin-top: 30px;
+  }
+  .beat-steps span { color: #333047; font-weight: 500; font-size: 1rem; white-space: nowrap; }
+  .beat-steps b {
+    font-family: var(--font-display);
+    color: var(--accent);
+    font-weight: 700;
+    /* isolate (not direction:ltr): logical margins resolve against the
+       element's own direction, so ltr put the 8px OUTSIDE the number and
+       glued it to its label */
+    margin-inline-end: 8px;
+    unicode-bidi: isolate;
+  }
+
+  /* faint static dust accents for the static tier (ink on white) */
+  .story-beats::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      radial-gradient(1.4px 1.4px at 12% 18%, rgba(90, 86, 104, 0.4), transparent 100%),
+      radial-gradient(1px 1px at 78% 9%, rgba(108, 92, 255, 0.4), transparent 100%),
+      radial-gradient(1.3px 1.3px at 64% 34%, rgba(90, 86, 104, 0.3), transparent 100%),
+      radial-gradient(1px 1px at 30% 52%, rgba(63, 168, 216, 0.35), transparent 100%),
+      radial-gradient(1.5px 1.5px at 88% 62%, rgba(90, 86, 104, 0.3), transparent 100%),
+      radial-gradient(1px 1px at 18% 80%, rgba(108, 92, 255, 0.35), transparent 100%),
+      radial-gradient(1.2px 1.2px at 55% 92%, rgba(90, 86, 104, 0.28), transparent 100%),
+      radial-gradient(60% 34% at 50% 0%, rgba(108, 92, 255, 0.07), transparent 70%);
+  }
+
+  /* ——— live mode ——— */
+  html.story-live #storyCanvas {
+    display: block;
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+  }
+  html.story-live .story-track { display: block; height: 1100vh; }
+  html.story-live .story-beats { position: fixed; inset: 0; z-index: 2; pointer-events: none; }
+  html.story-live .story-beats::before { content: none; }
+  html.story-live .beat {
+    position: absolute;
+    inset: 0;
+    max-width: none;
+    margin: 0;
+    padding: 24px;
+    display: grid;
+    place-items: center;
+    opacity: 0;
+    will-change: opacity, transform;
+  }
+  html.story-live .beat > .beat-inner { max-width: 820px; }
+  html.story-live .beat.live { pointer-events: auto; }
+
+  /* cinematic type: larger on the journey, tracking settles as a beat arrives */
+  html.story-live .beat .display-xl { font-size: clamp(3rem, 7.2vw, 6.2rem); }
+  html.story-live .beat .display-lg { font-size: clamp(2.2rem, 4.8vw, 4rem); }
+  html.story-live .beat h1, html.story-live .beat h2 {
+    letter-spacing: 0.02em;
+    transition: letter-spacing 0.9s var(--ease-out);
+  }
+  html.story-live .beat.live h1, html.story-live .beat.live h2 { letter-spacing: -0.015em; }
+  html.story-live .beat .cap-num {
+    letter-spacing: 0.34em;
+    transition: letter-spacing 0.8s var(--ease-out), opacity 0.8s;
+  }
+  html.story-live .beat.live .cap-num { letter-spacing: 0.18em; }
+  /* white halo so ink type always reads over dust — the V5 formations are
+     DENSE at their cores, so halos carry tight high-opacity inner layers */
+  html.story-live .beat .beat-sub { text-shadow: 0 0 26px rgba(250, 250, 249, 1), 0 0 14px rgba(250, 250, 249, 1), 0 0 7px rgba(250, 250, 249, 1), 0 0 3px rgba(250, 250, 249, 1), 0 0 1px rgba(250, 250, 249, 1); }
+  html.story-live .beat h1, html.story-live .beat h2 { text-shadow: 0 0 30px rgba(250, 250, 249, 0.95), 0 0 10px rgba(250, 250, 249, 0.9); }
+  /* the gradient accent lines use background-clip:text with a transparent
+     fill — an inherited text-shadow paints OVER the clipped gradient and
+     bleaches it. Halo them with drop-shadow (follows the rendered glyphs,
+     stays behind them) instead. Three passes: violet-on-violet over a dense
+     formation core needs the tight opaque layers (mobile QA finding). */
+  html.story-live .beat .accent-text {
+    text-shadow: none;
+    filter: drop-shadow(0 0 2px rgba(250, 250, 249, 1)) drop-shadow(0 0 6px rgba(250, 250, 249, 1)) drop-shadow(0 0 18px rgba(250, 250, 249, 0.9));
+  }
+  /* small print + header text need halos too — the finale star crosses both */
+  html.story-live .beat-micro,
+  html.story-live .beat-steps span { text-shadow: 0 0 14px rgba(250, 250, 249, 0.98), 0 0 6px rgba(250, 250, 249, 1), 0 0 3px rgba(250, 250, 249, 1), 0 0 1px rgba(250, 250, 249, 1); }
+  html.story-live .main-nav a,
+  html.story-live .logo-text { text-shadow: 0 0 12px rgba(250, 250, 249, 0.95), 0 0 5px rgba(250, 250, 249, 0.9); }
+  @media (min-width: 1021px) {
+    html.story-live .beat.side-a > .beat-inner { transform: translateX(20vw); }  /* RTL: text right, crystal left */
+    html.story-live .beat.side-b > .beat-inner { transform: translateX(-20vw); }
+    html.story-live .beat.side-a, html.story-live .beat.side-b { text-align: start; }
+    html.story-live .beat.side-b { text-align: end; }
+  }
+  html.story-live .story-hint {
+    display: flex;
+    position: fixed;
+    bottom: 26px;
+    inset-inline: 0;
+    justify-content: center;
+    z-index: 3;
+    color: var(--ink-faint);
+    pointer-events: none;
+  }
+  .story-hint svg { width: 22px; height: 22px; animation: hint-bob 2.2s var(--ease-out) infinite; }
+
+  /* soft white vignette over the 3D — airy, keeps edges calm */
+  html.story-live .story-beats::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(85% 75% at 50% 50%, transparent 58%, rgba(250, 250, 249, 0.55) 100%);
+  }
+
+  .site-header { background: transparent; }
+
+  /* V5.9 (user directive): in live mode the corner holds NO flat logo
+     mark — the star itself becomes the logo only when it docks. opacity
+     (not display) keeps the svg rect measurable as the dock target.
+     Header-scoped: the footer brand keeps its mark. */
+  html.story-live .site-header .logo-mark { opacity: 0; }
+  /* when the star lands, the header's frosted scroll pane hands over —
+     without this the docked piece is buried behind the blur (the
+     "star vanished in the header" bug: real bottom scroll carries
+     .scrolled; ?over= pins never scrolled, so QA missed it) */
+  html.story-live .site-header { transition: background 0.45s, box-shadow 0.45s; }
+  html.story-live.star-docked .site-header.scrolled {
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: none;
+  }
+
+  /* the footer (now carrying the contact email/phone) must rise OVER the
+     fixed canvas at the end of the scroll — static flow content paints
+     UNDER a positioned z-index:0 canvas, and the WebGL context is opaque
+     (alpha:false), so without this the footer is invisible and unclickable
+     in live mode (QA 2026-07-15) */
+  html.story-live .site-footer { position: relative; z-index: 3; }
+
+  /* the finale copy sits directly on the star. V5.6: the star is now a
+     SOLID opaque piece (not translucent dust), so every width gets a
+     soft near-white scrim — lighter on desktop, stronger on phones */
+  html.story-live .beat:last-of-type .beat-inner {
+    background: radial-gradient(ellipse 78% 58% at 50% 45%, rgba(250, 250, 249, 0.55), rgba(250, 250, 249, 0) 72%);
+  }
+  @media (max-width: 860px) {
+    html.story-live .beat:last-of-type .beat-inner {
+      background: radial-gradient(ellipse 82% 62% at 50% 45%, rgba(250, 250, 249, 0.72), rgba(250, 250, 249, 0) 72%);
+    }
+  }
+
+  /* static tier: brand star accents above each capability beat (BRIEF rule 4;
+     data-URI inline SVG — no ids, so no duplicate-id risk) */
+  .beat-cap .beat-inner::before {
+    content: '';
+    display: block;
+    width: 26px;
+    height: 26px;
+    margin: 0 auto 16px;
+    opacity: 0.55;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 3 L18.6 13.4 L29 16 L18.6 18.6 L16 29 L13.4 18.6 L3 16 L13.4 13.4 Z' fill='%236C5CFF'/%3E%3C/svg%3E") center/contain no-repeat;
+  }
+  html.story-live .beat-cap .beat-inner::before { content: none; }
+
+  @media (max-width: 640px) {
+    .beat-actions .btn { width: 100%; }
+  }
+</style>
+</head>
+<body>
+<script>document.documentElement.classList.remove('no-js')</script>
+
+<header class="site-header" id="siteHeader">
+  <div class="container header-inner">
+    <a href="index.html" class="logo" aria-label="Orbo Solutions, דף הבית">
+      <svg class="logo-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <circle cx="16" cy="16" r="11.5" fill="url(#lgh3)"/>
+        <path d="M16 3 L18.6 13.4 L29 16 L18.6 18.6 L16 29 L13.4 18.6 L3 16 L13.4 13.4 Z" fill="url(#lgh4)" stroke="url(#lgh)" stroke-width="1.5" stroke-linejoin="round"/>
+        <circle cx="16" cy="16" r="4.6" fill="url(#lgh2)"/>
+        <defs>
+          <linearGradient id="lgh" x1="6" y1="4" x2="26" y2="28" gradientUnits="userSpaceOnUse"><stop stop-color="#9d8bff"/><stop offset="0.5" stop-color="#7e63ff"/><stop offset="1" stop-color="#5a46d6"/></linearGradient>
+          <radialGradient id="lgh2" cx="16" cy="16" r="4.6" gradientUnits="userSpaceOnUse"><stop stop-color="#ffffff" stop-opacity="0.95"/><stop offset="1" stop-color="#e6deff" stop-opacity="0"/></radialGradient>
+          <radialGradient id="lgh3" cx="16" cy="16" r="11.5" gradientUnits="userSpaceOnUse"><stop stop-color="#8f7bff" stop-opacity="0.28"/><stop offset="1" stop-color="#8f7bff" stop-opacity="0"/></radialGradient>
+          <radialGradient id="lgh4" cx="16" cy="16" r="14" gradientUnits="userSpaceOnUse"><stop stop-color="#b9a6ff" stop-opacity="0.05"/><stop offset="0.8" stop-color="#8f74ff" stop-opacity="0.14"/><stop offset="1" stop-color="#8f74ff" stop-opacity="0.22"/></radialGradient>
+        </defs>
+      </svg>
+      <span class="logo-text">ORBO<span class="logo-sep">·</span>SOLUTIONS</span>
+    </a>
+    <nav class="main-nav" id="mainNav" aria-label="ניווט ראשי">
+      <a href="index.html" aria-current="page">בית</a>
+      <a href="services.html">שירותים</a>
+      <a href="contact.html">צור קשר</a>
+    </nav>
+    <div class="header-actions">
+      <button class="audio-toggle" data-audio-toggle aria-pressed="false" aria-label="מוזיקת רקע">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M11.5 5.5 7 9H3.8v6H7l4.5 3.5z"/>
+          <path class="at-on" d="M14.8 9.4a4 4 0 0 1 0 5.2"/>
+          <path class="at-on" d="M17.4 7a7.4 7.4 0 0 1 0 10"/>
+          <path class="at-off" d="M15.2 9.8l4.4 4.4m0-4.4l-4.4 4.4"/>
+        </svg>
+      </button>
+      <a href="contact.html" class="btn btn-primary btn-sm">שיחת היכרות חינם</a>
+      <button class="nav-toggle" id="navToggle" aria-label="פתיחת תפריט" aria-expanded="false"><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<main class="story">
+  <canvas id="storyCanvas" aria-hidden="true"></canvas>
+
+  <div class="story-beats">
+
+    <section class="beat" data-range="0,0.075">
+      <div class="beat-inner">
+        <span class="eyebrow">ORBO·SOLUTIONS</span>
+        <h1 class="display-xl">יש לכם מטרה.</h1>
+        <p class="beat-sub">גללו, ותראו איך רעיון נהיה מציאות.</p>
+      </div>
+    </section>
+
+    <section class="beat" data-range="0.10,0.175">
+      <div class="beat-inner">
+        <h2 class="display-lg">אנחנו בונים את הדרך אליה.</h2>
+        <p class="beat-sub">אתר, אפליקציה, מערכת חכמה או אוטומציה. אנחנו מתכננים, בונים ומלווים כל צעד, בהתאמה אמיתית לעסק שלכם.</p>
+      </div>
+    </section>
+
+    <section class="beat beat-cap side-a" data-range="0.205,0.26">
+      <div class="beat-inner">
+        <span class="cap-num">01</span>
+        <h2>אתרים וחוויות דיגיטליות</h2>
+        <p class="beat-sub">אתרים שאי אפשר לשכוח.</p>
+      </div>
+    </section>
+
+    <section class="beat beat-cap side-b" data-range="0.285,0.34">
+      <div class="beat-inner">
+        <span class="cap-num">02</span>
+        <h2>אפליקציות ותוכנה</h2>
+        <p class="beat-sub">מהגרסה הראשונה ועד מוצר שלם שרץ בענן.</p>
+      </div>
+    </section>
+
+    <section class="beat beat-cap side-a" data-range="0.365,0.42">
+      <div class="beat-inner">
+        <span class="cap-num">03</span>
+        <h2>מערכות עסקיות</h2>
+        <p class="beat-sub">מערכת אחת שמסדרת הכול: לקוחות, תפעול, כסף ודוחות.</p>
+      </div>
+    </section>
+
+    <section class="beat beat-cap side-b" data-range="0.445,0.50">
+      <div class="beat-inner">
+        <span class="cap-num">04</span>
+        <h2>AI ואוטומציה</h2>
+        <p class="beat-sub">העסק ממשיך לעבוד גם כשאתם ישנים.</p>
+      </div>
+    </section>
+
+    <section class="beat beat-cap side-a" data-range="0.525,0.58">
+      <div class="beat-inner">
+        <span class="cap-num">05</span>
+        <h2>משחקים וחוויות אינטראקטיביות</h2>
+        <p class="beat-sub">לקוחות שהופכים לשחקנים.</p>
+      </div>
+    </section>
+
+    <section class="beat beat-cap side-b" data-range="0.605,0.66">
+      <div class="beat-inner">
+        <span class="cap-num">06</span>
+        <h2>הצלה ומודרניזציה</h2>
+        <p class="beat-sub">פרויקט תקוע? מייצבים, משדרגים, מחזירים שליטה.</p>
+      </div>
+    </section>
+
+    <section class="beat" data-range="0.695,0.775">
+      <div class="beat-inner">
+        <h2 class="display-lg">וגם כשהעסק כבר רץ,<br><span class="accent-text">אנחנו דואגים שימשיך לרוץ.</span></h2>
+        <p class="beat-sub">תחזוקה, שיפורים ומערכות שגדלות איתכם. ליווי אמיתי, לפי מה שהעסק צריך ולא לפי תבנית.</p>
+      </div>
+    </section>
+
+    <section class="beat" data-range="0.805,0.875">
+      <div class="beat-inner">
+        <h2 class="display-lg">תהליך מסודר. בלי הפתעות.</h2>
+        <div class="beat-steps">
+          <span><b>01</b>היכרות ואפיון</span>
+          <span><b>02</b>עיצוב ופרוטוטייפ</span>
+          <span><b>03</b>פיתוח ובדיקות</span>
+          <span><b>04</b>השקה וליווי</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="beat" data-range="0.90,1.0">
+      <div class="beat-inner">
+        <h2 class="display-lg">רעיונות יש לכולם.<br><span class="accent-text">אנחנו הופכים אותם למציאות.</span></h2>
+        <div class="beat-actions">
+          <a href="contact.html" class="btn btn-primary btn-lg" data-magnetic>
+            לתיאום שיחת היכרות חינם
+            <svg class="btn-arrow" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg>
+          </a>
+          <a href="services.html" class="btn btn-ghost">כל השירותים</a>
+        </div>
+        <p class="beat-micro">שיחה ראשונה חינם · בלי התחייבות · מענה תוך יום עסקים</p>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="story-hint" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 9.75l5.5 5.5 5.5-5.5"/></svg>
+  </div>
+
+  <div class="story-track" aria-hidden="true"></div>
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="footer-brand">
+      <a href="index.html" class="logo" aria-label="Orbo Solutions, דף הבית">
+        <svg class="logo-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <circle cx="16" cy="16" r="11.5" fill="url(#lgf3)"/>
+          <path d="M16 3 L18.6 13.4 L29 16 L18.6 18.6 L16 29 L13.4 18.6 L3 16 L13.4 13.4 Z" fill="url(#lgf4)" stroke="url(#lgf)" stroke-width="1.5" stroke-linejoin="round"/>
+          <circle cx="16" cy="16" r="4.6" fill="url(#lgf2)"/>
+          <defs>
+            <linearGradient id="lgf" x1="6" y1="4" x2="26" y2="28" gradientUnits="userSpaceOnUse"><stop stop-color="#9d8bff"/><stop offset="0.5" stop-color="#7e63ff"/><stop offset="1" stop-color="#5a46d6"/></linearGradient>
+            <radialGradient id="lgf2" cx="16" cy="16" r="4.6" gradientUnits="userSpaceOnUse"><stop stop-color="#ffffff" stop-opacity="0.95"/><stop offset="1" stop-color="#e6deff" stop-opacity="0"/></radialGradient>
+            <radialGradient id="lgf3" cx="16" cy="16" r="11.5" gradientUnits="userSpaceOnUse"><stop stop-color="#8f7bff" stop-opacity="0.28"/><stop offset="1" stop-color="#8f7bff" stop-opacity="0"/></radialGradient>
+            <radialGradient id="lgf4" cx="16" cy="16" r="14" gradientUnits="userSpaceOnUse"><stop stop-color="#b9a6ff" stop-opacity="0.05"/><stop offset="0.8" stop-color="#8f74ff" stop-opacity="0.14"/><stop offset="1" stop-color="#8f74ff" stop-opacity="0.22"/></radialGradient>
+          </defs>
+        </svg>
+        <span class="logo-text">ORBO<span class="logo-sep">·</span>SOLUTIONS</span>
+      </a>
+      <p class="footer-tagline">סטודיו למוצרים דיגיטליים ואוטומציה.<br>מתכננים, מעצבים ובונים, מהרעיון ועד המציאות.</p>
+    </div>
+    <nav class="footer-nav" aria-label="ניווט תחתון">
+      <a href="index.html">בית</a>
+      <a href="services.html">שירותים</a>
+      <a href="contact.html">צור קשר</a>
+    </nav>
+    <div class="footer-contact">
+      <span class="footer-label">דברו איתנו</span>
+      <a href="mailto:contact@orbosolutions.com" class="footer-mail">contact@orbosolutions.com</a>
+      <a href="tel:+972528463293" class="footer-mail">052-846-3293</a>
+    </div>
+  </div>
+  <div class="container footer-bottom">
+    <span>© <span id="year">2026</span> Orbo Solutions. כל הזכויות שמורות.</span>
+    <span class="footer-made">Digital Product &amp; Automation Studio</span>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js" defer></script>
+<script src="assets/js/story.js?v=72" defer></script>
+<script src="assets/js/audio.js?v=72" defer></script>
+<script src="assets/js/main.js" defer></script>
+</body>
+</html>

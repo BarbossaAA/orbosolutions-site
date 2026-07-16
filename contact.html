@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl" class="no-js">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>צור קשר | Orbo Solutions</title>
+<meta name="description" content="ספרו לנו על המטרה שלכם. שיחת היכרות ראשונה חינם וללא התחייבות.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Orbo Solutions">
+<meta property="og:title" content="צור קשר | Orbo Solutions">
+<meta property="og:description" content="ספרו לנו על המטרה שלכם. שיחת היכרות ראשונה חינם וללא התחייבות.">
+<meta property="og:url" content="https://orbosolutions.com/contact.html">
+<meta property="og:image" content="https://orbosolutions.com/ad/ad-1080x1350.png">
+<meta property="og:locale" content="he_IL">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@300..900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/main.css?v=71">
+<style>
+/* ---------- Contact page only ---------- */
+.contact-section { padding-top: clamp(10px, 2vw, 28px); }
+
+/* Latin data fields type left-to-right */
+.field input[type="email"],
+.field input[type="tel"] { direction: ltr; text-align: left; }
+
+/* mini-steps: a light line draws down through the numbered circles */
+.mini-steps { position: relative; }
+.mini-steps::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 13px;
+  top: 14px;
+  bottom: 14px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--grad-accent);
+  opacity: 0.35;
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 1s var(--ease-out) 0.3s;
+}
+.aside-card.reveal.in .mini-steps::before { transform: none; }
+.no-js .mini-steps::before { transform: none; }
+@media (prefers-reduced-motion: reduce) { .mini-steps::before { transform: none; } }
+.mini-step-num { position: relative; }
+
+/* aside cards */
+.aside-icon {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  margin-bottom: 18px;
+}
+.aside-icon svg { width: 22px; height: 22px; }
+
+.aside-hours {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--ink-soft);
+  font-size: 0.93rem;
+  margin-top: 4px;
+}
+.aside-hours svg { width: 17px; height: 17px; color: var(--ink-faint); flex-shrink: 0; }
+
+@media (min-width: 861px) {
+  .contact-aside { position: sticky; top: calc(var(--header-h) + 28px); }
+}
+
+@media (max-width: 640px) {
+  .contact-form .btn-lg { font-size: 0.96rem; padding-inline: 0.9em; }
+  .contact-form .btn-lg .btn-arrow { width: 17px; height: 17px; }
+}
+</style>
+</head>
+<body>
+<script>document.documentElement.classList.remove('no-js')</script>
+
+<header class="site-header" id="siteHeader">
+  <div class="container header-inner">
+    <a href="index.html" class="logo" aria-label="Orbo Solutions, דף הבית">
+      <svg class="logo-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <circle cx="16" cy="16" r="11.5" fill="url(#lgh3)"/>
+        <path d="M16 3 L18.6 13.4 L29 16 L18.6 18.6 L16 29 L13.4 18.6 L3 16 L13.4 13.4 Z" fill="url(#lgh4)" stroke="url(#lgh)" stroke-width="1.5" stroke-linejoin="round"/>
+        <circle cx="16" cy="16" r="4.6" fill="url(#lgh2)"/>
+        <defs>
+          <linearGradient id="lgh" x1="6" y1="4" x2="26" y2="28" gradientUnits="userSpaceOnUse"><stop stop-color="#9d8bff"/><stop offset="0.5" stop-color="#7e63ff"/><stop offset="1" stop-color="#5a46d6"/></linearGradient>
+          <radialGradient id="lgh2" cx="16" cy="16" r="4.6" gradientUnits="userSpaceOnUse"><stop stop-color="#ffffff" stop-opacity="0.95"/><stop offset="1" stop-color="#e6deff" stop-opacity="0"/></radialGradient>
+          <radialGradient id="lgh3" cx="16" cy="16" r="11.5" gradientUnits="userSpaceOnUse"><stop stop-color="#8f7bff" stop-opacity="0.28"/><stop offset="1" stop-color="#8f7bff" stop-opacity="0"/></radialGradient>
+          <radialGradient id="lgh4" cx="16" cy="16" r="14" gradientUnits="userSpaceOnUse"><stop stop-color="#b9a6ff" stop-opacity="0.05"/><stop offset="0.8" stop-color="#8f74ff" stop-opacity="0.14"/><stop offset="1" stop-color="#8f74ff" stop-opacity="0.22"/></radialGradient>
+        </defs>
+      </svg>
+      <span class="logo-text">ORBO<span class="logo-sep">·</span>SOLUTIONS</span>
+    </a>
+    <nav class="main-nav" id="mainNav" aria-label="ניווט ראשי">
+      <a href="index.html">בית</a>
+      <a href="services.html">שירותים</a>
+      <a href="contact.html" aria-current="page">צור קשר</a>
+    </nav>
+    <div class="header-actions">
+      <button class="audio-toggle" data-audio-toggle aria-pressed="false" aria-label="מוזיקת רקע">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M11.5 5.5 7 9H3.8v6H7l4.5 3.5z"/>
+          <path class="at-on" d="M14.8 9.4a4 4 0 0 1 0 5.2"/>
+          <path class="at-on" d="M17.4 7a7.4 7.4 0 0 1 0 10"/>
+          <path class="at-off" d="M15.2 9.8l4.4 4.4m0-4.4l-4.4 4.4"/>
+        </svg>
+      </button>
+      <a href="contact.html" class="btn btn-primary btn-sm">שיחת היכרות חינם</a>
+      <button class="nav-toggle" id="navToggle" aria-label="פתיחת תפריט" aria-expanded="false"><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- Page hero -->
+  <section class="page-hero">
+    <div class="page-hero-bg" aria-hidden="true"><canvas class="pageHeroCanvas"></canvas></div>
+    <div class="container">
+      <span class="eyebrow reveal">בואו נדבר</span>
+      <h1 class="display-lg reveal hero-title" style="--d:.08s"><span class="w" style="--wd:.08s"><span>ספרו</span></span> <span class="w" style="--wd:.16s"><span>לנו</span></span> <span class="w" style="--wd:.24s"><span>על</span></span> <span class="w" style="--wd:.32s"><span>המטרה.</span></span><br><span class="w" style="--wd:.44s"><span class="accent-text">אנחנו נבנה את הפתרון.</span></span></h1>
+      <p class="lead reveal" style="--d:.5s">שיחת היכרות ראשונה, חינם, בלי התחייבות ובלי ז׳רגון טכני. רק להבין מה יזיז את העסק שלכם קדימה.</p>
+    </div>
+  </section>
+
+  <!-- Form + aside -->
+  <section class="section contact-section">
+    <div class="container">
+      <div class="contact-grid">
+
+        <form class="contact-form reveal" action="https://formsubmit.co/contact@orbosolutions.com" method="POST">
+          <input type="hidden" name="_subject" value="פנייה חדשה מאתר Orbo Solutions">
+          <input type="hidden" name="_captcha" value="false">
+
+          <div class="form-row reveal" style="--d:.06s">
+            <div class="field">
+              <label for="cf-name">שם מלא <span class="req">*</span></label>
+              <input type="text" id="cf-name" name="name" autocomplete="name" required>
+            </div>
+            <div class="field">
+              <label for="cf-email">אימייל <span class="req">*</span></label>
+              <input type="email" id="cf-email" name="email" autocomplete="email" required>
+            </div>
+          </div>
+
+          <div class="form-row reveal" style="--d:.12s">
+            <div class="field">
+              <label for="cf-phone">טלפון</label>
+              <input type="tel" id="cf-phone" name="phone" autocomplete="tel">
+            </div>
+            <div class="field">
+              <label for="cf-business">שם העסק</label>
+              <input type="text" id="cf-business" name="business" autocomplete="organization">
+            </div>
+          </div>
+
+          <div class="field field-select reveal" style="--d:.18s">
+            <label for="cf-interest">מה מעניין אתכם?</label>
+            <select id="cf-interest" name="interest">
+              <option value="" selected>בחרו תחום…</option>
+              <option>אתר או דף נחיתה</option>
+              <option>אפליקציה או MVP</option>
+              <option>מערכת עסקית</option>
+              <option>AI ואוטומציה</option>
+              <option>משחק או חוויה אינטראקטיבית</option>
+              <option>הצלת פרויקט או שדרוג</option>
+              <option>עוד לא בטוחים? בואו נדבר</option>
+            </select>
+          </div>
+
+          <div class="field reveal" style="--d:.24s">
+            <label for="cf-message">ספרו לנו בקצרה</label>
+            <textarea id="cf-message" name="message" placeholder="מה המטרה? מה כואב היום? אין צורך בפרטים טכניים, רק הכיוון."></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg btn-block reveal" style="--d:.32s" data-magnetic>
+            שלחו, ונחזור אליכם תוך יום עסקים
+            <svg class="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M19 12H5.5"/>
+              <path d="M12 5.5 5.5 12l6.5 6.5"/>
+            </svg>
+          </button>
+
+          <p class="form-note reveal" style="--d:.4s">לא נשתף את הפרטים שלכם עם אף אחד. אי פעם.</p>
+        </form>
+
+        <aside class="contact-aside">
+          <div class="aside-card reveal" style="--d:.12s">
+            <div class="aside-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2.5 3 13 13.5"/>
+                <path d="M2.5 3l6.8 18.5 3.7-8 8-3.7L2.5 3z"/>
+              </svg>
+            </div>
+            <h3>מה קורה אחרי שתשלחו?</h3>
+            <ol class="mini-steps">
+              <li class="mini-step"><span class="mini-step-num">1</span><span>חוזרים אליכם תוך יום עסקים אחד</span></li>
+              <li class="mini-step"><span class="mini-step-num">2</span><span>שיחת היכרות קצרה של 20 דקות, בלי התחייבות</span></li>
+              <li class="mini-step"><span class="mini-step-num">3</span><span>הצעה מסודרת: פתרון, מחיר סגור ולו״ז</span></li>
+            </ol>
+          </div>
+
+          <div class="aside-card reveal" style="--d:.2s">
+            <div class="aside-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2.5" y="5" width="19" height="14" rx="3"/>
+                <path d="M4 7.5l6.7 5a2.2 2.2 0 0 0 2.6 0l6.7-5"/>
+              </svg>
+            </div>
+            <h3>מעדיפים ישירות?</h3>
+            <a class="aside-mail" href="mailto:contact@orbosolutions.com" dir="ltr">contact@orbosolutions.com</a>
+            <a class="aside-mail" href="tel:+972528463293" dir="ltr">052-846-3293</a>
+            <p class="aside-hours">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="8.75"/>
+                <path d="M12 7.5V12l2.8 1.8"/>
+              </svg>
+              זמינים א׳-ה׳, <span dir="ltr">9:00-18:00</span>
+            </p>
+          </div>
+        </aside>
+
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="footer-brand">
+      <a href="index.html" class="logo" aria-label="Orbo Solutions, דף הבית">
+        <svg class="logo-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <circle cx="16" cy="16" r="11.5" fill="url(#lgf3)"/>
+          <path d="M16 3 L18.6 13.4 L29 16 L18.6 18.6 L16 29 L13.4 18.6 L3 16 L13.4 13.4 Z" fill="url(#lgf4)" stroke="url(#lgf)" stroke-width="1.5" stroke-linejoin="round"/>
+          <circle cx="16" cy="16" r="4.6" fill="url(#lgf2)"/>
+          <defs>
+            <linearGradient id="lgf" x1="6" y1="4" x2="26" y2="28" gradientUnits="userSpaceOnUse"><stop stop-color="#9d8bff"/><stop offset="0.5" stop-color="#7e63ff"/><stop offset="1" stop-color="#5a46d6"/></linearGradient>
+            <radialGradient id="lgf2" cx="16" cy="16" r="4.6" gradientUnits="userSpaceOnUse"><stop stop-color="#ffffff" stop-opacity="0.95"/><stop offset="1" stop-color="#e6deff" stop-opacity="0"/></radialGradient>
+            <radialGradient id="lgf3" cx="16" cy="16" r="11.5" gradientUnits="userSpaceOnUse"><stop stop-color="#8f7bff" stop-opacity="0.28"/><stop offset="1" stop-color="#8f7bff" stop-opacity="0"/></radialGradient>
+            <radialGradient id="lgf4" cx="16" cy="16" r="14" gradientUnits="userSpaceOnUse"><stop stop-color="#b9a6ff" stop-opacity="0.05"/><stop offset="0.8" stop-color="#8f74ff" stop-opacity="0.14"/><stop offset="1" stop-color="#8f74ff" stop-opacity="0.22"/></radialGradient>
+          </defs>
+        </svg>
+        <span class="logo-text">ORBO<span class="logo-sep">·</span>SOLUTIONS</span>
+      </a>
+      <p class="footer-tagline">סטודיו למוצרים דיגיטליים ואוטומציה.<br>מתכננים, מעצבים ובונים, מהרעיון ועד המציאות.</p>
+    </div>
+    <nav class="footer-nav" aria-label="ניווט תחתון">
+      <a href="index.html">בית</a>
+      <a href="services.html">שירותים</a>
+      <a href="contact.html">צור קשר</a>
+    </nav>
+    <div class="footer-contact">
+      <span class="footer-label">דברו איתנו</span>
+      <a href="mailto:contact@orbosolutions.com" class="footer-mail">contact@orbosolutions.com</a>
+      <a href="tel:+972528463293" class="footer-mail">052-846-3293</a>
+    </div>
+  </div>
+  <div class="container footer-bottom">
+    <span>© <span id="year">2026</span> Orbo Solutions. כל הזכויות שמורות.</span>
+    <span class="footer-made">Digital Product &amp; Automation Studio</span>
+  </div>
+</footer>
+
+<script src="assets/js/lumen-gl.js" defer></script>
+<script src="assets/js/pagehero-gl.js" defer></script>
+<script src="assets/js/audio.js?v=72" defer></script>
+<script src="assets/js/main.js" defer></script>
+<script src="assets/js/motion.js" defer></script>
+</body>
+</html>
