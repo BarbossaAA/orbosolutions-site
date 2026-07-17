@@ -799,8 +799,14 @@
       ? '  vColor = pow(max(cc, vec3(0.0)), vec3(0.4545));\n  float rlum = dot(vColor, vec3(0.299, 0.587, 0.114));\n  vColor = clamp(mix(vec3(rlum), vColor, 1.18), 0.0, 1.0);'
       : '  vColor = pow(max(cc, vec3(0.0)), vec3(0.4545));',
     /* V5.11 (user directive): inside the hardening star the motes turn
-       WHITE — sparkling glass shards, not colored dust */
-    '  vColor = mix(vColor, vec3(1.0), uSolid * 0.9);',
+       WHITE — sparkling glass shards, not colored dust. v80 phones:
+       the STARDUST motes (the 18% that stay behind after the dock)
+       keep most of their own color — white dust is invisible on the
+       pale finale grade, and colored flecks inside the glass feed the
+       "more color" directive too. Desktop line byte-identical. */
+    mobile
+      ? '  vColor = mix(vColor, vec3(1.0), uSolid * 0.9 * (1.0 - step(0.82, aSeed.y) * 0.85));'
+      : '  vColor = mix(vColor, vec3(1.0), uSolid * 0.9);',
     /* per-mote glow twinkle; HALVED once formed so sculpture strokes
        hold steady (V5.3 crispness) while free dust sparkles hard —
        but INSIDE the solid the damping lifts again and a faster glint
@@ -820,13 +826,20 @@
        sealed inside like an aquarium. V5.12: it stays glowing the
        WHOLE flight (no mid-air switch) and dissolves only WITH the
        piece→mark crossfade (uHand), handing its light to the mark's
-       baked core glint. */
-    '  vA *= (1.0 - uSolid * 0.50) * (1.0 - uHand);',
+       baked core glint. v80 (owner: "after the star rises the
+       background is TOO EMPTY" — phones): ~18% of the motes stay
+       behind as faint white STARDUST — a quiet after-image of the
+       star holding the frame; desktop line byte-identical. */
+    mobile
+      ? '  vA *= max((1.0 - uSolid * 0.50) * (1.0 - uHand), step(0.82, aSeed.y) * 0.55);'
+      : '  vA *= (1.0 - uSolid * 0.50) * (1.0 - uHand);',
     /* clamp BOTH ways: sub-pixel points shimmer as blur (V5.3 floor),
        near motes never balloon (ceiling) */
     /* point size rides uDockScale too — the sealed motes shrink with
        their aquarium instead of ballooning out of the tiny glass */
-    '  gl_PointSize = clamp(uSize * (30.0 / max(1.0, -mv.z)) * (0.45 + aSeed.x*1.1 + settle*0.4) * (0.85 + 0.15*tw) * mix(1.0, uDockScale * 6.0, uOver), 1.0, uSize * 2.7);',
+    mobile
+      ? '  gl_PointSize = clamp(uSize * (30.0 / max(1.0, -mv.z)) * (0.45 + aSeed.x*1.1 + settle*0.4) * (0.85 + 0.15*tw) * mix(1.0, uDockScale * 6.0, uOver * (1.0 - step(0.82, aSeed.y))), 1.0, uSize * 2.7);'
+      : '  gl_PointSize = clamp(uSize * (30.0 / max(1.0, -mv.z)) * (0.45 + aSeed.x*1.1 + settle*0.4) * (0.85 + 0.15*tw) * mix(1.0, uDockScale * 6.0, uOver), 1.0, uSize * 2.7);',
     '  gl_Position = projectionMatrix * mv;',
     '}'
   ].join('\n');
@@ -866,8 +879,13 @@
         '  p += texture2D(tPos, aRef).xyz * (1.0 - uSolid * 0.85);',
         /* V5.8.1: the aquarium TRAVELS — the same shrink+glide that docks
            the glass onto the header logo carries every sealed mote with
-           it (applied after all motion, so containment holds exactly) */
-        '  p = uDockPos + (p - vec3(0.0, 0.4, -444.0)) * uDockScale;',
+           it (applied after all motion, so containment holds exactly).
+           v80 phones: the stardust motes (same 18% mask as the alpha
+           keep) never board the flight — the piece sheds them as it
+           leaves and they hold the empty frame. */
+        mobile
+          ? '  p = mix(uDockPos + (p - vec3(0.0, 0.4, -444.0)) * uDockScale, p, step(0.82, aSeed.y));'
+          : '  p = uDockPos + (p - vec3(0.0, 0.4, -444.0)) * uDockScale;',
         VERT_TAIL
       ].join('\n'),
       fragmentShader: DUST_FRAG
@@ -914,7 +932,10 @@
         mobile ? '                (1.1 + aSeed.x*1.6) * 1.8, (0.25 + aSeed.x*1.6) * 1.7, 0.2*(aSeed.z - 0.5))'
                : '                1.1 + aSeed.x*1.6, 0.25 + aSeed.x*1.6, 0.2*(aSeed.z - 0.5))',
         '       * (1.0 - uSolid * 0.85);', /* sealed inside the aquarium */
-        '  p = uDockPos + (p - vec3(0.0, 0.4, -444.0)) * uDockScale;', /* travels with the glass */
+        /* travels with the glass; v80 phones: stardust stays behind */
+        mobile
+          ? '  p = mix(uDockPos + (p - vec3(0.0, 0.4, -444.0)) * uDockScale, p, step(0.82, aSeed.y));'
+          : '  p = uDockPos + (p - vec3(0.0, 0.4, -444.0)) * uDockScale;',
         VERT_TAIL
       ].join('\n'),
       fragmentShader: DUST_FRAG
@@ -1409,7 +1430,7 @@
   /* ---------- go live ---------- */
   /* version stamp — lets remote debugging confirm which engine build a
      machine is actually running (stale-cache hunts, V5.19 lesson) */
-  console.info('Orbo engine v78 | tier ' + gpuTier + (mobile ? ' mobile' : ' desktop') + (simInfo ? ' sim' : ' stateless'));
+  console.info('Orbo engine v80 | tier ' + gpuTier + (mobile ? ' mobile' : ' desktop') + (simInfo ? ' sim' : ' stateless'));
   document.documentElement.classList.add('story-live');
   document.documentElement.classList.add('story-light');
   var header = document.getElementById('siteHeader');
@@ -1422,7 +1443,7 @@
   if (/[?&]fps=1/.test(location.search)) {
     diag = document.createElement('div');
     diag.style.cssText = 'position:fixed;z-index:999;bottom:calc(96px + env(safe-area-inset-bottom,0px));inset-inline-start:6px;background:rgba(20,18,31,.82);color:#fff;font:10px/1.5 Consolas,monospace;padding:4px 8px;border-radius:6px;pointer-events:none;direction:ltr;text-align:left;white-space:pre';
-    diag.textContent = 'v78 warming…';
+    diag.textContent = 'v80 warming…';
     document.body.appendChild(diag);
   }
 
@@ -1729,7 +1750,7 @@
     if (diag) {
       dSum += dt; dN++; if (dt > dMax) dMax = dt;
       if (t - dLast > 500 && dN) {
-        diag.textContent = 'v78 tier' + gpuTier + (simInfo ? ' sim' : ' nofbo') + ' N' + N +
+        diag.textContent = 'v80 tier' + gpuTier + (simInfo ? ' sim' : ' nofbo') + ' N' + N +
           ' dpr' + DPR.toFixed(2) + ' g' + gLevel + (paged ? ' c' + pgC.toFixed(2) : '') + (idleSettled ? ' idle' : '') +
           '\n' + (dSum / dN).toFixed(1) + 'ms avg | ' + dMax.toFixed(0) + 'ms max | ' + innerWidth + 'x' + innerHeight;
         dSum = 0; dN = 0; dMax = 0; dLast = t;
