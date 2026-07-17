@@ -1355,7 +1355,12 @@
         bt.el.classList.toggle('live', q > 0.5);
       }
     }
-    if (hint) hint.style.opacity = Math.max(0, 1 - p * 14);
+    /* the swipe hint lives on the pager coordinate on phones — the
+       ignition parks at p=.06, which the scroll formula read as
+       "already under way" and killed the affordance for new visitors */
+    if (hint) hint.style.opacity = paged
+      ? Math.max(0, 1 - Math.max(0, pgC) * 1.4)
+      : Math.max(0, 1 - p * 14);
   }
 
   /* CHAPTER DOTS (ORBO MOBILE M2): 11 beats read as 7 app chapters —
@@ -1379,10 +1384,22 @@
   /* ---------- go live ---------- */
   /* version stamp — lets remote debugging confirm which engine build a
      machine is actually running (stale-cache hunts, V5.19 lesson) */
-  console.info('Orbo engine v76 | tier ' + gpuTier + (mobile ? ' mobile' : ' desktop') + (simInfo ? ' sim' : ' stateless'));
+  console.info('Orbo engine v77 | tier ' + gpuTier + (mobile ? ' mobile' : ' desktop') + (simInfo ? ' sim' : ' stateless'));
   document.documentElement.classList.add('story-live');
   document.documentElement.classList.add('story-light');
   var header = document.getElementById('siteHeader');
+
+  /* ?fps=1 — on-device diagnosis chip (v77). The FIRST question of any
+     "stuck on the phone" report is WHICH build and WHAT frame time;
+     this makes the phone itself answer both (a stale cache shows up
+     as an old v number right here). Param-gated, absent otherwise. */
+  var diag = null, dSum = 0, dN = 0, dMax = 0, dLast = 0;
+  if (/[?&]fps=1/.test(location.search)) {
+    diag = document.createElement('div');
+    diag.style.cssText = 'position:fixed;z-index:999;bottom:calc(96px + env(safe-area-inset-bottom,0px));inset-inline-start:6px;background:rgba(20,18,31,.82);color:#fff;font:10px/1.5 Consolas,monospace;padding:4px 8px;border-radius:6px;pointer-events:none;direction:ltr;text-align:left;white-space:pre';
+    diag.textContent = 'v77 warming…';
+    document.body.appendChild(diag);
+  }
 
   var trackH0 = track.offsetHeight - innerHeight;
   var pSmooth = trackH0 > 0 ? Math.min(1, Math.max(0, window.scrollY / trackH0)) : 0;
@@ -1413,14 +1430,18 @@
   }, { passive: true });
   document.documentElement.addEventListener('mouseleave', function () { hoverTarget = 0; });
   window.addEventListener('blur', function () { hoverTarget = 0; });
-  /* ORBO MOBILE (M2): touchDown gates the magnetic chapters — the
-     magnet may only steer the scroll AFTER the finger lifts and the
-     momentum dies; a touching finger always wins instantly. */
+  /* touchDown gates the idle throttle; on phones the same gestures
+     also drive THE PAGER (v77) — the finger that turns the chapter is
+     the finger that stirs it. Pager input is inert under QA pins. */
   var touchDown = false;
+  var paged = mobile; /* the pager IS the phone input model */
   window.addEventListener('touchstart', function (e) {
     if (!e.touches.length) return;
     touchDown = true;
-    magT = -1; magCalm = 0;
+    if (paged && pPin === null) {
+      if (e.touches.length > 1) pagerEnd(e.timeStamp); /* second finger commits the drag */
+      else pagerStart(e.touches[0].clientY, e.timeStamp);
+    }
     ndc.x = (e.touches[0].clientX / innerWidth) * 2 - 1;
     ndc.y = -(e.touches[0].clientY / innerHeight) * 2 + 1;
     lastNdc.copy(ndc);
@@ -1429,65 +1450,106 @@
   }, { passive: true });
   window.addEventListener('touchmove', function (e) {
     if (!e.touches.length) return;
+    if (paged && pPin === null && e.touches.length === 1) pagerMove(e.touches[0].clientY, e.timeStamp);
     ndc.x = (e.touches[0].clientX / innerWidth) * 2 - 1;
     ndc.y = -(e.touches[0].clientY / innerHeight) * 2 + 1;
     hoverTarget = 1;
   }, { passive: true });
   /* only the LAST finger leaving drops presence — a resting finger keeps
      its dimple even while other fingers tap/lift elsewhere (QA 2026-07-16) */
-  window.addEventListener('touchend', function (e) { if (e.touches.length) return; hoverTarget = 0; touchDown = false; magCalm = 0; });
-  window.addEventListener('touchcancel', function (e) { if (e.touches.length) return; hoverTarget = 0; touchDown = false; magCalm = 0; });
+  window.addEventListener('touchend', function (e) {
+    if (e.touches.length) return;
+    if (paged && pPin === null) pagerEnd(e.timeStamp);
+    hoverTarget = 0; touchDown = false;
+  });
+  window.addEventListener('touchcancel', function (e) {
+    if (e.touches.length) return;
+    if (paged && pPin === null) pagerEnd(e.timeStamp);
+    hoverTarget = 0; touchDown = false;
+  });
 
   /* ============================================================
-     MAGNETIC CHAPTERS (ORBO MOBILE M2) — phones only. The journey
-     stays fully scroll-driven (p is still a pure function of
-     scrollY — scrub-safe both ways); the magnet only STEERS the
-     resting point: once touch momentum dies inside the story, the
-     scroll eases to the nearest FORMED state (the ANCHORS' p values
-     — each beat's text is live and its formation complete there),
-     so a swipe reads as "one chapter arrives". Inside the footer
-     overscroll it parks the dock at either end (open or closed) so
-     the handover never rests mid-crossfade. CSS scroll-snap cannot
-     do this — it fights the 1100vh/800vh track and the overscroll
-     dock (MOBILE-PLAN 3.1). */
-  var MAG_P = [0, 0.06, 0.14, 0.2325, 0.3125, 0.3925, 0.4725, 0.5525, 0.6325, 0.735, 0.84, 0.925, 1.0];
-  var magT = -1, magCalm = 0, magLastY = -1;
-  function magnetize(dtn) {
-    var sy = window.scrollY;
-    if (magLastY < 0) magLastY = sy;
-    var v = sy - magLastY;
-    magLastY = sy;
-    if (touchDown || pPin !== null || overPin !== null) { magT = -1; magCalm = 0; return; }
-    if (magT < 0) {
-      /* momentum watch: a few near-still frames = the flick is over */
-      magCalm = Math.abs(v) < 1.6 ? magCalm + 1 : 0;
-      if (magCalm < 3 || trackH <= 0) return;
-      var ty;
-      if (sy <= trackH) {
-        var pNow = sy / trackH, best = 0, bd = 9;
-        for (var mi = 0; mi < MAG_P.length; mi++) {
-          var md = Math.abs(MAG_P[mi] - pNow);
-          if (md < bd) { bd = md; best = mi; }
-        }
-        ty = Math.round(MAG_P[best] * trackH);
-      } else {
-        /* overscroll: the dock is a switch, not a slider */
-        ty = (sy - trackH) > (maxScroll - trackH) * 0.5 ? maxScroll : trackH;
-      }
-      if (Math.abs(ty - sy) > 3) magT = ty; else magCalm = 0;
-      return;
+     THE PAGER (v77 — owner directive: "the whole scroll experience
+     does not suit the phone; replace it, a big change"). On phones
+     the story is NOT scroll-driven at all any more: the document is
+     locked to one viewport and the journey is PAGED — one swipe =
+     one chapter, the particle pour IS the page transition, and a
+     live drag scrubs the journey under the finger (which also
+     drives the ray-brush — the same gesture stirs what it turns).
+     This also deletes the phone's two worst jank sources outright:
+     the URL-bar resize storm and main-thread scroll work.
+
+     c = one continuous chapter coordinate:
+       -1 → 0   the ignition (load: the cloud assembles into the star)
+        0 → 11  the twelve chapters (PAGES[i] = the FORMED anchors)
+       11 → 12  the dock (star lands in the header, footer sheet rises)
+     p = pagesAt(c) stays a pure function of the timeline — scrub-safe,
+     and ?storyp/?over pins bypass the pager entirely (QA unchanged).
+     Desktop keeps the V5 scroll model byte-for-byte. */
+  var PAGES = [0.06, 0.14, 0.2325, 0.3125, 0.3925, 0.4725, 0.5525, 0.6325, 0.735, 0.84, 0.925, 1.0];
+  var PG_LAST = PAGES.length - 1;
+  var PG_DOCK = PG_LAST + 1;
+  var pgC = -1;          /* chapter coordinate (starts pre-ignition) */
+  var pgTween = null;    /* {from,to,t0,dur,out} */
+  var pgDrag = null;     /* {y0,cBase,lastY,lastT,prevY,prevT} */
+  function pagesAt(c) {
+    if (c <= -1) return 0;
+    if (c < 0) return PAGES[0] * (1 + c);      /* ignition ramp 0 → .06 */
+    if (c >= PG_LAST) return PAGES[PG_LAST];   /* dock zone holds p=1 */
+    var i = Math.floor(c), f = c - i;
+    return PAGES[i] + (PAGES[i + 1] - PAGES[i]) * f;
+  }
+  function pgEase(x, out) {
+    return out ? 1 - Math.pow(1 - x, 3)
+               : (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+  }
+  function pagerStart(y, now) {
+    pgTween = null;                     /* grab-in-flight adopts current c */
+    pgDrag = { y0: y, cBase: pgC, lastY: y, lastT: now, prevY: y, prevT: now };
+  }
+  function pagerMove(y, now) {
+    if (!pgDrag) return;
+    pgDrag.prevY = pgDrag.lastY; pgDrag.prevT = pgDrag.lastT;
+    pgDrag.lastY = y; pgDrag.lastT = now;
+    var c = pgDrag.cBase + (pgDrag.y0 - y) / innerHeight;  /* one viewport = one chapter; up = forward */
+    /* rubber past both ends — the star loosens toward the cloud below
+       page 0 and resists past the dock, and always springs back */
+    if (c < 0) c = c * 0.35;
+    if (c > PG_DOCK) c = PG_DOCK + (c - PG_DOCK) * 0.25;
+    pgC = Math.max(-0.35, Math.min(PG_DOCK + 0.15, c));
+  }
+  function pagerEnd(now) {
+    if (!pgDrag) return;
+    var dtm = Math.max(1, pgDrag.lastT - pgDrag.prevT);
+    var vel = (pgDrag.prevY - pgDrag.lastY) / dtm;  /* px/ms, + = forward */
+    var target = Math.round(pgC);
+    if (target === Math.round(pgDrag.cBase)) {
+      /* a short drag with a real FLICK still turns the page */
+      if (vel > 0.55) target += 1;
+      else if (vel < -0.55) target -= 1;
     }
-    /* glide: eased approach with a 1px floor so the tail never stalls
-       on scroll-position rounding */
-    var step = (magT - sy) * Math.min(1, 0.085 * dtn);
-    if (Math.abs(step) < 1) step = (magT > sy ? 1 : -1) * Math.min(1, Math.abs(magT - sy));
-    var ny = sy + step;
-    if (Math.abs(magT - ny) < 0.75) { ny = magT; magT = -1; magCalm = 0; }
-    /* behavior:'instant' — the page CSS sets scroll-behavior:smooth,
-       which would turn every per-frame write into a competing
-       animation; the magnet IS the animation */
-    window.scrollTo({ top: ny, left: 0, behavior: 'instant' });
-    magLastY = window.scrollY; /* our own write is not user velocity */
+    target = Math.max(0, Math.min(PG_DOCK, target));
+    pgDrag = null;
+    pgGo(target, Math.abs(vel) > 0.55 ? 620 : 780, true, now);
+  }
+  function pgGo(target, dur, out, now) {
+    if (Math.abs(target - pgC) < 0.002) { pgC = target; pgTween = null; return; }
+    pgTween = { from: pgC, to: target, t0: now, dur: dur, out: out };
+  }
+  function pagerFrame(now) {
+    if (pgDrag || !pgTween) return;
+    var x = Math.min(1, (now - pgTween.t0) / pgTween.dur);
+    pgC = pgTween.from + (pgTween.to - pgTween.from) * pgEase(x, pgTween.out);
+    if (x >= 1) { pgC = pgTween.to; pgTween = null; }
+  }
+  /* the paged shell: the class locks the document to one viewport
+     (index.html CSS) and the ignition tween assembles the opening
+     star as the app "opens". Pins keep the class — same CSS state as
+     production — but pin p directly (pager input stays inert). */
+  var dockOpen = false;
+  if (paged) {
+    document.documentElement.classList.add('story-paged');
+    if (pPin === null) pgGo(0, 1400, true, performance.now());
   }
 
   /* cache the track height — reading offsetHeight every frame while also
@@ -1584,7 +1646,11 @@
   function govern(dt) {
     gFrames++; gSum += dt;
     if (dt < gMin) gMin = dt;
-    if (gFrames < 90) return;
+    /* v77: phones adapt in ~0.8s windows — a struggling device spent
+       multiple 1.5-4s windows janking through the ladder before
+       reaching its floor ("very stuck" opening minutes). Desktop
+       keeps the V5 cadence exactly. */
+    if (gFrames < (mobile ? 48 : 90)) return;
     var avg = gSum / gFrames, min = gMin;
     gFrames = 0; gSum = 0; gMin = 999;
     if (avg <= 26) return;
@@ -1598,6 +1664,13 @@
        returns false — fall straight through to the next real rung */
     while (gLevel < gSteps.length) {
       if (gSteps[gLevel++]() !== false) break;
+    }
+    /* v77: severely over budget on a PHONE (sub-24fps) — shed a second
+       rung in the same window instead of janking to the next one */
+    if (mobile && avg > 42) {
+      while (gLevel < gSteps.length) {
+        if (gSteps[gLevel++]() !== false) break;
+      }
     }
   }
 
@@ -1621,13 +1694,26 @@
        the governor (permanent quality drop after one tab switch) */
     var dt = lastT ? Math.min(100, t - lastT) : 16.7;
     lastT = t;
+    if (diag) {
+      dSum += dt; dN++; if (dt > dMax) dMax = dt;
+      if (t - dLast > 500 && dN) {
+        diag.textContent = 'v77 tier' + gpuTier + (simInfo ? ' sim' : ' nofbo') + ' N' + N +
+          ' dpr' + DPR.toFixed(2) + ' g' + gLevel + (paged ? ' c' + pgC.toFixed(2) : '') + (idleSettled ? ' idle' : '') +
+          '\n' + (dSum / dN).toFixed(1) + 'ms avg | ' + dMax.toFixed(0) + 'ms max | ' + innerWidth + 'x' + innerHeight;
+        dSum = 0; dN = 0; dMax = 0; dLast = t;
+      }
+    }
     var dtn = Math.min(2.0, Math.max(0.25, dt / 16.7));
     var time = t * 0.001;
-    var p = pPin !== null ? pPin : (trackH > 0 ? Math.min(1, Math.max(0, window.scrollY / trackH)) : 0);
+    /* v77: phones read the PAGER timeline, desktop reads the scroll —
+       p stays a pure function of its driver either way */
+    if (paged && pPin === null) pagerFrame(t);
+    var p = pPin !== null ? pPin
+      : paged ? pagesAt(pgC)
+      : (trackH > 0 ? Math.min(1, Math.max(0, window.scrollY / trackH)) : 0);
     pSmooth += (p - pSmooth) * 0.085;
     mx += (ndc.x * 0.5 - mx) * 0.04;
     my += (-ndc.y * 0.5 - my) * 0.04;
-    if (mobile) magnetize(dtn);
 
     gradeUpdate(pSmooth);
     applyLeg(pSmooth);
@@ -1642,6 +1728,7 @@
     /* footer overscroll -> the piece docks as a small logo (V5.8);
        driven by scroll past the track end, pinned via ?over= in QA */
     var overRaw = overPin !== null ? overPin
+      : paged ? Math.min(1, Math.max(0, pgC - PG_LAST))
       : (trackH > 0 ? Math.min(1, Math.max(0, (window.scrollY - trackH) / Math.max(1, maxScroll - trackH))) : 0);
     /* V5.18/19: the last stretch of the overscroll snaps to DONE — the
        handover must complete even if the measured document end is off
@@ -1738,6 +1825,15 @@
       hdrDocked = wantDocked;
       document.documentElement.classList.toggle('star-docked', hdrDocked);
     }
+    /* v77 pager: the footer arrives as a SHEET when the dock page
+       commits (index CSS slides it; quantized single toggle) */
+    if (paged) {
+      var wantOpen = overPin !== null ? overPin > 0.55 : pgC > PG_LAST + 0.5;
+      if (wantOpen !== dockOpen) {
+        dockOpen = wantOpen;
+        document.documentElement.classList.toggle('dock-open', dockOpen);
+      }
+    }
     /* V5.10: on the last stretch of the flight the living piece hands
        over to the page's REAL flat mark — they now look identical, so
        the resting state on index is literally the same svg logo as
@@ -1825,9 +1921,10 @@
       header.style.setProperty('--sp', (spq / 500).toFixed(3));
     }
     /* M5: decide the NEXT frame's throttle from this frame's settled
-       state (phones only, never at QA pins) */
+       state (phones only, never at QA pins). v77: the pager must be
+       fully at rest — no drag, no tween in flight. */
     idleSettled = mobile && pPin === null && overPin === null &&
-      !touchDown && magT < 0 &&
+      !touchDown && !pgDrag && !pgTween &&
       Math.abs(p - pSmooth) < 1e-4 &&
       hover < 0.01 && push < 0.01 &&
       Math.abs(overRaw - overS) < 1e-3;

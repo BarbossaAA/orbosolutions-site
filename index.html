@@ -264,14 +264,31 @@
     html.story-live .story-hint { bottom: calc(86px + env(safe-area-inset-bottom, 0px)); }
   }
 
-  /* ORBO MOBILE (M2): the story as an app flow. A shorter thumb
-     journey (800vh), and every beat composed as an app SCREEN — the
-     formation owns the upper part of the frame, the words sit in the
-     thumb zone above the tab bar. The entrance is a 300ms spring on
-     .live (transform+opacity only — the V5.19 no-reflow law), driven
-     by story.js toggling the class instead of scrub-fading inline. */
+  /* ORBO MOBILE: the story as an app flow. Every beat composed as an
+     app SCREEN — the formation owns the upper part of the frame, the
+     words sit in the thumb zone above the tab bar. The entrance is a
+     300ms spring on .live (transform+opacity only — the V5.19
+     no-reflow law), driven by story.js toggling the class.
+     v77 PAGER (owner: "the whole scroll experience does not suit the
+     phone — replace it"): phones do not scroll AT ALL — the document
+     locks to one viewport, swipes turn chapters (story.js), and the
+     footer arrives as a fixed sheet when the star docks. This also
+     deletes the URL-bar resize jank outright. */
   @media (max-width: 767px) {
-    html.story-live .story-track { height: 800vh; }
+    html.story-paged { height: 100%; overflow: hidden; overscroll-behavior: none; }
+    html.story-paged body { position: fixed; inset: 0; width: 100%; height: 100%; overflow: hidden; }
+    html.story-paged .story-track { height: 100vh; height: 100svh; }
+    html.story-paged .site-footer {
+      position: fixed;
+      inset-inline: 0;
+      bottom: 0;
+      z-index: 5;
+      transform: translateY(103%);
+      transition: transform 0.55s var(--ease-out);
+      box-shadow: 0 -18px 60px -20px rgba(20, 18, 31, 0.25);
+      border-radius: 22px 22px 0 0;
+    }
+    html.story-paged.dock-open .site-footer { transform: translateY(0); }
     html.story-live .beat {
       place-items: end center;
       padding: 20px 20px calc(112px + env(safe-area-inset-bottom, 0px));
@@ -541,7 +558,7 @@
 </nav>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js" defer></script>
-<script src="assets/js/story.js?v=76" defer></script>
+<script src="assets/js/story.js?v=77" defer></script>
 <script src="assets/js/audio.js?v=74" defer></script>
 <script src="assets/js/main.js" defer></script>
 </body>
