@@ -18,7 +18,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@300..900&display=swap">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@300..900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/main.css?v=76">
+<link rel="stylesheet" href="assets/css/main.css?v=79">
 <style>
   /* ---- services page only ---- */
   .anchor-nav a { display: inline-flex; align-items: center; gap: 0.6em; }
@@ -185,6 +185,49 @@
        wayfinding bar once the long-form begins */
     .anchor-nav { display: none; }
     .anchor-nav.nav-floating { display: flex; }
+
+    /* v79 (owner: inner pages at home-page level): the long-form
+       worlds read as app cards — icon+title header row, readable
+       body weight, the wireframe scene back as whisper art (it was
+       hidden <=860; phones re-earn a small faint copy), and anchor
+       jumps clear the floating bar */
+    .service-detail { padding-block: 40px 34px; scroll-margin-top: calc(var(--header-h) + 72px); }
+    .svc-scene {
+      display: block;
+      width: 280px;
+      height: 280px;
+      inset-inline-end: -70px;
+      top: -28px;
+      margin-top: 0;
+      opacity: 0.10;
+    }
+    .service-detail:nth-child(even) .svc-scene { opacity: 0.13; }
+    .service-inner { gap: 16px; }
+    .service-side {
+      display: grid;
+      grid-template-columns: 52px 1fr;
+      column-gap: 14px;
+      align-items: center;
+    }
+    .service-icon {
+      grid-column: 1;
+      grid-row: 1 / 3;
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      margin-bottom: 0;
+    }
+    .service-icon svg { width: 26px; height: 26px; }
+    /* justify-self start: the stretched grid item + ltr content pinned
+       the numeral to the far (wrong) edge in RTL */
+    .service-num { grid-column: 2; justify-self: start; font-size: 0.78rem; margin-bottom: 2px; }
+    .service-side h2 { grid-column: 2; font-size: 1.3rem; margin-top: 0; }
+    .service-body p { font-size: 1rem; font-weight: 400; margin-bottom: 18px; }
+    .chip { font-size: 0.85rem; padding: 0.45em 1em; }
+
+    /* thumb-size floating wayfinding chips */
+    .anchor-nav.nav-floating { padding: 9px; }
+    .anchor-nav.nav-floating a { padding: 0.72em 1.3em; font-size: 0.92rem; }
   }
 </style>
 </head>

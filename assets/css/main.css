@@ -1050,6 +1050,22 @@ body::after {
   /* content never rests under the floating bar */
   .site-footer { padding-bottom: calc(var(--tabbar-h) + 28px + env(safe-area-inset-bottom, 0px)); }
 
+  /* ORBO MOBILE v79 (owner: "the rest of the pages at the same level
+     as home"): inner pages read as app screens — compact heroes
+     tuned to the 52px top bar, tighter section rhythm, and an
+     app-style page ENTRANCE (transform+opacity only; the story page
+     is excluded — a transform on main would re-anchor its fixed
+     canvas). */
+  .page-hero {
+    padding-top: calc(var(--header-h) + env(safe-area-inset-top, 0px) + 26px);
+    padding-bottom: 22px;
+  }
+  .page-hero .eyebrow { margin-bottom: 16px; }
+  .page-hero h1 { margin-bottom: 14px; }
+  .page-hero .lead { font-size: 1rem; }
+  .section { padding-block: 44px; }
+  main:not(.story) { animation: page-in 0.4s var(--ease-out); }
+
   /* ORBO MOBILE (M4): the footer collapses into a compact "about +
      contact chips" block — the tab bar already owns navigation */
   .site-footer { padding-top: 40px; }
@@ -1067,6 +1083,10 @@ body::after {
     text-align: start;
   }
   .footer-bottom { justify-content: center; text-align: center; row-gap: 4px; }
+}
+
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(14px); }
 }
 
 /* ---------- Reduced motion ---------- */

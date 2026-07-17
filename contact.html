@@ -18,7 +18,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@300..900&display=swap">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@300..900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/main.css?v=76">
+<link rel="stylesheet" href="assets/css/main.css?v=79">
 <style>
 /* ---------- Contact page only ---------- */
 .contact-section { padding-top: clamp(10px, 2vw, 28px); }
@@ -99,6 +99,26 @@
     border-color: #e8548f;
     box-shadow: 0 0 0 4px rgba(232, 84, 143, 0.10);
   }
+
+  /* v79 (owner: inner pages at home-page level): direct contact =
+     one BIG tap each — the email/phone links become full-width pill
+     buttons; the whole sheet tightens to app rhythm */
+  .aside-mail {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 52px;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-pill);
+    background: var(--bg);
+    box-shadow: var(--shadow-sm);
+    font-size: 1.02rem;
+    margin-bottom: 10px;
+  }
+  .aside-card { padding: 24px 20px; }
+  .contact-grid { gap: 18px; }
+  .contact-aside { gap: 14px; }
 }
 
 /* success state (?sent=1 after FormSubmit redirects back): a
