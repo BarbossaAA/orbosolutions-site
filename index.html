@@ -328,6 +328,35 @@
     .beat-steps { gap: 9px 16px; margin-top: 20px; }
     .beat-steps span { font-size: 0.88rem; }
   }
+
+  /* v78 (owner: the process screen felt EMPTY on phones): the four
+     steps become an app-style checklist of cards — solid surfaces
+     over the dust, no halos needed. Placed after the 640px block so
+     these win the cascade on small phones. */
+  @media (max-width: 767px) {
+    html.story-live .beat-steps {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 9px;
+      margin-top: 22px;
+      max-width: 320px;
+      margin-inline: auto;
+    }
+    html.story-live .beat-steps span {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 11px 15px;
+      font-size: 0.95rem;
+      white-space: normal;
+      text-align: start;
+      box-shadow: var(--shadow-sm);
+    }
+    html.story-live .beat-steps b { font-size: 1.02rem; margin-inline-end: 0; }
+  }
 </style>
 </head>
 <body>
@@ -558,7 +587,7 @@
 </nav>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js" defer></script>
-<script src="assets/js/story.js?v=77" defer></script>
+<script src="assets/js/story.js?v=78" defer></script>
 <script src="assets/js/audio.js?v=74" defer></script>
 <script src="assets/js/main.js" defer></script>
 </body>

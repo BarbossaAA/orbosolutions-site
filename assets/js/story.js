@@ -151,8 +151,12 @@
      appNarrow gates on BOTH flags — a portrait desktop/tablet window
      (narrow but not mobile) keeps the V5 staging untouched. */
   var appNarrow = mobile && narrow;
-  var ICON_X = appNarrow ? 1.2 : (narrow ? 2.0 : 6.2);
-  var ICON_Y = appNarrow ? 4.4 : (narrow ? 4.2 : 0.6);
+  /* v78 (owner: "the icons are CROOKED and too high"): dead-center,
+     a step lower, and the camera weave dies on phones (the arc plus
+     a parked touch offset rendered the centered icons off-axis =
+     visibly skewed in portrait) */
+  var ICON_X = appNarrow ? 0 : (narrow ? 2.0 : 6.2);
+  var ICON_Y = appNarrow ? 3.3 : (narrow ? 4.2 : 0.6);
   var ICON_S = appNarrow ? 3.8 : (narrow ? 3.6 : 5.2);
 
   /* the visible half-frame at sculpture depth (~23u ahead of the camera;
@@ -223,10 +227,14 @@
     aSeed[di * 3 + 1] = Math.random();
     aSeed[di * 3 + 2] = Math.random();
     var r = Math.random(), c;
-    if (r < 0.40) c = mixColor(INK, VIOLET, 0.35 + Math.random() * 0.65);
-    else if (r < 0.62) c = mixColor(VIOLET, DEEP, Math.random());
-    else if (r < 0.75) c = mixColor(PEACH, INK, Math.random() * 0.20);
-    else if (r < 0.88) c = mixColor(CYAN, INK, Math.random() * 0.20);
+    /* v78 (owner: "more color, more vibe, younger" — PHONES only):
+       the accent share rises 38% -> 55% there. Same muted brand hexes
+       (the palette law stands) — just more of the colorful citizens.
+       Desktop keeps the V5.4 population exactly. */
+    if (r < (mobile ? 0.25 : 0.40)) c = mixColor(INK, VIOLET, 0.35 + Math.random() * 0.65);
+    else if (r < (mobile ? 0.45 : 0.62)) c = mixColor(VIOLET, DEEP, Math.random());
+    else if (r < (mobile ? 0.65 : 0.75)) c = mixColor(PEACH, INK, Math.random() * 0.20);
+    else if (r < (mobile ? 0.85 : 0.88)) c = mixColor(CYAN, INK, Math.random() * 0.20);
     else c = mixColor(ROSE, INK, Math.random() * 0.16);
     aCol[di * 3] = c.r; aCol[di * 3 + 1] = c.g; aCol[di * 3 + 2] = c.b;
   }
@@ -427,24 +435,34 @@
     return out;
   }
 
-  /* four gates strung along the path, with a faint dust road beneath */
+  /* four gates strung along the path, with a faint dust road beneath.
+     v78 (owner: "after 'orderly process' the screen is too EMPTY" on
+     phones): the desktop corridor puts the beat camera (z≈-390)
+     INSIDE the gate string, so a portrait frame saw one sparse ring
+     and dead middle. Portrait now gets a receding TUNNEL — four full
+     rings ahead of the camera, near-constant angular size — plus the
+     road, so the frame reads full and deep. Desktop untouched. */
   function buildGates() {
-    var gz = [-366, -380, -394, -408];
+    var gz = appNarrow ? [-404, -414.5, -426, -438] : [-366, -380, -394, -408];
+    var gR = appNarrow ? [3.0, 4.3, 5.6, 7.0] : [6.6, 6.6, 6.6, 6.6];
+    var gy = appNarrow ? 1.0 : 0.6;
     var tilt = [0.0, 0.12, -0.12, 0.06];
     var out = new Float32Array(N * 3);
     for (var i = 0; i < N; i++) {
       var x, y, z;
       if (isHalo(i)) {
-        x = gauss() * 10; y = gauss() * 8; z = -387 + gauss() * 30;
+        x = gauss() * 10; y = gauss() * 8; z = (appNarrow ? -418 : -387) + gauss() * 30;
       } else if (i % 12 === 5) {                  /* the road of light */
-        x = jit(1.6); y = -4.2 + jit(0.8); z = -360 - Math.random() * 54;
+        x = jit(1.6);
+        y = (appNarrow ? -3.2 : -4.2) + jit(0.8);
+        z = appNarrow ? -398 - Math.random() * 46 : -360 - Math.random() * 54;
       } else {
         var g = i % 4;
         var a = Math.random() * Math.PI * 2;
-        var R = 6.6 + jit(0.5);
+        var R = gR[g] + jit(0.5);
         var px = Math.cos(a) * R, py = Math.sin(a) * R;
         x = px * Math.cos(tilt[g]) - py * Math.sin(tilt[g]);
-        y = px * Math.sin(tilt[g]) + py * Math.cos(tilt[g]) + 0.6;
+        y = px * Math.sin(tilt[g]) + py * Math.cos(tilt[g]) + gy;
         z = gz[g] + jit(0.7);
       }
       out[i * 3] = x; out[i * 3 + 1] = y; out[i * 3 + 2] = z;
@@ -775,7 +793,11 @@
     '  vec3 tint = mix(uTintFrom, uTintTo, mm);',
     '  vec3 cc = mix(aCol, tint, 0.14 + 0.24*settle);',
     '  cc = cc / (0.55 + 0.45 * cc);',
-    '  vColor = pow(max(cc, vec3(0.0)), vec3(0.4545));',
+    /* v78 phones: a gentle post-tone re-saturation (1.18 — NOT the
+       rejected V5.3 neon 1.5) lifts the vibe; desktop line exact */
+    mobile
+      ? '  vColor = pow(max(cc, vec3(0.0)), vec3(0.4545));\n  float rlum = dot(vColor, vec3(0.299, 0.587, 0.114));\n  vColor = clamp(mix(vec3(rlum), vColor, 1.18), 0.0, 1.0);'
+      : '  vColor = pow(max(cc, vec3(0.0)), vec3(0.4545));',
     /* V5.11 (user directive): inside the hardening star the motes turn
        WHITE — sparkling glass shards, not colored dust */
     '  vColor = mix(vColor, vec3(1.0), uSolid * 0.9);',
@@ -783,7 +805,10 @@
        hold steady (V5.3 crispness) while free dust sparkles hard —
        but INSIDE the solid the damping lifts again and a faster glint
        rides on top: glass catching light (V5.11) */
-    '  float tw = 0.80 + 0.34*sin(uTime*(0.8 + aSeed.x*1.7) + aSeed.y*6.283);',
+    /* v78 phones: livelier twinkle (young + fun); desktop line exact */
+    mobile
+      ? '  float tw = 0.78 + 0.44*sin(uTime*(0.9 + aSeed.x*1.9) + aSeed.y*6.283);'
+      : '  float tw = 0.80 + 0.34*sin(uTime*(0.8 + aSeed.x*1.7) + aSeed.y*6.283);',
     '  tw = mix(tw, 1.0, settle*0.5*(1.0 - uSolid));',
     '  tw += uSolid * 0.30 * sin(uTime*(2.2 + aSeed.z*2.6) + aSeed.x*6.283);',
     '  vA = (0.72 + 0.24*aSeed.z + settle*0.24) * tw;',
@@ -1384,7 +1409,7 @@
   /* ---------- go live ---------- */
   /* version stamp — lets remote debugging confirm which engine build a
      machine is actually running (stale-cache hunts, V5.19 lesson) */
-  console.info('Orbo engine v77 | tier ' + gpuTier + (mobile ? ' mobile' : ' desktop') + (simInfo ? ' sim' : ' stateless'));
+  console.info('Orbo engine v78 | tier ' + gpuTier + (mobile ? ' mobile' : ' desktop') + (simInfo ? ' sim' : ' stateless'));
   document.documentElement.classList.add('story-live');
   document.documentElement.classList.add('story-light');
   var header = document.getElementById('siteHeader');
@@ -1397,7 +1422,7 @@
   if (/[?&]fps=1/.test(location.search)) {
     diag = document.createElement('div');
     diag.style.cssText = 'position:fixed;z-index:999;bottom:calc(96px + env(safe-area-inset-bottom,0px));inset-inline-start:6px;background:rgba(20,18,31,.82);color:#fff;font:10px/1.5 Consolas,monospace;padding:4px 8px;border-radius:6px;pointer-events:none;direction:ltr;text-align:left;white-space:pre';
-    diag.textContent = 'v77 warming…';
+    diag.textContent = 'v78 warming…';
     document.body.appendChild(diag);
   }
 
@@ -1486,7 +1511,14 @@
      p = pagesAt(c) stays a pure function of the timeline — scrub-safe,
      and ?storyp/?over pins bypass the pager entirely (QA unchanged).
      Desktop keeps the V5 scroll model byte-for-byte. */
-  var PAGES = [0.06, 0.14, 0.2325, 0.3125, 0.3925, 0.4725, 0.5525, 0.6325, 0.735, 0.84, 0.925, 1.0];
+  /* v78 (owner: "the star should fall into the logo SOONER — the end
+     drags"): the separate portal page is GONE. The last swipe pours
+     gates -> portal -> gather -> solid in ONE gesture (the tween
+     sweeps p .84 -> 1), and the dock fires automatically on arrival
+     (overRaw steps to 1 at the last page — the M3 spring animates the
+     flight). The extra swipe past the end now only raises the footer
+     sheet; swiping back still reverses everything. */
+  var PAGES = [0.06, 0.14, 0.2325, 0.3125, 0.3925, 0.4725, 0.5525, 0.6325, 0.735, 0.84, 1.0];
   var PG_LAST = PAGES.length - 1;
   var PG_DOCK = PG_LAST + 1;
   var pgC = -1;          /* chapter coordinate (starts pre-ignition) */
@@ -1697,7 +1729,7 @@
     if (diag) {
       dSum += dt; dN++; if (dt > dMax) dMax = dt;
       if (t - dLast > 500 && dN) {
-        diag.textContent = 'v77 tier' + gpuTier + (simInfo ? ' sim' : ' nofbo') + ' N' + N +
+        diag.textContent = 'v78 tier' + gpuTier + (simInfo ? ' sim' : ' nofbo') + ' N' + N +
           ' dpr' + DPR.toFixed(2) + ' g' + gLevel + (paged ? ' c' + pgC.toFixed(2) : '') + (idleSettled ? ' idle' : '') +
           '\n' + (dSum / dN).toFixed(1) + 'ms avg | ' + dMax.toFixed(0) + 'ms max | ' + innerWidth + 'x' + innerHeight;
         dSum = 0; dN = 0; dMax = 0; dLast = t;
@@ -1712,6 +1744,10 @@
       : paged ? pagesAt(pgC)
       : (trackH > 0 ? Math.min(1, Math.max(0, window.scrollY / trackH)) : 0);
     pSmooth += (p - pSmooth) * 0.085;
+    /* v78: after the finger lifts the view re-centers — a PARKED
+       touch offset kept the camera rotated and skewed the centered
+       portrait icons ("crooked"). Desktop pointers are untouched. */
+    if (mobile && hoverTarget === 0) { ndc.x *= Math.pow(0.97, dtn); ndc.y *= Math.pow(0.97, dtn); }
     mx += (ndc.x * 0.5 - mx) * 0.04;
     my += (-ndc.y * 0.5 - my) * 0.04;
 
@@ -1728,7 +1764,7 @@
     /* footer overscroll -> the piece docks as a small logo (V5.8);
        driven by scroll past the track end, pinned via ?over= in QA */
     var overRaw = overPin !== null ? overPin
-      : paged ? Math.min(1, Math.max(0, pgC - PG_LAST))
+      : paged ? (pgC >= PG_LAST - 0.01 ? 1 : 0)
       : (trackH > 0 ? Math.min(1, Math.max(0, (window.scrollY - trackH) / Math.max(1, maxScroll - trackH))) : 0);
     /* V5.18/19: the last stretch of the overscroll snaps to DONE — the
        handover must complete even if the measured document end is off
@@ -1760,7 +1796,9 @@
     var z = camZ(pSmooth);
     var sway = Math.sin(pSmooth * 14) * 0.5;
     var weave = 0;
-    if (pSmooth > 0.205 && pSmooth < 0.66) {
+    /* v78: no weave on phones — the icons sit dead-center there and
+       the arc read as a skew, not as framing */
+    if (!appNarrow && pSmooth > 0.205 && pSmooth < 0.66) {
       /* six gentle alternating arcs — one per capability icon side.
          Desktop arcs away from the icon (text keeps the frame); narrow
          aspects arc TOWARD it so the formation stays inside the frustum. */
