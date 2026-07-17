@@ -21,7 +21,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@300..900&display=swap">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@300..900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/main.css?v=79">
+<link rel="stylesheet" href="assets/css/main.css?v=81">
 <style>
   /* ——— index.html: the story ——— */
 
@@ -265,6 +265,12 @@
     .story-dots i.on { width: 18px; background: var(--accent); }
     html.story-live #siteHeader::after { display: none; }
     html.story-live .story-hint { bottom: calc(86px + env(safe-area-inset-bottom, 0px)); }
+    /* v81: the pre-dock mark is invisible but was still holding 36px
+       of layout, nudging the centered wordmark off-axis (owner). It
+       leaves the flow — anchored just past the text's inline-start so
+       the dock target rect stays measurable exactly where it lands. */
+    html.story-live .site-header .logo { position: relative; }
+    html.story-live .site-header .logo-mark { position: absolute; inset-inline-start: -36px; }
   }
 
   /* ORBO MOBILE: the story as an app flow. Every beat composed as an

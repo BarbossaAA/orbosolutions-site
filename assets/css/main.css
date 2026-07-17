@@ -984,8 +984,13 @@ body::after {
     padding-top: env(safe-area-inset-top, 0px);
     height: calc(var(--header-h) + env(safe-area-inset-top, 0px));
   }
-  .site-header .nav-toggle,
-  .site-header .audio-toggle { display: none; }
+  /* v81 (owner): the brand sits CENTERED in the top bar — every
+     header-actions child is already hidden on phones, so the whole
+     container retires and the logo centers as a unit. The dock
+     target follows automatically (computeDock measures the live
+     logo rect), so the star now lands top-center. */
+  .site-header .header-actions { display: none; }
+  .header-inner { justify-content: center; }
   .main-nav { display: none; }
   .logo-mark { width: 26px; height: 26px; }
   .logo-text { font-size: 0.92rem; }
