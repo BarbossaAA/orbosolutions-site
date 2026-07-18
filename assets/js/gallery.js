@@ -1,14 +1,15 @@
-/* ORBO — the museum, adrift.
-   A dark marble palace floating alone in deep space. Through the great
-   arch: an observation deck over the void, the Milky Way vast and close,
-   the stream pouring off the edge into starlight. At the far end the
-   hall grows out of an asteroid cave — the water's source. Inside:
-   backlit posters, five LIVING lab paintings, generative artworks,
-   hologram pedestals and the great atrium star.
-   Textures are drawn at high resolution with bump and roughness maps —
-   veined marble, worn plaster, cratered rock — all procedural.
-   Desktop: pointer-lock + WASD, real shadows. Touch: joystick +
-   drag-look + tap, lean rendering. No assets. */
+/* ORBO — the museum, seventh cut: the jewel box.
+   One compact, warm, luminous hall — a stadium-shaped room with no
+   corners and no columns — built from materials that read as real:
+   honed stone tiles with veining and grout, troweled limewash walls,
+   bronze rails and frames, dark linen panels behind every piece.
+   Above, an oval skylight and clerestory windows open onto a glittering
+   night of thousands of stars. The collection: backlit posters, five
+   LIVING lab paintings, generative artworks, four hologram pedestals
+   and the atrium star. Small footprint, high finish, light on the GPU:
+   no shadow maps, no fog, few lights, low geometry.
+   Desktop: pointer-lock + WASD. Touch: joystick + drag-look + tap.
+   No assets — everything is drawn in code. */
 (function () {
   'use strict';
 
@@ -56,27 +57,20 @@
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isTouch ? 1.5 : 1.75));
   renderer.setSize(innerWidth, innerHeight);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.18;
-  if (!isTouch) {
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  }
+  renderer.toneMappingExposure = 1.06;
 
   var scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x05040c);
-  scene.fog = new THREE.Fog(0x07060f, 42, 170);
+  scene.background = new THREE.Color(0x0a0916);
 
-  var camera = new THREE.PerspectiveCamera(68, innerWidth / innerHeight, 0.08, 400);
+  var camera = new THREE.PerspectiveCamera(66, innerWidth / innerHeight, 0.08, 160);
   camera.rotation.order = 'YXZ';
 
-  /* ---------- hall dimensions ---------- */
-  var HALL = { w: 18, l: 62, h: 8 };       /* x: ±9, z: ±31; the deck continues past +31 */
+  /* ---------- room dimensions: a stadium (no corners anywhere) ---------- */
+  var ROOM = { hw: 7.5, straight: 7, h: 6.5 };   /* half-width; straight walls span z ±7; rounded ends beyond */
   var EYE = 1.65;
-  var TERRACE = { zEnd: 40.6 };
-  var BOUND = { x: 7.6, zMin: -28.6, zMax: 40.2 };
-  var LX = -HALL.w / 2 + 0.05, RX = HALL.w / 2 - 0.05;
+  var R_IN = ROOM.hw - 0.4;                       /* walkable radius at the rounded ends */
 
-  /* ---------- environment reflections (night hall) ---------- */
+  /* ---------- environment reflections (warm gallery light) ---------- */
   (function buildEnv() {
     var env = new THREE.Scene();
     var mk = function (color, w, h, x, y, z, ry) {
@@ -85,14 +79,14 @@
       m.rotation.y = ry || 0;
       env.add(m);
     };
-    env.background = new THREE.Color(0x030309);
-    mk(0x7a68e8, 18, 2.4, 0, 7, -8);
-    mk(0x342b58, 26, 4, 0, 8, 10, Math.PI);
-    mk(0xffb080, 4, 1.6, -9, 4, 0, Math.PI / 2);
-    mk(0x58c8f0, 4, 1.6, 9, 4, 0, -Math.PI / 2);
-    mk(0x161226, 40, 40, 0, -5, 0);
+    env.background = new THREE.Color(0xD8D2C4);
+    mk(0xfff4e0, 16, 4, 0, 7, -8);                 /* warm cove ahead */
+    mk(0xbfc6de, 20, 3, 0, 8, 8, Math.PI);         /* cool sky hint behind */
+    mk(0xffe2b8, 4, 1.6, -9, 4, 0, Math.PI / 2);
+    mk(0xffe2b8, 4, 1.6, 9, 4, 0, -Math.PI / 2);
+    mk(0xcfc6b2, 30, 30, 0, -4, 0);                /* stone floor bounce */
     var pmrem = new THREE.PMREMGenerator(renderer);
-    scene.environment = pmrem.fromScene(env, 0.035).texture;
+    scene.environment = pmrem.fromScene(env, 0.04).texture;
     pmrem.dispose();
   })();
 
@@ -112,7 +106,6 @@
     var n = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453;
     return n - Math.floor(n);
   };
-  /* fractal noise — the workhorse behind every "expensive-looking" surface */
   function fbm(x, y, oct) {
     var v = 0, a = 0.5, f = 1;
     for (var i = 0; i < oct; i++) {
@@ -123,58 +116,61 @@
     return v;
   }
 
-  /* ---------- material-quality suite: dark marble with matching maps ---------- */
-  function marbleSuite() {
-    var S = 1024;
-    var col = ctx2d(S, S), bmp = ctx2d(S, S), rgh = ctx2d(S, S);
-    /* base slab: deep blue-violet stone with large tonal drift */
+  /* ---------- material suites: stone, limewash, linen, bronze ---------- */
+
+  /* honed stone tiles: warm large-format slabs, veined, with grout lines */
+  function stoneFloorSuite() {
+    var S = 1024, TILES = 4;
+    var col = ctx2d(S, S), rgh = ctx2d(S, S);
     var img = col.createImageData(S, S);
-    var bimg = bmp.createImageData(S, S);
     var rimg = rgh.createImageData(S, S);
-    for (var y = 0; y < S; y += 1) {
-      for (var x = 0; x < S; x += 1) {
-        var u = x / S * 6, v = y / S * 6;
-        var base = fbm(u, v, 4);                        /* slow tonal drift */
-        /* veins: folded fbm produces branching bright threads */
-        var w = fbm(u * 2.2 + 13.7, v * 2.2 + 5.1, 5);
-        var vein = Math.pow(1 - Math.abs(Math.sin(w * 9.4 + base * 3)), 14);
-        var vein2 = Math.pow(1 - Math.abs(Math.sin(w * 4.1 + 2.2)), 22) * 0.6;
-        var vn = Math.min(1, vein + vein2);
-        var r = 18 + base * 14 + vn * 96;
-        var g = 15 + base * 12 + vn * 88;
-        var b = 30 + base * 20 + vn * 122;
+    var tileSz = S / TILES;
+    for (var y = 0; y < S; y++) {
+      for (var x = 0; x < S; x++) {
+        var tx = Math.floor(x / tileSz), ty = Math.floor(y / tileSz);
+        var seed = tx * 7.13 + ty * 3.71;
+        var u = x / S * 5, v = y / S * 5;
+        var tone = fbm(u + seed, v + seed * 2, 3);                 /* per-tile drift */
+        var w = fbm(u * 2.0 + seed * 9, v * 2.0 + 4.2, 5);
+        var vein = Math.pow(1 - Math.abs(Math.sin(w * 7.2 + tone * 2.4)), 16);
+        /* warm greige stone, amber veins */
+        var r = 208 + tone * 18 + vein * 26;
+        var g = 199 + tone * 16 + vein * 16;
+        var b = 184 + tone * 14 + vein * 4;
+        /* grout: darker seams between slabs */
+        var gx = x % tileSz, gy = y % tileSz;
+        var gd = Math.min(gx, tileSz - gx, gy, tileSz - gy);
+        if (gd < 3) { var k = 0.62 + gd * 0.1; r *= k; g *= k; b *= k; }
         var o = (y * S + x) * 4;
         img.data[o] = r; img.data[o + 1] = g; img.data[o + 2] = b; img.data[o + 3] = 255;
-        var h = 128 + vn * 70 - base * 26;              /* veins ride slightly proud */
-        bimg.data[o] = h; bimg.data[o + 1] = h; bimg.data[o + 2] = h; bimg.data[o + 3] = 255;
-        var ro = 70 + base * 60 - vn * 45;              /* veins polish brighter */
+        var ro = 95 + tone * 55 - vein * 35 + (gd < 3 ? 70 : 0);   /* veins polished, grout matte */
         rimg.data[o] = ro; rimg.data[o + 1] = ro; rimg.data[o + 2] = ro; rimg.data[o + 3] = 255;
       }
     }
     col.putImageData(img, 0, 0);
-    bmp.putImageData(bimg, 0, 0);
     rgh.putImageData(rimg, 0, 0);
     var map = asTexture(col.canvas);
-    var bump = asTexture(bmp.canvas, true);
     var rough = asTexture(rgh.canvas, true);
-    [map, bump, rough].forEach(function (t) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(3, 10); });
-    return { map: map, bump: bump, rough: rough };
+    [map, rough].forEach(function (t) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(3, 6); });
+    return { map: map, rough: rough };
   }
 
-  function plasterSuite() {
+  /* troweled limewash: soft directional strokes, darker toward the base */
+  function limewashSuite() {
     var S = 512;
     var col = ctx2d(S, S), bmp = ctx2d(S, S);
     var img = col.createImageData(S, S);
     var bimg = bmp.createImageData(S, S);
     for (var y = 0; y < S; y++) {
       for (var x = 0; x < S; x++) {
-        var u = x / S * 5, v = y / S * 5;
-        var p = fbm(u, v, 4);
-        var fine = noise(x * 0.7, y * 0.7) * 0.5;
+        var u = x / S, v = y / S;
+        /* strokes stretched horizontally — a trowel's memory */
+        var p = fbm(u * 3.2, v * 9, 4);
+        var drift = fbm(u * 1.1 + 7, v * 1.1, 3);
+        var base = 224 + p * 14 + drift * 10 - v * 10;   /* gently darker downward */
         var o = (y * S + x) * 4;
-        var r = 26 + p * 16 + fine * 6;
-        img.data[o] = r; img.data[o + 1] = r - 2; img.data[o + 2] = r + 8; img.data[o + 3] = 255;
-        var h = 120 + p * 30 + fine * 40;
+        img.data[o] = base; img.data[o + 1] = base - 5; img.data[o + 2] = base - 16; img.data[o + 3] = 255;
+        var h = 116 + p * 46 + drift * 22;
         bimg.data[o] = h; bimg.data[o + 1] = h; bimg.data[o + 2] = h; bimg.data[o + 3] = 255;
       }
     }
@@ -182,138 +178,94 @@
     bmp.putImageData(bimg, 0, 0);
     var map = asTexture(col.canvas);
     var bump = asTexture(bmp.canvas, true);
-    [map, bump].forEach(function (t) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(8, 3); });
+    [map, bump].forEach(function (t) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(6, 2); });
     return { map: map, bump: bump };
   }
 
-  function cofferTexture() {
+  /* dark linen: the panels each artwork hangs on */
+  function linenTexture() {
     var S = 512;
     var c = ctx2d(S, S);
-    c.fillStyle = '#141020';
-    c.fillRect(0, 0, S, S);
-    /* recessed panel with fake depth shading */
-    var g = c.createLinearGradient(0, 40, 0, S - 40);
-    g.addColorStop(0, '#0a0814');
-    g.addColorStop(0.5, '#0e0b1a');
-    g.addColorStop(1, '#080610');
-    c.fillStyle = g;
-    c.fillRect(44, 44, S - 88, S - 88);
-    c.strokeStyle = 'rgba(0, 0, 0, 0.6)';
-    c.lineWidth = 8;
-    c.strokeRect(48, 48, S - 96, S - 96);
-    c.strokeStyle = 'rgba(132, 116, 232, 0.6)';
-    c.lineWidth = 7;
-    c.strokeRect(22, 22, S - 44, S - 44);
-    c.strokeStyle = 'rgba(132, 116, 232, 0.14)';
-    c.lineWidth = 3;
-    c.strokeRect(60, 60, S - 120, S - 120);
+    var img = c.createImageData(S, S);
+    for (var y = 0; y < S; y++) {
+      for (var x = 0; x < S; x++) {
+        var weave = (noise(x * 0.9, y * 0.13) + noise(x * 0.13, y * 0.9)) * 0.5;
+        var drift = fbm(x / S * 3, y / S * 3, 3);
+        var base = 52 + weave * 14 + drift * 8;
+        var o = (y * S + x) * 4;
+        img.data[o] = base; img.data[o + 1] = base - 3; img.data[o + 2] = base - 6; img.data[o + 3] = 255;
+      }
+    }
+    c.putImageData(img, 0, 0);
     var t = asTexture(c.canvas);
     t.wrapS = t.wrapT = THREE.RepeatWrapping;
-    t.repeat.set(5, 17);
     return t;
   }
 
-  /* ---------- the sky: deep space and the Milky Way ---------- */
-  function galaxyTexture() {
-    var W = 2048, H = 1024;
+  /* ---------- the glittering night ---------- */
+  function starsTexture(count, sizeMax, glints) {
+    var W = 1024, H = 512;
     var c = ctx2d(W, H);
-    /* void gradient — never pure black */
+    /* not black — a deep blue night with faint breath */
     var bg = c.createLinearGradient(0, 0, 0, H);
-    bg.addColorStop(0, '#05040d');
-    bg.addColorStop(0.5, '#080614');
-    bg.addColorStop(1, '#04030b');
+    bg.addColorStop(0, '#0a0918');
+    bg.addColorStop(0.5, '#0d0b1d');
+    bg.addColorStop(1, '#090815');
     c.fillStyle = bg;
     c.fillRect(0, 0, W, H);
-
-    /* the galactic band runs diagonally: y = band(x) */
-    function bandY(x) { return H * 0.52 + Math.sin(x / W * Math.PI * 1.1 + 0.4) * H * 0.16; }
-
-    /* far starfield — thousands, weighted small */
-    for (var i = 0; i < 3200; i++) {
-      var sx = Math.random() * W, sy = Math.random() * H;
+    for (var n = 0; n < 8; n++) {
+      var nx = Math.random() * W, ny = Math.random() * H, nr = 90 + Math.random() * 150;
+      var ng = c.createRadialGradient(nx, ny, 0, nx, ny, nr);
+      ng.addColorStop(0, 'rgba(120, 105, 220, 0.05)');
+      ng.addColorStop(1, 'rgba(0,0,0,0)');
+      c.fillStyle = ng;
+      c.fillRect(nx - nr, ny - nr, nr * 2, nr * 2);
+    }
+    for (var i = 0; i < count; i++) {
+      var x = Math.random() * W, y = Math.random() * H;
       var m = Math.random();
-      var near = Math.exp(-Math.pow((sy - bandY(sx)) / (H * 0.16), 2));
-      if (Math.random() > 0.35 + near * 0.65) continue;     /* stars crowd the band */
-      var s = m < 0.85 ? 1 : m < 0.97 ? 1.6 : 2.4;
+      var s = m < 0.8 ? 1 : m < 0.96 ? 1.5 + Math.random() * (sizeMax - 1.5) * 0.4 : 1.5 + Math.random() * (sizeMax - 1.5);
       var tint = Math.random();
-      var base = tint < 0.72 ? '226, 226, 255' : tint < 0.88 ? '255, 226, 196' : '178, 206, 255';
-      c.fillStyle = 'rgba(' + base + ', ' + (0.25 + m * 0.7) + ')';
-      c.fillRect(sx, sy, s, s);
+      var col = tint < 0.68 ? '228, 228, 255' : tint < 0.86 ? '255, 232, 200' : '186, 210, 255';
+      c.fillStyle = 'rgba(' + col + ', ' + (0.35 + m * 0.62) + ')';
+      c.beginPath();
+      c.arc(x, y, s * 0.5, 0, 6.284);
+      c.fill();
     }
-
-    /* nebula glow: thousands of soft blobs breathing along the band */
+    /* a few brilliant ones with glints */
     c.globalCompositeOperation = 'lighter';
-    for (var n = 0; n < 2400; n++) {
-      var x = Math.random() * W;
-      var spread = (Math.random() + Math.random() + Math.random() - 1.5) * H * 0.13;
-      var y = bandY(x) + spread;
-      var r = 8 + Math.random() * 46;
-      var dCore = Math.abs(x - W * 0.56) / (W * 0.5);
-      var pick = Math.random();
-      var colr = pick < 0.42 ? [126, 106, 240] : pick < 0.72 ? [92, 130, 235] : dCore < 0.3 ? [255, 205, 150] : [180, 150, 255];
-      var a = (0.012 + Math.random() * 0.02) * (1 - Math.abs(spread) / (H * 0.15));
-      if (a <= 0) continue;
-      var rg = c.createRadialGradient(x, y, 0, x, y, r);
-      rg.addColorStop(0, 'rgba(' + colr[0] + ',' + colr[1] + ',' + colr[2] + ',' + a + ')');
-      rg.addColorStop(1, 'rgba(0,0,0,0)');
-      c.fillStyle = rg;
-      c.fillRect(x - r, y - r, r * 2, r * 2);
-    }
-    /* the bright core */
-    var core = c.createRadialGradient(W * 0.56, bandY(W * 0.56), 0, W * 0.56, bandY(W * 0.56), 260);
-    core.addColorStop(0, 'rgba(255, 226, 186, 0.30)');
-    core.addColorStop(0.4, 'rgba(214, 178, 255, 0.14)');
-    core.addColorStop(1, 'rgba(0,0,0,0)');
-    c.fillStyle = core;
-    c.fillRect(0, 0, W, H);
-    c.globalCompositeOperation = 'source-over';
-
-    /* dust lanes tear dark rifts through the band */
-    for (var d = 0; d < 700; d++) {
-      var dx = Math.random() * W;
-      var dy = bandY(dx) + (Math.random() - 0.5) * H * 0.07;
-      var dr = 10 + Math.random() * 34;
-      var da = 0.05 + Math.random() * 0.10;
-      var dg = c.createRadialGradient(dx, dy, 0, dx, dy, dr);
-      dg.addColorStop(0, 'rgba(4, 3, 10, ' + da + ')');
-      dg.addColorStop(1, 'rgba(4, 3, 10, 0)');
-      c.fillStyle = dg;
-      c.fillRect(dx - dr, dy - dr, dr * 2, dr * 2);
-    }
-
-    /* hero stars with four-point flares */
-    c.globalCompositeOperation = 'lighter';
-    for (var h = 0; h < 26; h++) {
+    for (var h = 0; h < glints; h++) {
       var hx = Math.random() * W, hy = Math.random() * H;
-      var hr = 1.6 + Math.random() * 1.8;
+      var hr = 1.4 + Math.random() * 1.4;
       var warm = Math.random() < 0.3;
-      var hcol = warm ? '255, 224, 190' : '224, 228, 255';
-      var hg = c.createRadialGradient(hx, hy, 0, hx, hy, hr * 7);
-      hg.addColorStop(0, 'rgba(' + hcol + ', 0.9)');
-      hg.addColorStop(0.25, 'rgba(' + hcol + ', 0.28)');
+      var hc = warm ? '255, 226, 190' : '226, 230, 255';
+      var hg = c.createRadialGradient(hx, hy, 0, hx, hy, hr * 6);
+      hg.addColorStop(0, 'rgba(' + hc + ', 0.95)');
+      hg.addColorStop(0.3, 'rgba(' + hc + ', 0.25)');
       hg.addColorStop(1, 'rgba(0,0,0,0)');
       c.fillStyle = hg;
-      c.fillRect(hx - hr * 7, hy - hr * 7, hr * 14, hr * 14);
-      c.strokeStyle = 'rgba(' + hcol + ', 0.5)';
-      c.lineWidth = 0.9;
+      c.fillRect(hx - hr * 6, hy - hr * 6, hr * 12, hr * 12);
+      c.strokeStyle = 'rgba(' + hc + ', 0.45)';
+      c.lineWidth = 0.8;
       c.beginPath();
-      c.moveTo(hx - hr * 9, hy); c.lineTo(hx + hr * 9, hy);
-      c.moveTo(hx, hy - hr * 9); c.lineTo(hx, hy + hr * 9);
+      c.moveTo(hx - hr * 7, hy); c.lineTo(hx + hr * 7, hy);
+      c.moveTo(hx, hy - hr * 7); c.lineTo(hx, hy + hr * 7);
       c.stroke();
     }
     c.globalCompositeOperation = 'source-over';
     return asTexture(c.canvas);
   }
-
-  var dome = new THREE.Mesh(
-    new THREE.SphereGeometry(180, 32, 20),
-    new THREE.MeshBasicMaterial({ map: galaxyTexture(), side: THREE.BackSide, fog: false })
+  /* two counter-rotating domes make the sky shimmer */
+  var skyA = new THREE.Mesh(
+    new THREE.SphereGeometry(70, 24, 14),
+    new THREE.MeshBasicMaterial({ map: starsTexture(1500, 3.2, 22), side: THREE.BackSide })
   );
-  dome.rotation.set(0.35, Math.PI * 0.85, 0.2);   /* the band sweeps over the deck view */
-  scene.add(dome);
-
-  /* drifting asteroids far off the deck */
-  var asteroids = [];
+  scene.add(skyA);
+  var skyB = new THREE.Mesh(
+    new THREE.SphereGeometry(66, 24, 14),
+    new THREE.MeshBasicMaterial({ map: starsTexture(2200, 2.2, 0), side: THREE.BackSide, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending, depthWrite: false })
+  );
+  scene.add(skyB);
 
   function radialTexture(inner, outer) {
     var c = ctx2d(256, 256);
@@ -328,8 +280,8 @@
   function coneTexture() {
     var c = ctx2d(64, 256);
     var g = c.createLinearGradient(0, 0, 0, 256);
-    g.addColorStop(0, 'rgba(150, 130, 255, 0.55)');
-    g.addColorStop(1, 'rgba(150, 130, 255, 0)');
+    g.addColorStop(0, 'rgba(120, 100, 240, 0.4)');
+    g.addColorStop(1, 'rgba(120, 100, 240, 0)');
     c.fillStyle = g;
     c.fillRect(0, 0, 64, 256);
     return asTexture(c.canvas);
@@ -391,7 +343,7 @@
       c.textAlign = 'center';
       c.direction = 'rtl';
       c.fillStyle = ink;
-      c.font = '850 ' + (art.big ? 120 : 88) + 'px ' + FONT;
+      c.font = '850 ' + (art.big ? 108 : 88) + 'px ' + FONT;
       c.fillText(art.title, W / 2, art.sub ? 350 : 380, W - 120);
       if (art.sub) {
         c.fillStyle = soft;
@@ -412,45 +364,27 @@
     return t;
   }
 
+  /* gallery card: warm white, ink text, bronze pin line */
   function plaqueTexture(art) {
     var W = 512, H = 256;
     var c = ctx2d(W, H);
-    var accent = art.accent || '#c9afff';
+    var accent = art.accent || '#5B4CF5';
     var redraw = function () {
-      c.clearRect(0, 0, W, H);
-      c.fillStyle = '#141022';
+      c.fillStyle = '#FBFAF6';
       c.fillRect(0, 0, W, H);
-      c.strokeStyle = accent;
-      c.globalAlpha = 0.5;
-      c.lineWidth = 3;
-      c.strokeRect(8, 8, W - 16, H - 16);
-      c.globalAlpha = 1;
+      c.strokeStyle = 'rgba(20, 18, 31, 0.14)';
+      c.lineWidth = 2;
+      c.strokeRect(4, 4, W - 8, H - 8);
+      c.fillStyle = '#9a7b52';
+      c.fillRect(W - 14, 18, 4, H - 36);
       c.textAlign = 'right';
       c.direction = 'rtl';
-      c.fillStyle = '#F4F2FA';
+      c.fillStyle = '#17141F';
       c.font = '700 44px ' + FONT;
-      c.fillText(art.title, W - 42, 96, W - 84);
+      c.fillText(art.title, W - 42, 100, W - 80);
       c.fillStyle = accent;
-      c.globalAlpha = 0.9;
       c.font = '500 30px ' + FONT;
-      c.fillText(art.tag, W - 42, 158, W - 84);
-      c.globalAlpha = 1;
-    };
-    redraw();
-    var t = asTexture(c.canvas);
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { redraw(); t.needsUpdate = true; });
-    return t;
-  }
-
-  function wingTexture(text, ltr) {
-    var c = ctx2d(1024, 256);
-    var redraw = function () {
-      c.clearRect(0, 0, 1024, 256);
-      c.textAlign = 'center';
-      c.direction = ltr ? 'ltr' : 'rtl';
-      c.fillStyle = 'rgba(184, 164, 255, 0.5)';
-      c.font = '850 150px ' + FONT;
-      c.fillText(text, 512, 178);
+      c.fillText(art.tag, W - 42, 162, W - 80);
     };
     redraw();
     var t = asTexture(c.canvas);
@@ -465,14 +399,14 @@
       c.clearRect(0, 0, W, H);
       c.textAlign = 'center';
       c.direction = 'ltr';
-      c.shadowColor = 'rgba(140, 120, 255, 0.9)';
-      c.shadowBlur = 46;
+      c.shadowColor = 'rgba(108, 92, 255, 0.55)';
+      c.shadowBlur = 38;
       var g = c.createLinearGradient(0, 60, 0, 320);
-      g.addColorStop(0, '#BCA8FF');
-      g.addColorStop(1, '#7A5CFF');
+      g.addColorStop(0, '#8F74FF');
+      g.addColorStop(1, '#5B4CF5');
       c.fillStyle = g;
-      c.font = '850 210px ' + FONT;
-      c.fillText('ORBO·GALLERY', W / 2, 272, W - 100);
+      c.font = '850 190px ' + FONT;
+      c.fillText('ORBO·GALLERY', W / 2, 262, W - 100);
       c.shadowBlur = 0;
     };
     redraw();
@@ -485,14 +419,18 @@
     var c = ctx2d(512, 128);
     var redraw = function () {
       c.clearRect(0, 0, 512, 128);
+      c.fillStyle = 'rgba(255, 255, 255, 0.88)';
+      c.beginPath();
+      if (c.roundRect) c.roundRect(36, 22, 440, 84, 42); else c.rect(36, 22, 440, 84);
+      c.fill();
+      c.strokeStyle = 'rgba(91, 76, 245, 0.4)';
+      c.lineWidth = 3;
+      c.stroke();
       c.textAlign = 'center';
       c.direction = 'rtl';
-      c.fillStyle = 'rgba(178, 225, 255, 0.95)';
-      c.font = '700 56px ' + FONT;
-      c.shadowColor = 'rgba(120, 200, 255, 0.9)';
-      c.shadowBlur = 22;
-      c.fillText(text, 256, 82, 470);
-      c.shadowBlur = 0;
+      c.fillStyle = '#17141F';
+      c.font = '700 50px ' + FONT;
+      c.fillText(text, 256, 86, 400);
     };
     redraw();
     var t = asTexture(c.canvas);
@@ -583,338 +521,202 @@
     return asTexture(c.canvas);
   }
 
-  /* ---------- the hall: a star-plan palace ----------
-     no more single box. An octagonal ROTUNDA rises at the center under an
-     open oculus; three gallery WINGS (east: the works, west: code art,
-     north: the lab, ending in the asteroid cave) radiate from it through
-     arched passages; a south corridor leads out to the observation deck. */
-  var marble = marbleSuite();
-  var plaster = plasterSuite();
-  var wallMat = new THREE.MeshStandardMaterial({ map: plaster.map, bumpMap: plaster.bump, bumpScale: 0.6, roughness: 0.92, metalness: 0.0, side: THREE.DoubleSide });
-  var floorMat = new THREE.MeshStandardMaterial({ map: marble.map, bumpMap: marble.bump, bumpScale: 0.35, roughnessMap: marble.rough, roughness: 1.0, metalness: 0.5, envMapIntensity: 1.25 });
-  var stoneMat = new THREE.MeshStandardMaterial({ color: 0x211b33, roughness: 0.55, metalness: 0.25, envMapIntensity: 0.9 });
-  var trimMat = new THREE.MeshStandardMaterial({ color: 0x0c0a13, roughness: 0.5, metalness: 0.35 });
-  var glowLineMat = new THREE.MeshBasicMaterial({ color: 0x8474e8 });
-  var frameMat = new THREE.MeshStandardMaterial({ color: 0x2a2438, roughness: 0.32, metalness: 0.8, envMapIntensity: 1.2 });
+  /* ---------- the room ---------- */
+  var stone = stoneFloorSuite();
+  var lime = limewashSuite();
+  var floorMat = new THREE.MeshStandardMaterial({ map: stone.map, roughnessMap: stone.rough, roughness: 1.0, metalness: 0.06, envMapIntensity: 1.1 });
+  var wallMat = new THREE.MeshStandardMaterial({ map: lime.map, bumpMap: lime.bump, bumpScale: 0.5, roughness: 0.94, metalness: 0.0 });
+  var wallMatIn = new THREE.MeshStandardMaterial({ map: lime.map, bumpMap: lime.bump, bumpScale: 0.5, roughness: 0.94, metalness: 0.0, side: THREE.BackSide });
+  var bronzeMat = new THREE.MeshStandardMaterial({ color: 0x9a7b52, roughness: 0.34, metalness: 0.85, envMapIntensity: 1.15 });
+  var darkBronze = new THREE.MeshStandardMaterial({ color: 0x4a3b2a, roughness: 0.4, metalness: 0.7, envMapIntensity: 1.0 });
+  var linenMat = new THREE.MeshStandardMaterial({ map: linenTexture(), roughness: 0.92, metalness: 0.02 });
+  var ceilMat = new THREE.MeshStandardMaterial({ color: 0xEFE9DC, roughness: 0.9, metalness: 0.0, side: THREE.DoubleSide });
+  var warmLineMat = new THREE.MeshBasicMaterial({ color: 0xffe3b8 });
 
-  /* one marble ground under the whole plan */
-  var floor = new THREE.Mesh(new THREE.PlaneGeometry(58, 64), floorMat);
-  floor.rotation.x = -Math.PI / 2;
-  floor.receiveShadow = true;
-  scene.add(floor);
-
-  function wall(w, h, x, y, z, ry) {
-    var m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), wallMat);
-    m.position.set(x, y, z);
-    m.rotation.y = ry;
-    scene.add(m);
-    var base = new THREE.Mesh(new THREE.BoxGeometry(w, 0.22, 0.08), trimMat);
-    base.position.set(x, 0.11, z);
-    base.rotation.y = ry;
-    base.translateZ(0.03);
-    scene.add(base);
-    [0.26, h - 0.5].forEach(function (yy) {
-      var line = new THREE.Mesh(new THREE.BoxGeometry(w, 0.025, 0.02), glowLineMat);
-      line.position.set(x, yy, z);
-      line.rotation.y = ry;
-      line.translateZ(0.05);
-      scene.add(line);
-    });
-  }
-
-  /* — the rotunda: four diagonal octagon walls between the passages — */
-  var ROT_R = 10, APO = ROT_R * Math.cos(Math.PI / 8);
-  [45, 135, 225, 315].forEach(function (deg) {
-    var a = deg * Math.PI / 180;
-    var cx = Math.sin(a) * APO, cz = -Math.cos(a) * APO;
-    wall(7.6, HALL.h, cx, HALL.h / 2, cz, a + Math.PI);
+  /* stadium floor: rectangle + two half-discs */
+  var floorGroup = new THREE.Group();
+  var f1 = new THREE.Mesh(new THREE.PlaneGeometry(ROOM.hw * 2, ROOM.straight * 2), floorMat);
+  f1.rotation.x = -Math.PI / 2;
+  floorGroup.add(f1);
+  [1, -1].forEach(function (side) {
+    var half = new THREE.Mesh(new THREE.CircleGeometry(ROOM.hw, 40, side > 0 ? 0 : Math.PI, Math.PI), floorMat);
+    half.rotation.x = -Math.PI / 2;
+    half.position.z = side * ROOM.straight;
+    floorGroup.add(half);
   });
-  /* the drum above and its ring ceiling with an open oculus */
-  var drum = new THREE.Mesh(new THREE.CylinderGeometry(ROT_R + 0.2, ROT_R + 0.2, 3.2, 32, 1, true), wallMat);
-  drum.position.set(0, HALL.h + 1.6, 0);
-  scene.add(drum);
-  var drumGlow = new THREE.Mesh(new THREE.TorusGeometry(ROT_R + 0.05, 0.035, 6, 48), glowLineMat);
-  drumGlow.rotation.x = Math.PI / 2;
-  drumGlow.position.y = HALL.h + 0.15;
-  scene.add(drumGlow);
-  var ring = new THREE.Mesh(new THREE.RingGeometry(4.5, ROT_R + 0.45, 48), new THREE.MeshStandardMaterial({ color: 0x120f1c, roughness: 0.9, side: THREE.DoubleSide }));
-  ring.rotation.x = Math.PI / 2;
-  ring.position.y = HALL.h + 3.2;
-  scene.add(ring);
-  var oculusGlow = new THREE.Mesh(new THREE.TorusGeometry(4.5, 0.05, 8, 48), glowLineMat);
-  oculusGlow.rotation.x = Math.PI / 2;
-  oculusGlow.position.y = HALL.h + 3.14;
-  scene.add(oculusGlow);
+  scene.add(floorGroup);
 
-  /* — passages: pylons + glowing arch at each of the four mouths — */
-  function passage(px, pz, ry, span) {
-    [-1, 1].forEach(function (side) {
-      var pyl = new THREE.Mesh(new THREE.BoxGeometry(0.6, 6.4, 0.6), stoneMat);
-      pyl.position.set(px + Math.cos(ry) * side * span / 2, 3.2, pz - Math.sin(ry) * side * span / 2);
-      pyl.castShadow = !isTouch;
-      scene.add(pyl);
-    });
-    var arch = new THREE.Mesh(new THREE.TorusGeometry(span / 2, 0.15, 10, 24, Math.PI), stoneMat);
-    arch.position.set(px, 0, pz);
-    arch.rotation.y = ry;
-    arch.scale.y = 1.28;
-    scene.add(arch);
-    var archGlow = new THREE.Mesh(new THREE.TorusGeometry(span / 2 - 0.18, 0.03, 6, 24, Math.PI), glowLineMat);
-    archGlow.position.set(px, 0, pz);
-    archGlow.rotation.y = ry;
-    archGlow.scale.y = 1.28;
-    scene.add(archGlow);
-  }
-  passage(0, -7.6, 0, 9.6);            /* north — the lab */
-  passage(0, 7.6, 0, 9.0);             /* south — the corridor out */
-  passage(7.6, 0, Math.PI / 2, 9.6);   /* east — the works */
-  passage(-7.6, 0, Math.PI / 2, 9.6);  /* west — code art */
-
-  /* — wings — */
-  var ceilMat = new THREE.MeshStandardMaterial({ map: cofferTexture(), roughness: 0.9, metalness: 0.0, emissive: 0x2c2452, emissiveMap: cofferTexture(), emissiveIntensity: 0.5, side: THREE.DoubleSide });
-  function wingCeil(w, l, x, z) {
-    var m = new THREE.Mesh(new THREE.PlaneGeometry(w, l), ceilMat);
-    m.rotation.x = Math.PI / 2;
-    m.position.set(x, HALL.h, z);
-    scene.add(m);
-  }
-  /* north wing (the lab) */
-  wall(24, HALL.h, -5, HALL.h / 2, -18, Math.PI / 2);
-  wall(24, HALL.h, 5, HALL.h / 2, -18, -Math.PI / 2);
-  wingCeil(10, 24.5, 0, -18);
-  /* east wing (the works) */
-  wall(21.5, HALL.h, 17, HALL.h / 2, -5, 0);
-  wall(21.5, HALL.h, 17, HALL.h / 2, 5, Math.PI);
-  wall(10, HALL.h, 28, HALL.h / 2, 0, -Math.PI / 2);
-  wingCeil(22, 10, 17, 0);
-  /* west wing (code art) */
-  wall(21.5, HALL.h, -17, HALL.h / 2, -5, 0);
-  wall(21.5, HALL.h, -17, HALL.h / 2, 5, Math.PI);
-  wall(10, HALL.h, -28, HALL.h / 2, 0, Math.PI / 2);
-  wingCeil(22, 10, -17, 0);
-  /* south corridor to the deck */
-  wall(23, HALL.h, -4.5, HALL.h / 2, 19.5, Math.PI / 2);
-  wall(23, HALL.h, 4.5, HALL.h / 2, 19.5, -Math.PI / 2);
-  wingCeil(9, 23.5, 0, 19.5);
-
-  /* the door arch at the corridor's end */
-  var header = new THREE.Mesh(new THREE.PlaneGeometry(9.2, 3), wallMat);
-  header.position.set(0, HALL.h - 1.5, HALL.l / 2);
-  scene.add(header);
-  var archRib = new THREE.Mesh(new THREE.TorusGeometry(4.5, 0.16, 10, 26, Math.PI), stoneMat);
-  archRib.position.set(0, 0, HALL.l / 2);
-  archRib.scale.y = 1.11;
-  scene.add(archRib);
-  var archLine = new THREE.Mesh(new THREE.TorusGeometry(4.32, 0.03, 6, 26, Math.PI), glowLineMat);
-  archLine.position.set(0, 0, HALL.l / 2);
-  archLine.scale.y = 1.11;
-  scene.add(archLine);
-  /* stubs closing the deck side of the arch */
-  var portalWalls = [{ x: -5.6, hx: 1.15, z: HALL.l / 2, hz: 0.32 }, { x: 5.6, hx: 1.15, z: HALL.l / 2, hz: 0.32 }];
+  /* walls: two straight planes + two half-cylinders, seamless */
   [-1, 1].forEach(function (side) {
-    var stub = new THREE.Mesh(new THREE.PlaneGeometry(2.3, HALL.h), wallMat);
-    stub.position.set(side * 5.6, HALL.h / 2, HALL.l / 2);
-    scene.add(stub);
+    var w = new THREE.Mesh(new THREE.PlaneGeometry(ROOM.straight * 2, ROOM.h), wallMat);
+    w.position.set(side * ROOM.hw, ROOM.h / 2, 0);
+    w.rotation.y = side > 0 ? -Math.PI / 2 : Math.PI / 2;
+    scene.add(w);
   });
-
-  /* the glowing brand sign rides the arch — both faces */
-  var brandTex = brandTexture();
-  [[HALL.l / 2 - 0.09, Math.PI], [HALL.l / 2 + 0.09, 0]].forEach(function (s) {
-    var sign = new THREE.Mesh(
-      new THREE.PlaneGeometry(8, 2),
-      new THREE.MeshBasicMaterial({ map: brandTex, transparent: true, depthWrite: false })
+  [1, -1].forEach(function (side) {
+    var cyl = new THREE.Mesh(
+      new THREE.CylinderGeometry(ROOM.hw, ROOM.hw, ROOM.h, 40, 1, true, side > 0 ? 0 : Math.PI, Math.PI),
+      wallMatIn
     );
-    sign.position.set(0, 6.55, s[0]);
-    sign.rotation.y = s[1];
-    scene.add(sign);
+    cyl.position.set(0, ROOM.h / 2, side * ROOM.straight);
+    scene.add(cyl);
   });
 
-  /* night lights — a warm heart in every room, one cool key from the stars */
-  scene.add(new THREE.AmbientLight(0x9a8ecf, 0.34));
-  scene.add(new THREE.HemisphereLight(0x6a5fae, 0x0d0b14, 0.42));
-  var key = new THREE.DirectionalLight(0xcfd6ff, 0.85);
-  key.position.set(18, 34, 50);
-  if (!isTouch) {
-    key.castShadow = true;
-    key.shadow.mapSize.set(2048, 2048);
-    key.shadow.camera.left = -34;
-    key.shadow.camera.right = 34;
-    key.shadow.camera.top = 48;
-    key.shadow.camera.bottom = -48;
-    key.shadow.camera.near = 1;
-    key.shadow.camera.far = 170;
-    key.shadow.bias = -0.0004;
+  /* bronze wainscot rail + warm cove line, all the way around */
+  function beltRing(y, mat, tube) {
+    /* straight segments */
+    [-1, 1].forEach(function (side) {
+      var seg = new THREE.Mesh(new THREE.CylinderGeometry(tube, tube, ROOM.straight * 2, 6), mat);
+      seg.rotation.x = Math.PI / 2;
+      seg.position.set(side * (ROOM.hw - 0.04), y, 0);
+      scene.add(seg);
+    });
+    /* curved segments */
+    [1, -1].forEach(function (side) {
+      var arc = new THREE.Mesh(new THREE.TorusGeometry(ROOM.hw - 0.04, tube, 6, 30, Math.PI), mat);
+      arc.rotation.x = -Math.PI / 2;
+      arc.rotation.z = side > 0 ? 0 : Math.PI;
+      arc.position.set(0, y, side * ROOM.straight);
+      scene.add(arc);
+    });
   }
-  scene.add(key);
-  scene.add(key.target);
-  /* rotunda crown light + one warm point per wing */
-  var crown = new THREE.PointLight(0xd9ccff, 44, 30, 1.6);
-  crown.position.set(0, HALL.h + 2.4, 0);
-  scene.add(crown);
-  [[0, -18, 0xffd9bd], [12, 0, 0xb7a6ff], [22, 0, 0xffd9bd], [-12, 0, 0xb7a6ff], [-22, 0, 0xffd9bd], [0, 19.5, 0xffd9bd]].forEach(function (L) {
-    var p = new THREE.PointLight(L[2], 34, 22, 1.7);
-    p.position.set(L[0], HALL.h - 0.8, L[1]);
-    scene.add(p);
-  });
+  beltRing(0.95, bronzeMat, 0.03);            /* wainscot rail */
+  beltRing(ROOM.h - 0.55, warmLineMat, 0.022); /* warm cove light line */
+  /* stone base skirting */
+  beltRing(0.12, darkBronze, 0.05);
 
-  /* ---------- the observation deck ---------- */
-  var terraceLen = TERRACE.zEnd - HALL.l / 2 + 0.6;
-  var deck = new THREE.Mesh(new THREE.PlaneGeometry(13, terraceLen + 1), new THREE.MeshStandardMaterial({ map: marble.map, bumpMap: marble.bump, bumpScale: 0.35, roughnessMap: marble.rough, roughness: 1.0, metalness: 0.45, envMapIntensity: 1.1 }));
-  deck.rotation.x = -Math.PI / 2;
-  deck.position.set(0, 0.001, HALL.l / 2 + terraceLen / 2);
-  deck.receiveShadow = true;
-  scene.add(deck);
-  function rail(w, x, z, ry) {
-    var m = new THREE.Mesh(new THREE.BoxGeometry(w, 1.05, 0.16), stoneMat);
-    m.position.set(x, 0.525, z);
-    m.rotation.y = ry;
-    scene.add(m);
-    var line = new THREE.Mesh(new THREE.BoxGeometry(w, 0.025, 0.03), glowLineMat);
-    line.position.set(x, 1.07, z);
-    line.rotation.y = ry;
-    scene.add(line);
-  }
-  rail(13.4, 0, TERRACE.zEnd + 0.35, 0);
-  rail(terraceLen, -6.55, HALL.l / 2 + terraceLen / 2, Math.PI / 2);
-  rail(terraceLen, 6.55, HALL.l / 2 + terraceLen / 2, Math.PI / 2);
-
-  /* the island's underside — hewn rock, seen over the rail */
-  var under = new THREE.Mesh(new THREE.CylinderGeometry(34, 18, 13, 14, 3), null);
+  /* ceiling: a warm plane with a great oval opening to the stars */
   (function () {
-    var p = under.geometry.attributes.position;
-    for (var i = 0; i < p.count; i++) {
-      var vx = p.getX(i), vy = p.getY(i), vz = p.getZ(i);
-      var n = fbm(vx * 0.18, vz * 0.18 + vy, 3) - 0.5;
-      p.setXYZ(i, vx * (1 + n * 0.4), vy, vz * (1 + n * 0.4));
-    }
-    under.geometry.computeVertexNormals();
+    var shape = new THREE.Shape();
+    var W2 = ROOM.hw + 0.6, L2 = ROOM.straight + ROOM.hw + 0.6;
+    shape.moveTo(-W2, -L2);
+    shape.lineTo(W2, -L2);
+    shape.lineTo(W2, L2);
+    shape.lineTo(-W2, L2);
+    shape.closePath();
+    var hole = new THREE.Path();
+    hole.absellipse(0, 0, 4.4, 7.2, 0, Math.PI * 2, false, 0);
+    shape.holes.push(hole);
+    var geo = new THREE.ShapeGeometry(shape, 36);
+    var ceil = new THREE.Mesh(geo, ceilMat);
+    ceil.rotation.x = Math.PI / 2;
+    ceil.position.y = ROOM.h;
+    scene.add(ceil);
+    /* bronze rim + warm glow ring around the oval */
+    var rim = new THREE.Mesh(new THREE.TorusGeometry(1, 0.055, 8, 60), bronzeMat);
+    rim.rotation.x = Math.PI / 2;
+    rim.scale.set(4.4, 7.2, 1);
+    rim.position.y = ROOM.h - 0.02;
+    scene.add(rim);
+    var glowRing = new THREE.Mesh(new THREE.TorusGeometry(1, 0.028, 6, 60), warmLineMat);
+    glowRing.rotation.x = Math.PI / 2;
+    glowRing.scale.set(4.15, 6.95, 1);
+    glowRing.position.y = ROOM.h - 0.06;
+    scene.add(glowRing);
   })();
-  under.material = new THREE.MeshStandardMaterial({ color: 0x191428, roughness: 0.95, flatShading: true });
-  under.position.set(0, -6.6, 2);
-  scene.add(under);
 
-  /* ---------- the asteroid cave (north end) ---------- */
-  var rockMat = new THREE.MeshStandardMaterial({ color: 0x3a3350, roughness: 0.96, metalness: 0.0, flatShading: true, vertexColors: true });
-  function makeRock(x, y, z, s) {
-    var geo = new THREE.IcosahedronGeometry(1, 3);
-    var p = geo.attributes.position;
-    var colors = new Float32Array(p.count * 3);
-    for (var i = 0; i < p.count; i++) {
-      var vx = p.getX(i), vy = p.getY(i), vz = p.getZ(i);
-      var n = fbm(vx * 1.3 + x, vy * 1.3 + z, 3) - 0.5;
-      var n2 = fbm(vx * 3.4 + z, vz * 3.4 + x, 2) - 0.5;
-      var k = 1 + n * 0.55 + n2 * 0.18;
-      p.setXYZ(i, vx * k, vy * k * 0.82, vz * k);
-      var shade = 0.62 + n * 0.7;
-      colors[i * 3] = shade;
-      colors[i * 3 + 1] = shade * 0.96;
-      colors[i * 3 + 2] = Math.min(1, shade * 1.18);
-    }
-    geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-    geo.computeVertexNormals();
-    var m = new THREE.Mesh(geo, rockMat);
-    m.position.set(x, y, z);
-    m.scale.setScalar(s);
-    m.rotation.y = Math.random() * 6.28;
-    scene.add(m);
-    return m;
-  }
-  [
-    [-4.9, 1.6, -29.6, 3.0], [-3.4, 1.0, -31.2, 2.8], [-4.2, 4.8, -30.4, 2.8], [-2.2, 5.6, -32.4, 3.0],
-    [4.9, 1.6, -29.6, 3.0], [3.4, 1.0, -31.2, 2.8], [4.2, 4.8, -30.4, 2.8], [2.2, 5.6, -32.4, 3.0],
-    [0, 8.0, -32.4, 3.4], [-1.2, 7.2, -32.6, 2.4], [1.2, 7.2, -32.6, 2.4]
-  ].forEach(function (r) { makeRock(r[0], r[1], r[2], r[3]); });
-  var caveBack = new THREE.Mesh(new THREE.PlaneGeometry(22, 18), new THREE.MeshBasicMaterial({ color: 0x0d0a18 }));
-  caveBack.position.set(0, 5, -36);
-  scene.add(caveBack);
-  [[-3.0, 1.1, -30.2, 0.5], [3.2, 0.8, -30.6, 0.4], [-1.2, 6.2, -30.9, 0.45], [2.0, 5.8, -31.2, 0.35]].forEach(function (cr) {
-    var c = new THREE.Mesh(new THREE.IcosahedronGeometry(cr[3], 0), new THREE.MeshBasicMaterial({ color: 0x9d8cff }));
-    c.position.set(cr[0], cr[1], cr[2]);
-    c.rotation.set(Math.random(), Math.random(), Math.random());
-    scene.add(c);
-  });
-  var caveLight = new THREE.PointLight(0x9d8cff, 16, 18, 1.6);
-  caveLight.position.set(0, 3.4, -29.5);
-  scene.add(caveLight);
-  makeRock(0, 0.6, -30.6, 1.6);
-
-  /* far rocks drifting in the black */
-  [[-42, 9, 74, 5], [38, 16, 92, 7], [-26, 26, 110, 9], [52, 4, 60, 3.4], [-58, -6, 88, 6]].forEach(function (a) {
-    var r = makeRock(a[0], a[1], a[2], a[3]);
-    r.userData.drift = { sp: 0.02 + Math.random() * 0.03, ph: Math.random() * 6.28, base: a[1] };
-    asteroids.push(r);
+  /* clerestory windows: stars through bronze-framed openings, high on the long walls */
+  var windowTex = starsTexture(900, 2.6, 8);
+  [-1, 1].forEach(function (side) {
+    [-4.6, 0, 4.6].forEach(function (z) {
+      var win = new THREE.Mesh(new THREE.PlaneGeometry(2.7, 1.4), new THREE.MeshBasicMaterial({ map: windowTex }));
+      win.position.set(side * (ROOM.hw - 0.05), 5.05, z);
+      win.rotation.y = side > 0 ? -Math.PI / 2 : Math.PI / 2;
+      scene.add(win);
+      var frame = new THREE.Mesh(new THREE.TorusGeometry(1, 0.04, 6, 4), bronzeMat);
+      frame.rotation.y = side > 0 ? -Math.PI / 2 : Math.PI / 2;
+      frame.rotation.z = Math.PI / 4;
+      frame.scale.set(1.98, 1.06, 1);
+      frame.position.set(side * (ROOM.hw - 0.07), 5.05, z);
+      scene.add(frame);
+    });
   });
 
-  /* benches face the star across the rotunda */
-  var blobTex = radialTexture('rgba(0, 0, 0, 0.55)', 'rgba(0, 0, 0, 0)');
+  /* the entry: a bronze-arched door on the near curve, brand sign above */
+  (function () {
+    var doorR = 6.95;
+    var door = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 3.6), new THREE.MeshStandardMaterial({ color: 0x241d2e, roughness: 0.5, metalness: 0.3 }));
+    door.position.set(0, 1.8, ROOM.straight + doorR);
+    door.rotation.y = Math.PI;
+    scene.add(door);
+    var arch = new THREE.Mesh(new THREE.TorusGeometry(1.32, 0.07, 8, 24, Math.PI), bronzeMat);
+    arch.position.set(0, 3.6, ROOM.straight + doorR - 0.02);
+    arch.rotation.y = Math.PI;
+    scene.add(arch);
+    var sign = new THREE.Mesh(
+      new THREE.PlaneGeometry(4.6, 1.15),
+      new THREE.MeshBasicMaterial({ map: brandTexture(), transparent: true, depthWrite: false })
+    );
+    sign.position.set(0, 5.35, ROOM.straight + doorR - 0.04);
+    sign.rotation.y = Math.PI;
+    scene.add(sign);
+  })();
+
+  /* light: warm, layered, cheap */
+  scene.add(new THREE.AmbientLight(0xfff4e6, 0.52));
+  scene.add(new THREE.HemisphereLight(0xd9deee, 0xe6d9c4, 0.55));
+  [[0, -4.5], [0, 0], [0, 4.5]].forEach(function (p, i) {
+    var pt = new THREE.PointLight(i % 2 ? 0xffe9cc : 0xfff2dd, 20, 16, 1.8);
+    pt.position.set(p[0], ROOM.h - 0.7, p[1]);
+    scene.add(pt);
+  });
+  /* starlight breath through the oval */
+  var moon = new THREE.PointLight(0xcdd4f2, 9, 18, 1.8);
+  moon.position.set(0, ROOM.h + 1.2, 0);
+  scene.add(moon);
+
+  /* benches: dark bronze legs, warm stone tops, soft contact shadows */
+  var blobTex = radialTexture('rgba(30, 24, 18, 0.5)', 'rgba(30, 24, 18, 0)');
   var benches = [];
-  [[-6.4, 0], [6.4, 0]].forEach(function (bz) {
-    var b = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.42, 2.2), stoneMat);
-    b.position.set(bz[0], 0.21, bz[1]);
-    b.castShadow = !isTouch;
-    scene.add(b);
-    var edge = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.02, 2.2), glowLineMat);
-    edge.position.set(bz[0] + (bz[0] > 0 ? -0.29 : 0.29), 0.43, bz[1]);
-    scene.add(edge);
-    if (isTouch) {
-      var s = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 3.0), new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, opacity: 0.6, depthWrite: false }));
-      s.rotation.x = -Math.PI / 2;
-      s.position.set(bz[0], 0.013, bz[1]);
-      scene.add(s);
-    }
-    benches.push({ x: bz[0], z: bz[1], hx: 0.65, hz: 1.35 });
+  [[-3.1, 0], [3.1, 0]].forEach(function (bz) {
+    var top = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.09, 2.0), new THREE.MeshStandardMaterial({ color: 0x2e2620, roughness: 0.55, metalness: 0.1 }));
+    top.position.set(bz[0], 0.44, bz[1]);
+    scene.add(top);
+    [[-0.8], [0.8]].forEach(function (lz) {
+      var leg = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.42, 8), darkBronze);
+      leg.position.set(bz[0], 0.21, bz[1] + lz[0]);
+      scene.add(leg);
+    });
+    var sh = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 2.8), new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, opacity: 0.7, depthWrite: false }));
+    sh.rotation.x = -Math.PI / 2;
+    sh.position.set(bz[0], 0.012, bz[1]);
+    scene.add(sh);
+    benches.push({ x: bz[0], z: bz[1], hx: 0.5, hz: 1.2 });
   });
 
-  /* floating dust motes across the whole plan */
+  /* dust motes catching the lamplight */
   var dust = null;
   (function () {
-    var N = 340;
+    var N = 160;
     var pos0 = new Float32Array(N * 3);
     for (var i = 0; i < N; i++) {
-      pos0[i * 3] = (Math.random() - 0.5) * 52;
-      pos0[i * 3 + 1] = Math.random() * (HALL.h - 1) + 0.4;
-      pos0[i * 3 + 2] = (Math.random() - 0.5) * 58;
+      pos0[i * 3] = (Math.random() - 0.5) * 13;
+      pos0[i * 3 + 1] = Math.random() * (ROOM.h - 1) + 0.4;
+      pos0[i * 3 + 2] = (Math.random() - 0.5) * 26;
     }
     var g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(pos0, 3));
     dust = new THREE.Points(g, new THREE.PointsMaterial({
-      color: 0xa79aff, size: 0.022, transparent: true, opacity: 0.42,
-      blending: THREE.AdditiveBlending, depthWrite: false
+      color: 0xd8c9a8, size: 0.018, transparent: true, opacity: 0.45, depthWrite: false
     }));
     scene.add(dust);
   })();
 
-  /* a soft ring of light follows the visitor */
+  /* a soft pool of light follows the visitor across the stone */
   var playerHalo = new THREE.Mesh(
-    new THREE.PlaneGeometry(3.2, 3.2),
-    new THREE.MeshBasicMaterial({ map: radialTexture('rgba(140, 120, 255, 0.35)', 'rgba(140, 120, 255, 0)'), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false })
+    new THREE.PlaneGeometry(2.8, 2.8),
+    new THREE.MeshBasicMaterial({ map: radialTexture('rgba(255, 236, 200, 0.13)', 'rgba(255, 236, 200, 0)'), transparent: true, depthWrite: false })
   );
   playerHalo.rotation.x = -Math.PI / 2;
-  playerHalo.position.y = 0.016;
+  playerHalo.position.y = 0.014;
   scene.add(playerHalo);
 
-  var plantCollide = [];
-
-  /* wing names crown their passages */
-  function wingTitle(text, x, y, z, ry) {
-    var m = new THREE.Mesh(
-      new THREE.PlaneGeometry(5, 1.25),
-      new THREE.MeshBasicMaterial({ map: wingTexture(text), transparent: true, depthWrite: false, side: THREE.DoubleSide })
-    );
-    m.position.set(x, y, z);
-    m.rotation.y = ry;
-    scene.add(m);
-  }
-  wingTitle('המעבדה', 0, 7.0, -7.9, 0);
-  wingTitle('העבודות', 7.9, 7.0, 0, -Math.PI / 2);
-  wingTitle('אמנות בקוד', -7.9, 7.0, 0, Math.PI / 2);
-
-  /* ---------- holograms (additive — they burn in the dark) ---------- */
+  /* ---------- holograms (saturated — they read in daylight) ---------- */
   var holoLineMat = function (color) {
-    return new THREE.LineBasicMaterial({ color: color || 0x8fd8ff, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending, depthWrite: false });
+    return new THREE.LineBasicMaterial({ color: color, transparent: true, opacity: 0.92, depthWrite: false });
   };
   var holoFillMat = function (color) {
-    return new THREE.MeshBasicMaterial({ color: color || 0x5b8cf5, transparent: true, opacity: 0.07, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
+    return new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: 0.10, depthWrite: false, side: THREE.DoubleSide });
   };
 
   function starShape(r) {
@@ -935,7 +737,7 @@
     var g = new THREE.Group();
     var aura = new THREE.Mesh(
       new THREE.PlaneGeometry(2.2, 2.2),
-      new THREE.MeshBasicMaterial({ map: radialTexture('rgba(108, 92, 255, 0.30)', 'rgba(108, 92, 255, 0)'), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })
+      new THREE.MeshBasicMaterial({ map: radialTexture('rgba(108, 92, 255, 0.28)', 'rgba(108, 92, 255, 0)'), transparent: true, depthWrite: false, side: THREE.DoubleSide })
     );
     g.add(aura);
     var core = new THREE.Group();
@@ -943,18 +745,18 @@
     var i, m;
 
     if (kind === 'globe') {
-      core.add(new THREE.LineSegments(new THREE.WireframeGeometry(new THREE.SphereGeometry(0.52, 18, 12)), holoLineMat(0x8fd8ff)));
-      core.add(new THREE.Mesh(new THREE.SphereGeometry(0.52, 18, 12), holoFillMat(0x5b8cf5)));
-      var ring = new THREE.Mesh(new THREE.TorusGeometry(0.74, 0.008, 6, 48), new THREE.MeshBasicMaterial({ color: 0xa08bff, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending, depthWrite: false }));
+      core.add(new THREE.LineSegments(new THREE.WireframeGeometry(new THREE.SphereGeometry(0.52, 18, 12)), holoLineMat(0x1F8FD8)));
+      core.add(new THREE.Mesh(new THREE.SphereGeometry(0.52, 18, 12), holoFillMat(0x1F8FD8)));
+      var ring = new THREE.Mesh(new THREE.TorusGeometry(0.74, 0.01, 6, 48), new THREE.MeshBasicMaterial({ color: 0x5B4CF5, transparent: true, opacity: 0.8, depthWrite: false }));
       ring.rotation.x = Math.PI / 2.4;
       core.add(ring);
     } else if (kind === 'device') {
-      core.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(0.44, 0.84, 0.05)), holoLineMat(0x9fe8d8)));
-      core.add(new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.84, 0.05), holoFillMat(0x5bd8b0)));
+      core.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(0.44, 0.84, 0.05)), holoLineMat(0x0FA88C)));
+      core.add(new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.84, 0.05), holoFillMat(0x0FA88C)));
       for (i = 0; i < 3; i++) {
-        var card = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.18), holoFillMat(0x9fe8d8));
+        var card = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.18), holoFillMat(0x0FA88C));
         card.userData.orbit = { r: 0.62, sp: 0.7 + i * 0.25, ph: i * 2.1, y: -0.15 + i * 0.16 };
-        card.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.PlaneGeometry(0.3, 0.18)), holoLineMat(0x9fe8d8)));
+        card.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.PlaneGeometry(0.3, 0.18)), holoLineMat(0x0FA88C)));
         core.add(card);
       }
     } else if (kind === 'neural') {
@@ -962,7 +764,7 @@
       for (i = 0; i < 15; i++) {
         var v = new THREE.Vector3((Math.random() - 0.5) * 1.15, (Math.random() - 0.5) * 0.95, (Math.random() - 0.5) * 1.15);
         nodes.push(v);
-        var nm = new THREE.Mesh(new THREE.SphereGeometry(0.032, 8, 8), new THREE.MeshBasicMaterial({ color: 0xc9afff, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false }));
+        var nm = new THREE.Mesh(new THREE.SphereGeometry(0.034, 8, 8), new THREE.MeshBasicMaterial({ color: 0x6C5CFF, transparent: true, opacity: 0.95, depthWrite: false }));
         nm.position.copy(v);
         nm.userData.pulse = Math.random() * 6.28;
         core.add(nm);
@@ -974,20 +776,20 @@
         }
       }
       var lg = new THREE.BufferGeometry().setFromPoints(pts);
-      core.add(new THREE.LineSegments(lg, holoLineMat(0xa08bff)));
+      core.add(new THREE.LineSegments(lg, holoLineMat(0x6C5CFF)));
     } else if (kind === 'game') {
-      core.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(0.48)), holoLineMat(0xffc79a)));
-      core.add(new THREE.Mesh(new THREE.IcosahedronGeometry(0.48), holoFillMat(0xff9a5b)));
+      core.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(0.48)), holoLineMat(0xE8722E)));
+      core.add(new THREE.Mesh(new THREE.IcosahedronGeometry(0.48), holoFillMat(0xE8722E)));
       for (i = 0; i < 4; i++) {
-        var cube = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(0.09, 0.09, 0.09)), holoLineMat(0xffc79a));
+        var cube = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(0.09, 0.09, 0.09)), holoLineMat(0xE8722E));
         cube.userData.orbit = { r: 0.78, sp: 0.9 + i * 0.3, ph: i * 1.57, y: 0 };
         core.add(cube);
       }
     } else { /* star */
       var shape = starShape(0.62);
-      core.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.ShapeGeometry(shape)), holoLineMat(0xc9afff)));
-      m = new THREE.Mesh(new THREE.ShapeGeometry(shape), holoFillMat(0x9d8cff));
-      m.material.opacity = 0.12;
+      core.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.ShapeGeometry(shape)), holoLineMat(0x5B4CF5)));
+      m = new THREE.Mesh(new THREE.ShapeGeometry(shape), holoFillMat(0x6C5CFF));
+      m.material.opacity = 0.16;
       core.add(m);
       var halo = [];
       for (i = 0; i < 60; i++) {
@@ -995,12 +797,12 @@
         halo.push(new THREE.Vector3(Math.cos(a) * rr, (Math.random() - 0.5) * 0.5, Math.sin(a) * rr));
       }
       var hg = new THREE.BufferGeometry().setFromPoints(halo);
-      core.add(new THREE.Points(hg, new THREE.PointsMaterial({ color: 0xc9afff, size: 0.02, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending, depthWrite: false })));
+      core.add(new THREE.Points(hg, new THREE.PointsMaterial({ color: 0x6C5CFF, size: 0.022, transparent: true, opacity: 0.8, depthWrite: false })));
     }
 
     var rings = [];
     for (i = 0; i < 2; i++) {
-      var r = new THREE.Mesh(new THREE.TorusGeometry(0.72, 0.006, 5, 40), new THREE.MeshBasicMaterial({ color: 0x8fd8ff, transparent: true, opacity: 0.3, blending: THREE.AdditiveBlending, depthWrite: false }));
+      var r = new THREE.Mesh(new THREE.TorusGeometry(0.72, 0.008, 5, 40), new THREE.MeshBasicMaterial({ color: 0x5B4CF5, transparent: true, opacity: 0.4, depthWrite: false }));
       r.rotation.x = Math.PI / 2;
       r.userData.phase = i * 0.5;
       rings.push(r);
@@ -1014,16 +816,16 @@
 
   var holograms = [];
 
-  /* ---------- pedestals ---------- */
+  /* ---------- pedestals: a quiet ring around the star ---------- */
   var coneTex = coneTexture();
   var pedestalDefs = [
-    { id: 'cap-web', holo: 'globe', x: -4.6, z: 4.6, label: 'אתרים וחוויות', tag: 'מה אנחנו בונים', accent: '#8fd8ff',
+    { id: 'cap-web', holo: 'globe', x: -3.3, z: -2.5, label: 'אתרים וחוויות', tag: 'מה אנחנו בונים', accent: '#1F8FD8',
       body: 'אתרים שמרגישים כמו מקום, לא כמו דף. האולם שאתם עומדים בו עכשיו נבנה באותם כלים בדיוק — ורץ בדפדפן, בלי להתקין כלום.', link: 'services.html', linkText: 'לעמוד השירותים' },
-    { id: 'cap-sys', holo: 'device', x: 4.6, z: 4.6, label: 'אפליקציות ומערכות', tag: 'מה אנחנו בונים', accent: '#9fe8d8',
+    { id: 'cap-sys', holo: 'device', x: 3.3, z: -2.5, label: 'אפליקציות ומערכות', tag: 'מה אנחנו בונים', accent: '#0FA88C',
       body: 'מהרעיון ועד מוצר שרץ בענן: אפליקציות, מערכות ניהול וכלים פנימיים שנתפרים בדיוק לצורת העבודה של העסק.', link: 'services.html', linkText: 'לעמוד השירותים' },
-    { id: 'cap-ai', holo: 'neural', x: -4.6, z: -4.6, label: 'AI ואוטומציה', tag: 'מה אנחנו בונים', accent: '#c9afff',
+    { id: 'cap-ai', holo: 'neural', x: -3.3, z: 2.5, label: 'AI ואוטומציה', tag: 'מה אנחנו בונים', accent: '#6C5CFF',
       body: 'תהליכים שקורים מעצמם: מיון פניות, טיוטות מסמכים, חיבורים בין מערכות — עם בקרה אנושית בנקודות שחשוב.', link: 'services.html', linkText: 'לעמוד השירותים' },
-    { id: 'cap-play', holo: 'game', x: 4.6, z: -4.6, label: 'משחקים וחוויות', tag: 'מה אנחנו בונים', accent: '#ffc79a',
+    { id: 'cap-play', holo: 'game', x: 3.3, z: 2.5, label: 'משחקים וחוויות', tag: 'מה אנחנו בונים', accent: '#E8722E',
       body: 'הדרך הכי טובה להבין מוצר היא לשחק בו: סימולטורים, קונפיגורטורים וחוויות אינטראקטיביות שהופכות סקרנות להחלטה.', link: 'services.html', linkText: 'לעמוד השירותים' }
   ];
 
@@ -1032,128 +834,158 @@
   var billboards = [];
 
   pedestalDefs.forEach(function (def) {
-    var base = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.68, 0.95, 24), stoneMat);
+    var base = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.6, 0.95, 24), new THREE.MeshStandardMaterial({ color: 0xE3DCCB, roughness: 0.55, metalness: 0.05, envMapIntensity: 0.9 }));
     base.position.set(def.x, 0.475, def.z);
-    base.castShadow = !isTouch;
     scene.add(base);
-    var ring = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.022, 8, 40), new THREE.MeshBasicMaterial({ color: new THREE.Color(def.accent) }));
-    ring.rotation.x = Math.PI / 2;
-    ring.position.set(def.x, 0.96, def.z);
-    scene.add(ring);
+    var collar = new THREE.Mesh(new THREE.TorusGeometry(0.47, 0.02, 8, 40), bronzeMat);
+    collar.rotation.x = Math.PI / 2;
+    collar.position.set(def.x, 0.96, def.z);
+    scene.add(collar);
+    var bshadow = new THREE.Mesh(new THREE.PlaneGeometry(1.9, 1.9), new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, opacity: 0.7, depthWrite: false }));
+    bshadow.rotation.x = -Math.PI / 2;
+    bshadow.position.set(def.x, 0.011, def.z);
+    scene.add(bshadow);
 
     var cone = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.16, 0.85, 2.6, 20, 1, true),
-      new THREE.MeshBasicMaterial({ map: coneTex, transparent: true, opacity: 0.16, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })
+      new THREE.CylinderGeometry(0.16, 0.8, 2.4, 20, 1, true),
+      new THREE.MeshBasicMaterial({ map: coneTex, transparent: true, opacity: 0.12, depthWrite: false, side: THREE.DoubleSide })
     );
-    cone.position.set(def.x, 2.35, def.z);
+    cone.position.set(def.x, 2.25, def.z);
     scene.add(cone);
 
-    var holo = makeHologram(def.holo, 1);
-    holo.position.set(def.x, 1.85, def.z);
+    var holo = makeHologram(def.holo, 0.92);
+    holo.position.set(def.x, 1.8, def.z);
     scene.add(holo);
     holograms.push(holo);
     def._holo = holo;
 
-    var pl = new THREE.PointLight(new THREE.Color(def.accent), 5, 6, 1.8);
-    pl.position.set(def.x, 2.1, def.z);
-    scene.add(pl);
-
     var label = new THREE.Mesh(
-      new THREE.PlaneGeometry(1.5, 0.375),
+      new THREE.PlaneGeometry(1.4, 0.35),
       new THREE.MeshBasicMaterial({ map: holoLabelTexture(def.label), transparent: true, depthWrite: false })
     );
-    label.position.set(def.x, 2.95, def.z);
+    label.position.set(def.x, 2.8, def.z);
     scene.add(label);
     billboards.push(label);
 
-    var hit = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 0.95, 3.4, 8), new THREE.MeshBasicMaterial({ visible: false }));
-    hit.position.set(def.x, 1.7, def.z);
+    var hit = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 3.2, 8), new THREE.MeshBasicMaterial({ visible: false }));
+    hit.position.set(def.x, 1.6, def.z);
     hit.userData.art = { title: def.label, tag: def.tag, body: def.body, link: def.link, self: true, linkText: def.linkText, _holo: holo, _glow: null };
     scene.add(hit);
     pickables.push(hit);
   });
 
-  /* the great atrium star */
-  var atriumStar = makeHologram('star', 2.6);
-  atriumStar.position.set(0, 6.4, 0);
+  /* the atrium star floats beneath the oval of stars */
+  var atriumStar = makeHologram('star', 2.1);
+  atriumStar.position.set(0, 4.5, 0);
   scene.add(atriumStar);
   holograms.push(atriumStar);
-  var atriumHit = new THREE.Mesh(new THREE.SphereGeometry(1.9, 10, 8), new THREE.MeshBasicMaterial({ visible: false }));
+  var atriumHit = new THREE.Mesh(new THREE.SphereGeometry(1.6, 10, 8), new THREE.MeshBasicMaterial({ visible: false }));
   atriumHit.position.copy(atriumStar.position);
   atriumHit.userData.art = {
     title: 'ORBO', tag: 'הסטודיו', _holo: atriumStar, _glow: null, self: true,
-    body: 'הכוכב של אורבו. כל מה שסביבכם — האולם, שביל החלב וההולוגרמות — נבנה כאן, בקוד, בלי אף קובץ מוכן. ככה נראית אצלנו גישה לפרויקט.',
+    body: 'הכוכב של אורבו. כל מה שסביבכם — האולם, השמיים, ההולוגרמות והציורים החיים — נבנה כאן, בקוד, בלי אף קובץ מוכן. ככה נראית אצלנו גישה לפרויקט.',
     link: 'studio.html', linkText: 'להכיר אותנו'
   };
   scene.add(atriumHit);
   pickables.push(atriumHit);
 
-  /* comets circling the star */
   var comets = [];
   (function () {
-    var cometTex = radialTexture('rgba(201, 175, 255, 0.9)', 'rgba(201, 175, 255, 0)');
+    var cometTex = radialTexture('rgba(108, 92, 255, 0.8)', 'rgba(108, 92, 255, 0)');
     for (var i = 0; i < 3; i++) {
       var m = new THREE.Mesh(
-        new THREE.PlaneGeometry(0.55, 0.55),
-        new THREE.MeshBasicMaterial({ map: cometTex, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })
+        new THREE.PlaneGeometry(0.45, 0.45),
+        new THREE.MeshBasicMaterial({ map: cometTex, transparent: true, opacity: 0.85, depthWrite: false, side: THREE.DoubleSide })
       );
       scene.add(m);
-      comets.push({ mesh: m, r: 3.1 + i * 0.5, sp: 0.5 + i * 0.17, ph: i * 2.1, tilt: 0.35 + i * 0.22 });
+      comets.push({ mesh: m, r: 2.4 + i * 0.4, sp: 0.5 + i * 0.17, ph: i * 2.1, tilt: 0.35 + i * 0.22 });
     }
   })();
 
-  /* ---------- the collection ---------- */
+  /* ---------- the collection ----------
+     every piece hangs on a dark linen panel in a bronze frame; the
+     curved-end pieces sit at an effective radius so nothing embeds. */
+  var CURVE_R = 6.9;
+  function curvePos(endSide, deg) {
+    /* phi is the signed angle around the end's half-circle; the piece
+       faces the circle's center so nothing embeds in the curve */
+    var phi = deg * Math.PI / 180;
+    return {
+      px: Math.sin(phi) * CURVE_R,
+      pz: endSide * (ROOM.straight + Math.cos(phi) * CURVE_R),
+      ry: endSide > 0 ? Math.PI + phi : -phi
+    };
+  }
+  var farL = curvePos(-1, -38), farR = curvePos(-1, 38);
+  var nearL = curvePos(1, -42), nearR = curvePos(1, 42);
+
   var ART = [
-    { id: 'bisomna', px: 12, pz: -4.94, ry: 0, title: 'BISOMNA', tag: 'אתר · באוויר', style: 'light', sub: 'אתר למיזם שינה ישראלי', domain: 'bisomna.com', link: 'https://bisomna.com', accent: '#9d8cff',
+    /* left straight wall */
+    { id: 'bisomna', px: -(ROOM.hw - 0.06), pz: -4.6, ry: Math.PI / 2, title: 'BISOMNA', tag: 'אתר · באוויר', style: 'light', sub: 'אתר למיזם שינה ישראלי', domain: 'bisomna.com', link: 'https://bisomna.com', accent: '#5B4CF5',
       body: 'אתר רחב למיזם בתחום השינה — מוצר, מדע, חנות ומשקיעים. וידאו שנע יחד עם הגלילה ותצוגת מוצר שנפתחת לשכבות, והכול נשאר מהיר גם בנייד.' },
-    { id: 'orbo', px: 27.94, pz: 0, ry: -Math.PI / 2, title: 'orbosolutions.com', tag: 'הבית שלנו', style: 'dark', sub: 'דף הבית של הסטודיו', domain: 'orbosolutions.com', link: 'index.html', self: true, accent: '#8c78ff',
+    { id: 'orbo', px: -(ROOM.hw - 0.06), pz: 0, ry: Math.PI / 2, title: 'orbosolutions.com', tag: 'הבית שלנו', style: 'dark', sub: 'דף הבית של הסטודיו', domain: 'orbosolutions.com', link: 'index.html', self: true, accent: '#6C5CFF',
       body: 'דף הבית שלנו הוא מסע: גוללים, והמצלמה עפה דרך עולם של חלקיקים שמתגבשים לצורות. בנוי כולו בקוד, בלי אף קובץ תמונה.' },
-    { id: 'aurora', px: 4.94, pz: -12, ry: -Math.PI / 2, live: 'aurora', title: 'AURORA', tag: 'ציור חי · המעבדה', accent: '#c6f24e', link: 'lab/01-aurora-gsap/',
-      body: 'סרטי אור שנעים בזרם. הציור שעל הקיר נצבע מחדש עשרות פעמים בשנייה, ממש עכשיו — כמו כל ציורי המעבדה באגף הזה.' },
-    { id: 'nebula', px: 4.94, pz: -19, ry: -Math.PI / 2, live: 'nebula', title: 'NEBULA', tag: 'ציור חי · המעבדה', accent: '#4dd8ff', link: 'lab/02-nebula-three/',
-      body: 'גלקסיה של חלקיקים שמסתחררת לאט. בגרסה המלאה גוללים אל תוך מרכז הגלקסיה.' },
-    { id: 'prism', px: 4.94, pz: -26, ry: -Math.PI / 2, live: 'prism', title: 'PRISM', tag: 'ציור חי · המעבדה', accent: '#9d6bff', link: 'lab/03-prism-r3f/',
-      body: 'אלומת אור שנשברת דרך גאומטריה ומתפצלת לספקטרום. בגרסה המלאה — חדר חומרים תלת־ממדי שלם.' },
-    { id: 'genesis', px: -12, pz: -4.94, ry: 0, gen: genesisTexture, title: 'GENESIS', tag: 'אמנות גנרטיבית', accent: '#ffb080',
+    { id: 'aurora', px: -(ROOM.hw - 0.06), pz: 4.6, ry: Math.PI / 2, live: 'aurora', title: 'AURORA', tag: 'ציור חי · המעבדה', accent: '#86B32B', link: 'lab/01-aurora-gsap/',
+      body: 'סרטי אור שנעים בזרם. הציור שעל הקיר נצבע מחדש עשרות פעמים בשנייה, ממש עכשיו — כמו כל ציורי המעבדה כאן.' },
+    /* right straight wall */
+    { id: 'genesis', px: ROOM.hw - 0.06, pz: -4.6, ry: -Math.PI / 2, gen: genesisTexture, title: 'GENESIS', tag: 'אמנות גנרטיבית', accent: '#E8722E',
       body: 'שלוש מאות קווים ששוחררו לשדה זרימה מתמטי. אף אחד לא צייר את היצירה הזאת — היא חושבה, קו אחרי קו, ברגע שנכנסתם למוזיאון.' },
-    { id: 'mosaic', px: -17, pz: 4.94, ry: Math.PI, gen: mosaicTexture, title: 'MOSAIC', tag: 'אמנות גנרטיבית', accent: '#9d8cff',
+    { id: 'mosaic', px: ROOM.hw - 0.06, pz: 0, ry: -Math.PI / 2, gen: mosaicTexture, title: 'MOSAIC', tag: 'אמנות גנרטיבית', accent: '#6C5CFF',
       body: 'פסיפס שנבנה מחלוקת המרחב בין ארבעים ושש נקודות אקראיות. כל ריצה מייצרת פסיפס שלא היה קיים מעולם.' },
-    { id: 'flux', px: -4.94, pz: -12, ry: Math.PI / 2, live: 'flux', title: 'FLUX', tag: 'ציור חי · המעבדה', accent: '#ff4b3e', link: 'lab/04-flux-shaders/',
+    { id: 'flux', px: ROOM.hw - 0.06, pz: 4.6, ry: -Math.PI / 2, live: 'flux', title: 'FLUX', tag: 'ציור חי · המעבדה', accent: '#E0402F', link: 'lab/04-flux-shaders/',
       body: 'שדות צבע שזורמים על המסך לפי כללים מתמטיים. בגרסה המלאה — שישה שדות שונים, ישר מול המעבד הגרפי.' },
-    { id: 'terra', px: -4.94, pz: -19, ry: Math.PI / 2, live: 'terra', title: 'TERRA', tag: 'ציור חי · המעבדה', accent: '#e0c08c', link: 'lab/05-terra-webgl/',
+    /* far curve: the finale flanked by two living paintings */
+    { id: 'nebula', px: farL.px, pz: farL.pz, ry: farL.ry, live: 'nebula', title: 'NEBULA', tag: 'ציור חי · המעבדה', accent: '#1F8FD8', link: 'lab/02-nebula-three/',
+      body: 'גלקסיה של חלקיקים שמסתחררת לאט. בגרסה המלאה גוללים אל תוך מרכז הגלקסיה.' },
+    { id: 'star', px: 0, pz: -(ROOM.straight + CURVE_R), ry: 0, title: 'ORBO', tag: 'הסטודיו', style: 'dark', big: true, sub: 'רעיונות יש לכולם. אנחנו הופכים אותם למציאות.', accent: '#6C5CFF',
+      body: 'תודה שביקרתם. אם משהו כאן הדליק לכם רעיון — נשמח לשמוע עליו.', contact: true },
+    { id: 'terra', px: farR.px, pz: farR.pz, ry: farR.ry, live: 'terra', title: 'TERRA', tag: 'ציור חי · המעבדה', accent: '#C9A05C', link: 'lab/05-terra-webgl/',
       body: 'רכסי הרים שמחושבים מרעש מתמטי טהור, תחת שמש נמוכה. בגרסה המלאה גולשים בין נופים שלמים.' },
-    { id: 'fractal', px: -27.94, pz: 0, ry: Math.PI / 2, gen: fractalTexture, title: 'JULIA', tag: 'אמנות גנרטיבית', accent: '#c9afff',
-      body: 'קבוצת ז׳וליה — נוסחה אחת קצרה שמכילה אינסוף. ככל שמתקרבים, מתגלים עוד ועוד עולמות. חושבה פיקסל־פיקסל בכניסתכם.' },
-    { id: 'star', px: 0, pz: -29.6, ry: 0, title: 'ORBO', tag: 'הסטודיו', style: 'dark', big: true, sub: 'רעיונות יש לכולם. אנחנו הופכים אותם למציאות.', accent: '#8c78ff',
-      body: 'תודה שביקרתם. אם משהו כאן הדליק לכם רעיון — נשמח לשמוע עליו.', contact: true }
+    /* near curve, flanking the door */
+    { id: 'prism', px: nearL.px, pz: nearL.pz, ry: nearL.ry, live: 'prism', title: 'PRISM', tag: 'ציור חי · המעבדה', accent: '#7A5CFF', link: 'lab/03-prism-r3f/',
+      body: 'אלומת אור שנשברת דרך גאומטריה ומתפצלת לספקטרום. בגרסה המלאה — חדר חומרים תלת־ממדי שלם.' },
+    { id: 'fractal', px: nearR.px, pz: nearR.pz, ry: nearR.ry, gen: fractalTexture, title: 'JULIA', tag: 'אמנות גנרטיבית', accent: '#7A5CFF',
+      body: 'קבוצת ז׳וליה — נוסחה אחת קצרה שמכילה אינסוף. ככל שמתקרבים, מתגלים עוד ועוד עולמות. חושבה פיקסל־פיקסל בכניסתכם.' }
   ];
 
-  var glowTexNeutral = radialTexture('rgba(255, 255, 255, 0.55)', 'rgba(255, 255, 255, 0)');
-  var poolTex = radialTexture('rgba(255, 225, 195, 0.16)', 'rgba(255, 225, 195, 0)');
+  var glowTexNeutral = radialTexture('rgba(255, 255, 255, 0.7)', 'rgba(255, 255, 255, 0)');
 
   ART.forEach(function (art) {
     var group = new THREE.Group();
-    var W = art.big ? 4.8 : 2.7, H = art.big ? 3.0 : 1.69;
-    var AY = art.big ? 4.0 : 2.15;
+    var W = art.big ? 3.6 : 2.2, H = art.big ? 2.25 : 1.375;
+    var AY = art.big ? 2.6 : 2.1;
 
     group.position.set(art.px, 0, art.pz);
     group.rotation.y = art.ry;
 
+    /* the dark linen panel the piece hangs on */
+    var panelM = new THREE.Mesh(new THREE.BoxGeometry(W + 1.0, H + 1.0, 0.05), linenMat);
+    panelM.position.set(0, AY, 0.028);
+    group.add(panelM);
+    /* bronze edge around the panel */
+    var edge = new THREE.Mesh(new THREE.TorusGeometry(1, 0.022, 6, 4), bronzeMat);
+    edge.rotation.z = Math.PI / 4;
+    edge.scale.set((W + 1.0) / 1.414, (H + 1.0) / 1.414, 1);
+    edge.position.set(0, AY, 0.055);
+    group.add(edge);
+
+    /* soft accent glow on the linen */
     var glow = new THREE.Mesh(
-      new THREE.PlaneGeometry(W * 1.55, H * 1.75),
-      new THREE.MeshBasicMaterial({ map: glowTexNeutral, color: new THREE.Color(art.accent || '#8c78ff'), transparent: true, opacity: 0.32, blending: THREE.AdditiveBlending, depthWrite: false })
+      new THREE.PlaneGeometry(W * 1.35, H * 1.5),
+      new THREE.MeshBasicMaterial({ map: glowTexNeutral, color: new THREE.Color(art.accent || '#6C5CFF'), transparent: true, opacity: 0.3, blending: THREE.AdditiveBlending, depthWrite: false })
     );
-    glow.position.set(0, AY, 0.015);
+    glow.position.set(0, AY, 0.06);
     group.add(glow);
 
-    var d = 0.07, th = 0.08, off = 0.1;
+    /* bronze frame */
+    var d = 0.06, th = 0.07, off = 0.1;
     [[0, AY + H / 2 + th / 2, W + th * 2, th], [0, AY - H / 2 - th / 2, W + th * 2, th]].forEach(function (s) {
-      var m = new THREE.Mesh(new THREE.BoxGeometry(s[2], s[3], d), frameMat);
+      var m = new THREE.Mesh(new THREE.BoxGeometry(s[2], s[3], d), darkBronze);
       m.position.set(s[0], s[1], off - d / 2);
       group.add(m);
     });
     [[-W / 2 - th / 2, AY], [W / 2 + th / 2, AY]].forEach(function (s) {
-      var m = new THREE.Mesh(new THREE.BoxGeometry(th, H, d), frameMat);
+      var m = new THREE.Mesh(new THREE.BoxGeometry(th, H, d), darkBronze);
       m.position.set(s[0], s[1], off - d / 2);
       group.add(m);
     });
@@ -1188,29 +1020,25 @@
 
     if (!art.big) {
       var plq = new THREE.Mesh(
-        new THREE.PlaneGeometry(0.66, 0.33),
+        new THREE.PlaneGeometry(0.56, 0.28),
         new THREE.MeshBasicMaterial({ map: plaqueTexture(art) })
       );
-      plq.position.set(W / 2 + 0.66, 1.4, 0.02);
+      plq.position.set(W / 2 + 0.95, 1.35, 0.02);
       group.add(plq);
     }
 
-    var pool = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 2.3), new THREE.MeshBasicMaterial({ map: poolTex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
-    pool.rotation.x = -Math.PI / 2;
-    pool.position.set(group.position.x + Math.sin(group.rotation.y) * 1.2, 0.013, group.position.z + Math.cos(group.rotation.y) * 1.2);
-    scene.add(pool);
-
+    /* desktop: one warm spot per piece */
     if (!isTouch) {
-      var sp = new THREE.SpotLight(0xffe9d6, 30, 12, 0.55, 0.65, 1.4);
-      var sWorld = new THREE.Vector3(0, HALL.h - 0.5, 2.1).applyEuler(group.rotation).add(group.position);
+      var sp = new THREE.SpotLight(0xfff0dc, 16, 9, 0.5, 0.6, 1.5);
+      var sWorld = new THREE.Vector3(0, ROOM.h - 0.35, 1.7).applyEuler(group.rotation).add(group.position);
       sp.position.copy(sWorld);
       var tWorld = new THREE.Vector3(0, AY, 0).applyEuler(group.rotation).add(group.position);
       sp.target.position.copy(tWorld);
       scene.add(sp);
       scene.add(sp.target);
-      var hs = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.1, 0.18, 10), trimMat);
+      var hs = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.09, 0.16, 10), darkBronze);
       hs.position.copy(sWorld);
-      hs.position.y = HALL.h - 0.12;
+      hs.position.y = ROOM.h - 0.1;
       scene.add(hs);
     }
 
@@ -1218,9 +1046,9 @@
   });
 
   /* ---------- player ---------- */
-  var yaw = 0;
+  var yaw = Math.PI;    /* enter facing the hall from the door end */
   var pitch = 0;
-  var pos = new THREE.Vector3(0, EYE, 27.6);
+  var pos = new THREE.Vector3(0, EYE, 10.6);
   var vel = new THREE.Vector3();
   var keys = {};
   var running = false;
@@ -1232,8 +1060,9 @@
     camera.position.copy(pos);
     camera.rotation.set(pitch, yaw, 0);
   }
-  pos.set(0, 3.1, 30.4);
-  pitch = -0.06;
+  yaw = Math.PI;
+  pos.set(0, 2.7, 12.6);
+  pitch = -0.05;
   applyCamera();
 
   /* ---------- input: desktop ---------- */
@@ -1399,28 +1228,26 @@
     hud.setAttribute('aria-hidden', 'false');
     started = true;
     if (reduced) {
-      pos.set(0, EYE, 27.6);
+      pos.set(0, EYE, 10.6);
       pitch = 0;
     } else {
-      glide = { t: 0, dur: 2.1, fromP: pos.clone(), toP: new THREE.Vector3(0, EYE, 27.6), fromPitch: pitch, toPitch: 0 };
+      glide = { t: 0, dur: 2.0, fromP: pos.clone(), toP: new THREE.Vector3(0, EYE, 10.6), fromPitch: pitch, toPitch: 0 };
     }
     requestLock();
     setTimeout(function () {
       showHint(isTouch ? 'ג׳ויסטיק בצד — תנועה · גרירה — להסתכל' : 'W A S D — תנועה · עכבר — להסתכל', 4200);
-    }, reduced ? 300 : 2300);
+    }, reduced ? 300 : 2200);
   });
 
   /* ---------- movement & collisions ---------- */
   var fwd = new THREE.Vector3(), rgt = new THREE.Vector3(), wish = new THREE.Vector3();
-  var pedCollide = pedestalDefs.map(function (d) { return { x: d.x, z: d.z, r: 1.0 }; });
+  var pedCollide = pedestalDefs.map(function (d) { return { x: d.x, z: d.z, r: 0.92 }; });
 
-function walkable(x, z) {
-    if (x * x + z * z < 98) return true;                              /* rotunda */
-    if (x > -4.5 && x < 4.5 && z > 6 && z < 31) return true;          /* south corridor */
-    if (x > -6.4 && x < 6.4 && z >= 31 && z < 40.2) return true;      /* deck */
-    if (x > -4.75 && x < 4.75 && z > -28.6 && z < -6) return true;    /* north wing */
-    if (x > 6 && x < 27.6 && z > -4.6 && z < 4.6) return true;        /* east wing */
-    if (x < -6 && x > -27.6 && z > -4.6 && z < 4.6) return true;      /* west wing */
+  /* the stadium: a rectangle capped by two discs */
+  function walkable(x, z) {
+    if (Math.abs(x) < R_IN && Math.abs(z) <= ROOM.straight) return true;
+    var dz = Math.abs(z) - ROOM.straight;
+    if (dz > 0 && x * x + dz * dz < R_IN * R_IN) return true;
     return false;
   }
 
@@ -1451,7 +1278,7 @@ function walkable(x, z) {
       }
     }
     if (wish.lengthSq() > 1) wish.normalize();
-    var speed = running ? 4.4 : 2.6;
+    var speed = running ? 4.2 : 2.5;
     wish.multiplyScalar(speed);
     var s = 1 - Math.exp(-10 * dt);
     vel.lerp(wish, s);
@@ -1464,18 +1291,16 @@ function walkable(x, z) {
     }
 
     var i, b, dx, dz, dd;
-    var boxes = benches.concat(portalWalls);
-    for (i = 0; i < boxes.length; i++) {
-      b = boxes[i];
+    for (i = 0; i < benches.length; i++) {
+      b = benches[i];
       dx = pos.x - b.x; dz = pos.z - b.z;
       if (Math.abs(dx) < b.hx && Math.abs(dz) < b.hz) {
         if (b.hx - Math.abs(dx) < b.hz - Math.abs(dz)) pos.x = b.x + (dx > 0 ? b.hx : -b.hx);
         else pos.z = b.z + (dz > 0 ? b.hz : -b.hz);
       }
     }
-    var circles = pedCollide.concat(plantCollide);
-    for (i = 0; i < circles.length; i++) {
-      b = circles[i];
+    for (i = 0; i < pedCollide.length; i++) {
+      b = pedCollide[i];
       dx = pos.x - b.x; dz = pos.z - b.z;
       dd = Math.hypot(dx, dz);
       if (dd < b.r && dd > 0.0001) {
@@ -1486,7 +1311,7 @@ function walkable(x, z) {
 
     var sp2 = vel.length();
     if (!reduced && sp2 > 0.4) bobPhase += dt * sp2 * 3.4;
-    pos.y = EYE + (reduced ? 0 : Math.sin(bobPhase * 2) * 0.028 * Math.min(sp2 / 2.6, 1));
+    pos.y = EYE + (reduced ? 0 : Math.sin(bobPhase * 2) * 0.026 * Math.min(sp2 / 2.5, 1));
 
     applyCamera();
   }
@@ -1499,8 +1324,8 @@ function walkable(x, z) {
     for (var i = 0; i < liveArts.length; i++) {
       var L = liveArts[i];
       var wp = L.plane.getWorldPosition(new THREE.Vector3());
-      if (wp.distanceTo(pos) > 17) continue;
-      var near = Math.max(0, 1 - wp.distanceTo(pos) / 10);
+      if (wp.distanceTo(pos) > 15) continue;
+      var near = Math.max(0, 1 - wp.distanceTo(pos) / 9);
       L.t += dt * (2 + near * 2.5);
       ORBO_LAB.draw[L.kind]({ ctx: L.art, w: L.w, h: L.h, t: L.t, seed: L.seed });
       var g = L.tex;
@@ -1546,7 +1371,7 @@ function walkable(x, z) {
         var ring = u.rings[r];
         var ph = ((t * 0.35 + ring.userData.phase) % 1);
         ring.position.y = -0.7 + ph * 1.5;
-        ring.material.opacity = 0.32 * (1 - ph) + ex * 0.3;
+        ring.material.opacity = 0.4 * (1 - ph) + ex * 0.3;
       }
     }
   }
@@ -1559,29 +1384,27 @@ function walkable(x, z) {
       if (!a._plane) continue;
       a._plane.getWorldPosition(tmpV);
       var d = tmpV.distanceTo(pos);
-      if (d > 22) continue;
+      if (d > 18) continue;
       var prox = Math.max(0, Math.min(1, 1 - (d - 2) / 5));
-      a._glow.material.opacity = 0.3 + prox * 0.3 + (a === hoverArt ? 0.18 : 0);
-      var sc = 1 + prox * 0.035;
+      a._glow.material.opacity = 0.26 + prox * 0.3 + (a === hoverArt ? 0.16 : 0);
+      var sc = 1 + prox * 0.03;
       a._plane.scale.set(sc, sc, 1);
     }
     playerHalo.position.x = pos.x;
     playerHalo.position.z = pos.z;
     playerHalo.material.opacity = 0.8 + (reduced ? 0 : Math.sin(t * 1.6) * 0.2);
-    /* asteroids drift and the galaxy breathes past them */
-    for (var ai = 0; ai < asteroids.length; ai++) {
-      var ast = asteroids[ai];
-      ast.rotation.y += dt * ast.userData.drift.sp;
-      ast.rotation.x += dt * ast.userData.drift.sp * 0.6;
-      ast.position.y = ast.userData.drift.base + Math.sin(t * 0.1 + ast.userData.drift.ph) * 1.6;
+    /* the sky shimmers: two star shells breathe against each other */
+    if (!reduced) {
+      skyA.rotation.y += dt * 0.0022;
+      skyB.rotation.y -= dt * 0.0014;
+      skyB.material.opacity = 0.72 + Math.sin(t * 0.8) * 0.18;
     }
-    if (!reduced) dome.rotation.y += dt * 0.0016;
     for (var k = 0; k < comets.length; k++) {
       var cm = comets[k];
       var a2 = t * cm.sp + cm.ph;
       cm.mesh.position.set(
         Math.cos(a2) * cm.r,
-        6.4 + Math.sin(a2 * 1.3) * Math.sin(cm.tilt) * 1.1,
+        4.5 + Math.sin(a2 * 1.3) * Math.sin(cm.tilt) * 0.9,
         Math.sin(a2) * cm.r * 0.8
       );
       cm.mesh.lookAt(pos.x, pos.y, pos.z);
@@ -1607,8 +1430,8 @@ function walkable(x, z) {
     }
 
     if (dust && !reduced) {
-      dust.rotation.y += dt * 0.005;
-      dust.position.y = Math.sin(t * 0.16) * 0.06;
+      dust.rotation.y += dt * 0.004;
+      dust.position.y = Math.sin(t * 0.16) * 0.05;
     }
 
     pickTick++;
@@ -1623,7 +1446,6 @@ function walkable(x, z) {
     camera.updateProjectionMatrix();
     renderer.setSize(innerWidth, innerHeight);
   });
-  /* a tab restored from the background can report 0x0 at init — heal once */
   setTimeout(function () {
     if (!renderer.domElement.width && innerWidth) {
       camera.aspect = innerWidth / innerHeight;
