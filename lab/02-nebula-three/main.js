@@ -144,7 +144,7 @@ async function boot() {
   renderer.setPixelRatio(DPR);
   renderer.setSize(W, H);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.05;
+  renderer.toneMappingExposure = 0.92;
 
   const scene = new THREE.Scene();
   const bgColor = new THREE.Color('#020409');
@@ -201,7 +201,9 @@ async function boot() {
      the difference is invisible, the fillrate saving is large.
      (setSize is overridden BEFORE addPass — both addPass and
      composer.setSize push full pixel dims into the pass.) */
-  const bloom = new UnrealBloomPass(new THREE.Vector2(W, H), 1.15, 0.9, 0.0);
+  /* threshold 0.5: only genuinely hot pixels bloom — with 0.0 the whole
+     frame glowed and the scene read as washed-out bright */
+  const bloom = new UnrealBloomPass(new THREE.Vector2(W, H), 1.15, 0.9, 0.5);
   const bloomSetSize = bloom.setSize.bind(bloom);
   bloom.setSize = (w, h) =>
     bloomSetSize(Math.max(1, Math.round(w / 2)), Math.max(1, Math.round(h / 2)));
@@ -295,10 +297,10 @@ async function boot() {
   const KEYS = [
     { p: [3.2, 26.5, 30.0], t: [0.0, 0.0, 0.0], bloom: 1.02 },   /* 01 high above the disc */
     { p: [12.6, 3.1, 11.4], t: [3.4, 0.2, -2.6], bloom: 1.1 },   /* 02 diving along the arms */
-    { p: [9.8, 1.7, -0.2], t: [7.4, 0.5, -4.8], bloom: 1.24 },   /* 03 drifting through the nursery */
-    { p: [2.4, 1.5, 2.7], t: [0.0, 0.15, 0.0], bloom: 0.45 },    /* 04 core approach: bloom EASES DOWN
-                                                                    (was 1.4 — additive stack + full bloom
-                                                                    clipped to blinding white) */
+    { p: [9.8, 1.7, -0.2], t: [7.4, 0.5, -4.8], bloom: 1.05 },   /* 03 drifting through the nursery */
+    { p: [2.4, 1.5, 2.7], t: [0.0, 0.15, 0.0], bloom: 0.28 },    /* 04 core approach: bloom EASES DOWN
+                                                                    hard — the additive stack near the
+                                                                    bulge is hot enough on its own */
     { p: [-4.6, 3.4, 24.5], t: [-1.5, 9.5, -16.0], bloom: 1.0 }, /* 05 pulled back, tilted up */
   ];
 
@@ -624,7 +626,7 @@ async function boot() {
     /* core-approach dimming: as the camera nears the galactic centre,
        per-star brightness eases down (with the per-point near fade in
        the shader) so the additive sum stays luminous, never blinding */
-    const coreDim = 0.45 + 0.55 * THREE.MathUtils.smoothstep(camera.position.length(), 2.5, 9.0);
+    const coreDim = 0.22 + 0.78 * THREE.MathUtils.smoothstep(camera.position.length(), 2.2, 10.0);
     for (let i = 0; i < warpMats.length; i++) {
       warpMats[i].uniforms.uCoreDim.value = coreDim;
     }

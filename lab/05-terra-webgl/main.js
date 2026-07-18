@@ -70,6 +70,7 @@ let onScreen = true;
 /* SplitText bookkeeping for the slide title */
 let titleSplit = null;
 let titleInTween = null;
+let introTl = null;        // intro timeline — completed + killed on an early swipe
 
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 const pad2 = (n) => String(n).padStart(2, '0');
@@ -252,6 +253,14 @@ function splitTitle() {
 function playDomSwap(next, dir = 1) {
   const project = PROJECTS[next];
 
+  // Input unlocks at ~1.35s but the intro tail (desc/counter/CTA/rail/hint)
+  // runs until ~3.5s. On an early swipe, jump the intro to its end state and
+  // kill it BEFORE creating any swap tweens — otherwise its pending from/
+  // fromTo tweens fire later and stomp this swap (e.g. the rail-fill fromTo
+  // would snap the progress rail back to slide 1's fill, and the hint
+  // fade-in would override dimHint()).
+  if (introTl) { introTl.progress(1).kill(); introTl = null; }
+
   rollCounter(next);
   gsap.to(document.documentElement, {
     '--accent': project.accent,
@@ -285,8 +294,10 @@ function playDomSwap(next, dir = 1) {
     stagger: outSplit ? { each: 0.015, from: dir === 1 ? 'start' : 'end' } : 0.05,
     ease: 'power2.in'
   }, 0)
-    // overwrite:'auto' kills any still-running intro tweens on these
-    // elements — input now unlocks before the intro fully settles.
+    // overwrite:'auto' kills any still-running in-tweens on these elements
+    // from a previous rapid swap. (Intro tweens are handled by the introTl
+    // complete+kill at the top of playDomSwap — overwrite alone can't reach
+    // intro tail tweens that haven't started yet.)
     .to([els.eyebrow, els.meta, els.desc], { y: -12, opacity: 0, duration: 0.4, ease: 'power2.in', overwrite: 'auto' }, 0.02)
     .add(() => {
       buildSlideDom(project);
@@ -643,9 +654,11 @@ function intro() {
 
   const tl = gsap.timeline({
     onComplete: () => {
+      introTl = null;
       if (state === 'loading') state = 'idle';
     }
   });
+  introTl = tl;
   tl.to(els.loaderFill, { scaleX: 1, duration: 0.2, ease: 'power1.inOut' })
     .to(els.loader, { yPercent: -100, duration: 0.85, ease: 'power4.inOut', delay: 0.15 })
     .set(els.loader, { display: 'none' })

@@ -60,7 +60,7 @@ void main() {
 
   /* points close to the lens ease OUT instead of stacking to white:
      the additive sum stays luminous, never clips */
-  vFade = smoothstep(0.3, 2.4, -mv.z);
+  vFade = smoothstep(0.6, 3.2, -mv.z);
 
   vColor = aColor;
   vSeed = aSeed;
