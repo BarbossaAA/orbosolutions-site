@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FLUX — Fragment Shader Observatory</title>
+  <meta name="description" content="FLUX: six live GLSL fragment programs rendered in raw WebGL2. No libraries, no textures — arithmetic only.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='black'/><rect x='11' y='11' width='42' height='42' fill='none' stroke='%23FF3B30' stroke-width='4'/><rect x='27' y='27' width='10' height='10' fill='white'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="booting">
+  <a href="../" aria-label="Back to the ORBO LAB index" style="position:fixed;top:18px;left:18px;z-index:2147483000;font:600 11px/1 &quot;Space Grotesk&quot;,system-ui,sans-serif;letter-spacing:.14em;color:rgba(255,255,255,.66);text-decoration:none;padding:10px 15px;border:1px solid rgba(255,255,255,.16);border-radius:999px;background:rgba(10,10,14,.42);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)">&larr; ORBO LAB</a>
+
+  <noscript>
+    <div class="noscript">
+      <p class="tag">SIGNAL LOST</p>
+      <h1>JAVASCRIPT DISABLED</h1>
+      <p class="body">Every pixel on this page is computed live by your GPU through WebGL2.
+      Without JavaScript there is nothing to compile and nothing to draw.
+      Enable JavaScript and reload.</p>
+    </div>
+  </noscript>
+
+  <!-- BOOT OVERLAY -->
+  <div id="intro" aria-hidden="true">
+    <p class="tag">UNIT 04 / 05</p>
+    <div class="intro-mark">FLUX</div>
+    <p class="intro-sub">FRAGMENT SHADER OBSERVATORY</p>
+    <div id="boot-log"></div>
+    <div class="intro-bar"><i id="intro-fill"></i></div>
+  </div>
+
+  <!-- NO-WEBGL2 FALLBACK -->
+  <div id="fallback" hidden>
+    <p class="tag">SIGNAL LOST</p>
+    <h1>WEBGL2<br>UNAVAILABLE</h1>
+    <p class="body">FLUX computes every pixel on your GPU through a WebGL2 context, and this
+    browser declined to provide one. Hardware acceleration may be disabled, or the browser
+    may be out of date. Any current Chrome, Edge, Firefox or Safari will run the observatory.</p>
+    <div class="fallback-list">
+      <p>001 MORPH — RAYMARCHED SDF · SOFT SHADOWS</p>
+      <p>002 INK — FBM DOMAIN WARP</p>
+      <p>003 JULIA — ESCAPE-TIME FRACTAL · ORBIT TRAP</p>
+      <p>004 BLOOM — METABALL FIELD · ADDITIVE GLOW</p>
+      <p>005 AURORA — LAYERED NOISE CURTAINS</p>
+      <p>006 CELLS — VORONOI · BORDER DISTANCE</p>
+    </div>
+  </div>
+
+  <header class="site-head">
+    <div class="head-left">
+      <span class="mark">FLUX<i class="mark-dot" aria-hidden="true"></i></span>
+      <span class="head-sub">FRAGMENT SHADER OBSERVATORY</span>
+    </div>
+    <div class="hud" aria-label="Instrument readouts">
+      <span>T+<b id="hud-time">0000.0</b></span>
+      <span>FPS <b id="hud-fps">--</b></span>
+      <span>DPR <b id="hud-dpr">-</b></span>
+      <span>PRG <b id="hud-prg">0/6</b></span>
+    </div>
+  </header>
+
+  <section class="hero">
+    <p class="tag">UNIT 04 / 05 — LIVE INSTRUMENT</p>
+    <h1>SIX FRAGMENT PROGRAMS,<br>COMPUTED AS YOU WATCH.</h1>
+    <p class="hero-body">Every tile below is a hand-written GLSL fragment shader running in raw
+    WebGL2 — no libraries, no textures, no video files. Hover a tile to overdrive its clock.
+    Click one to inspect it at full resolution, source included.</p>
+    <p class="hero-meta">SPECIMENS 006 &nbsp;·&nbsp; UNIFORMS u_time / u_mouse / u_resolution &nbsp;·&nbsp; DEPENDENCIES 000</p>
+  </section>
+
+  <main>
+    <section id="grid" class="grid" aria-label="Live shader gallery"></section>
+  </main>
+
+  <footer class="site-foot">
+    <div class="foot-grid">
+      <div>
+        <h3>PROTOCOL</h3>
+        <p>One shared animation clock drives every visible tile. Offscreen programs are halted
+        by an intersection observer. Tiles render at reduced density; the full-resolution pass
+        is reserved for the inspector.</p>
+      </div>
+      <div>
+        <h3>INPUT</h3>
+        <p>The pointer streams into every program as u_mouse, smoothed by exponential decay.
+        Hovering a tile overdrives its local clock to ×2.2. Keys 1–6 jump straight to a
+        program; ESC returns to the grid.</p>
+      </div>
+      <div>
+        <h3>SYSTEM</h3>
+        <p>Raw WebGL2 and hand-written GLSL ES 3.00. Zero libraries, zero textures, zero build
+        step. If it is not arithmetic, it is not here.</p>
+      </div>
+    </div>
+    <div class="foot-bar">
+      <span>FLUX — UNIT 04 / 05</span>
+      <span class="foot-motion"><span id="foot-note">MOTION: FULL</span><button id="motion-btn" type="button" hidden>ENABLE MOTION</button></span>
+      <span>2026 · RENDERED LOCALLY BY YOUR GPU</span>
+    </div>
+  </footer>
+
+  <!-- FULLSCREEN INSPECTOR -->
+  <div id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-name" hidden>
+    <canvas id="modal-canvas"></canvas>
+    <div class="modal-top">
+      <div class="modal-id">
+        <span id="modal-index" class="m-index">001</span>
+        <span id="modal-name" class="m-name">MORPH</span>
+        <span id="modal-tech" class="m-tech"></span>
+      </div>
+      <div class="modal-actions">
+        <button id="btn-source" type="button" aria-pressed="false">SOURCE</button>
+        <button id="btn-close" type="button" aria-label="Close inspector">ESC / ×</button>
+      </div>
+    </div>
+    <div class="modal-info">
+      <p id="modal-desc"></p>
+    </div>
+    <div class="modal-fault" aria-hidden="true">
+      <b>ERR</b>
+      <span>PROGRAM FAULT — SEE CONSOLE FOR THE COMPILE LOG</span>
+    </div>
+    <aside id="source-panel" aria-label="GLSL source code">
+      <div class="source-head">
+        <span>FRAGMENT · GLSL ES 3.00</span>
+        <span id="source-stats"></span>
+      </div>
+      <pre id="source-pre"><code id="source-code"></code></pre>
+    </aside>
+  </div>
+
+  <div id="cursor" aria-hidden="true"><i></i></div>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>

@@ -1,0 +1,504 @@
+/* ==========================================================================
+   5 SITES PROJECT — hub launcher
+   Dark, elegant index page. No WebGL here — CSS + GSAP polish only.
+   ========================================================================== */
+
+:root {
+  --bg: #0b0b0d;
+  --bg-raised: #101014;
+  --text: #ebe9e4;
+  --muted: #8a8894;
+  --line: rgba(235, 233, 228, 0.12);
+  --font: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-weight: 400;
+  line-height: 1.5;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Subtle procedural grain over everything (inline SVG turbulence, no assets) */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+::selection {
+  background: var(--text);
+  color: var(--bg);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent, var(--text));
+  outline-offset: 4px;
+}
+
+code {
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: 0.92em;
+  color: var(--text);
+  background: var(--bg-raised);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.1em 0.4em;
+}
+
+/* --------------------------------------------------------------------------
+   Layout frame
+   -------------------------------------------------------------------------- */
+
+.frame {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: clamp(1.25rem, 4vw, 3rem);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* --------------------------------------------------------------------------
+   Header
+   -------------------------------------------------------------------------- */
+
+.brand-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding-bottom: 1.1rem;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.brand {
+  font-weight: 600;
+}
+
+.tagline {
+  color: var(--muted);
+  font-weight: 400;
+  text-align: right;
+}
+
+.title {
+  font-size: clamp(2.5rem, 7.5vw, 5.25rem);
+  font-weight: 500;
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  margin: clamp(2.5rem, 7vh, 4.5rem) 0 clamp(1.75rem, 4vh, 2.75rem);
+  text-wrap: balance;
+}
+
+.title .line {
+  display: block;
+  overflow: hidden;
+}
+
+.title .line-inner {
+  display: block;
+  will-change: transform;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 2.25rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding-bottom: clamp(1.5rem, 4vh, 2.5rem);
+}
+
+/* --------------------------------------------------------------------------
+   Index rows
+   -------------------------------------------------------------------------- */
+
+.index {
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.index li {
+  border-bottom: 1px solid var(--line);
+}
+
+.row {
+  position: relative;
+  display: grid;
+  grid-template-columns: clamp(3rem, 6vw, 5.5rem) minmax(0, 1.1fr) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: clamp(1rem, 3vw, 2.5rem);
+  padding: clamp(1.6rem, 3.4vw, 2.4rem) clamp(0.75rem, 2vw, 1.5rem);
+  isolation: isolate;
+  transition:
+    padding 0.55s var(--ease-out),
+    color 0.35s ease;
+}
+
+/* Accent bleed layer */
+.row::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(90deg, var(--accent-soft), transparent 72%);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.6s var(--ease-out);
+}
+
+/* Accent edge bar */
+.row::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--accent);
+  transform: scaleY(0);
+  transform-origin: top center;
+  transition: transform 0.45s var(--ease-out) 0.05s;
+}
+
+.row-num {
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  transition: color 0.35s ease;
+}
+
+.row-name {
+  font-size: clamp(1.9rem, 4.6vw, 3.5rem);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  white-space: nowrap;
+  transition:
+    color 0.35s ease,
+    letter-spacing 0.55s var(--ease-out),
+    transform 0.55s var(--ease-out);
+}
+
+.row-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  min-width: 0;
+}
+
+.row-desc {
+  font-size: 0.92rem;
+  font-weight: 300;
+  color: var(--muted);
+  max-width: 34ch;
+  transition: color 0.35s ease;
+}
+
+.row-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.row-tags i {
+  font-style: normal;
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.28em 0.85em;
+  transition:
+    color 0.35s ease,
+    border-color 0.35s ease;
+}
+
+.row-arrow {
+  width: clamp(2.25rem, 4vw, 3rem);
+  color: var(--accent);
+  opacity: 0;
+  transform: translateX(-18px);
+  transition:
+    opacity 0.4s ease,
+    transform 0.55s var(--ease-out);
+}
+
+.row-arrow svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Hover / focus state: expand, bleed, arrow in */
+.row:hover,
+.row:focus-visible {
+  padding-top: clamp(2rem, 4vw, 3rem);
+  padding-bottom: clamp(2rem, 4vw, 3rem);
+}
+
+.row:hover::before,
+.row:focus-visible::before {
+  transform: scaleX(1);
+}
+
+.row:hover::after,
+.row:focus-visible::after {
+  transform: scaleY(1);
+}
+
+.row:hover .row-name,
+.row:focus-visible .row-name {
+  color: var(--accent);
+  letter-spacing: 0.045em;
+  transform: translateX(0.35rem);
+}
+
+.row:hover .row-num,
+.row:focus-visible .row-num {
+  color: var(--accent);
+}
+
+.row:hover .row-desc,
+.row:focus-visible .row-desc {
+  color: var(--text);
+}
+
+.row:hover .row-tags i,
+.row:focus-visible .row-tags i {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.row:hover .row-arrow,
+.row:focus-visible .row-arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.row:active .row-name {
+  transform: translateX(0.35rem) scale(0.99);
+}
+
+/* --------------------------------------------------------------------------
+   Footer
+   -------------------------------------------------------------------------- */
+
+.site-foot {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.75rem 2rem;
+  padding-top: clamp(1.75rem, 5vh, 3rem);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.foot-right {
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-size: 0.68rem;
+}
+
+/* --------------------------------------------------------------------------
+   Intro overlay (driven by JS; never shown without it)
+   -------------------------------------------------------------------------- */
+
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.intro-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.4rem;
+}
+
+.intro-mark {
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+}
+
+.intro-ticks {
+  display: flex;
+  gap: 0.55rem;
+}
+
+.intro-tick {
+  width: 2.4rem;
+  height: 3px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  border-radius: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   Custom cursor (enabled via html.cursor-on for fine pointers only)
+   -------------------------------------------------------------------------- */
+
+.cursor {
+  display: none;
+}
+
+html.cursor-on .cursor {
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+html.cursor-on .cursor.is-visible {
+  opacity: 1;
+}
+
+html.cursor-on,
+html.cursor-on a,
+html.cursor-on body {
+  cursor: none;
+}
+
+.cursor-dot {
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text);
+}
+
+.cursor-ring {
+  position: absolute;
+  top: -19px;
+  left: -19px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--cursor-accent, rgba(235, 233, 228, 0.4));
+  transition:
+    transform 0.35s var(--ease-out),
+    border-color 0.35s ease;
+}
+
+.cursor.is-hover .cursor-ring {
+  transform: scale(1.7);
+  border-color: var(--cursor-accent, var(--text));
+}
+
+.cursor.is-down .cursor-ring {
+  transform: scale(0.8);
+}
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 860px) {
+  .row {
+    grid-template-columns: 3rem minmax(0, 1fr) auto;
+    grid-template-areas:
+      "num name  arrow"
+      "num body  arrow";
+    align-items: start;
+    row-gap: 0.85rem;
+  }
+
+  .row-num  { grid-area: num; padding-top: 0.4rem; }
+  .row-name { grid-area: name; white-space: normal; }
+  .row-body { grid-area: body; }
+
+  .row-arrow {
+    grid-area: arrow;
+    align-self: center;
+  }
+}
+
+@media (max-width: 520px) {
+  .brand-row {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .tagline {
+    text-align: left;
+  }
+
+  .row-arrow {
+    display: none;
+  }
+
+  .site-foot {
+    flex-direction: column;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Reduced motion: keep the page fully usable, drop decorative movement
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+
+  .row-arrow {
+    opacity: 1;
+    transform: none;
+  }
+
+  .intro {
+    display: none !important;
+  }
+}

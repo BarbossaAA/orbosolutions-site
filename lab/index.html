@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ORBO LAB — a WebGL / animation library</title>
+  <meta name="description" content="The open experiments library of Orbo Solutions: five self-contained WebGL and animation studies — AURORA, NEBULA, PRISM, FLUX and TERRA. No build step, everything procedural.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Orbo Solutions">
+  <meta property="og:title" content="ORBO LAB — a WebGL / animation library">
+  <meta property="og:description" content="Five live real-time graphics experiments, all visuals generated in code.">
+  <meta property="og:url" content="https://orbosolutions.com/lab/">
+  <link rel="canonical" href="https://orbosolutions.com/lab/">
+  <link rel="icon" type="image/svg+xml" href="../assets/img/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+  <!-- Intro overlay: shown only by JS when the entrance animation runs -->
+  <div class="intro" id="intro" style="display:none" aria-hidden="true">
+    <div class="intro-inner">
+      <p class="intro-mark">ORBO LAB</p>
+      <div class="intro-ticks">
+        <span class="intro-tick" style="--accent:#c6f24e"></span>
+        <span class="intro-tick" style="--accent:#4dd8ff"></span>
+        <span class="intro-tick" style="--accent:#9d6bff"></span>
+        <span class="intro-tick" style="--accent:#ff4b3e"></span>
+        <span class="intro-tick" style="--accent:#e0c08c"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom cursor: activated only for fine pointers without reduced motion -->
+  <div class="cursor" id="cursor" aria-hidden="true">
+    <span class="cursor-ring"></span>
+    <span class="cursor-dot"></span>
+  </div>
+
+  <div class="frame">
+
+    <header class="site-head">
+      <div class="brand-row">
+        <span class="brand">ORBO<span style="color:#9d6bff">·</span>LAB</span>
+        <span class="tagline">the experiments library of Orbo Solutions</span>
+        <a class="tagline" href="../" style="margin-inline-start:auto; text-decoration:none">orbosolutions.com&nbsp;&rarr;</a>
+      </div>
+      <h1 class="title">
+        <span class="line"><span class="line-inner">Five rooms of light,</span></span>
+        <span class="line"><span class="line-inner">motion &amp; code.</span></span>
+      </h1>
+      <div class="meta">
+        <span>Index 01–05</span>
+        <span>No build step · static serve</span>
+        <span>All visuals procedural</span>
+      </div>
+    </header>
+
+    <main>
+      <ul class="index" id="siteIndex">
+        <li>
+          <a class="row" href="./01-aurora-gsap/" style="--accent:#c6f24e; --accent-soft:rgba(198,242,78,.13)">
+            <span class="row-num">01</span>
+            <span class="row-name">AURORA</span>
+            <span class="row-body">
+              <span class="row-desc">Ribbons of gradient light choreographed against buttery smooth scroll.</span>
+              <span class="row-tags"><i>GSAP</i><i>Lenis</i></span>
+            </span>
+            <span class="row-arrow">
+              <svg viewBox="0 0 40 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M2 12h34M27 3l9 9-9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+          </a>
+        </li>
+        <li>
+          <a class="row" href="./02-nebula-three/" style="--accent:#4dd8ff; --accent-soft:rgba(77,216,255,.13)">
+            <span class="row-num">02</span>
+            <span class="row-name">NEBULA</span>
+            <span class="row-body">
+              <span class="row-desc">A volumetric particle cloud blooming and collapsing in deep space.</span>
+              <span class="row-tags"><i>Three.js</i><i>Bloom</i></span>
+            </span>
+            <span class="row-arrow">
+              <svg viewBox="0 0 40 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M2 12h34M27 3l9 9-9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+          </a>
+        </li>
+        <li>
+          <a class="row" href="./03-prism-r3f/" style="--accent:#9d6bff; --accent-soft:rgba(157,107,255,.13)">
+            <span class="row-num">03</span>
+            <span class="row-name">PRISM</span>
+            <span class="row-body">
+              <span class="row-desc">Refractive geometry and declarative 3D scenes composed in React.</span>
+              <span class="row-tags"><i>React Three Fiber</i></span>
+            </span>
+            <span class="row-arrow">
+              <svg viewBox="0 0 40 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M2 12h34M27 3l9 9-9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+          </a>
+        </li>
+        <li>
+          <a class="row" href="./04-flux-shaders/" style="--accent:#ff4b3e; --accent-soft:rgba(255,75,62,.13)">
+            <span class="row-num">04</span>
+            <span class="row-name">FLUX</span>
+            <span class="row-body">
+              <span class="row-desc">Fragment-shader fields rendered raw — no framework, just the GPU.</span>
+              <span class="row-tags"><i>Raw WebGL2</i><i>GLSL</i></span>
+            </span>
+            <span class="row-arrow">
+              <svg viewBox="0 0 40 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M2 12h34M27 3l9 9-9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+          </a>
+        </li>
+        <li>
+          <a class="row" href="./05-terra-webgl/" style="--accent:#e0c08c; --accent-soft:rgba(224,192,140,.13)">
+            <span class="row-num">05</span>
+            <span class="row-name">TERRA</span>
+            <span class="row-body">
+              <span class="row-desc">A slider that glides between procedural landscapes carved from noise.</span>
+              <span class="row-tags"><i>Three.js</i><i>GSAP slider</i></span>
+            </span>
+            <span class="row-arrow">
+              <svg viewBox="0 0 40 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M2 12h34M27 3l9 9-9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+          </a>
+        </li>
+      </ul>
+    </main>
+
+    <footer class="site-foot">
+      <p>Every visual on these pages is generated in code — no images, no models, no build step. Built in-house at <a href="../" style="color:inherit">Orbo Solutions</a>.</p>
+      <p class="foot-right">Five rooms, zero builds · MMXXVI</p>
+    </footer>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+  <script src="./main.js"></script>
+</body>
+</html>

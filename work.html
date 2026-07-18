@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl" class="no-js">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>העבודות שלנו | Orbo Solutions</title>
+<meta name="description" content="דברים אמיתיים שרצים באמת: אתרים חיים בפרודקשן, מוצרים ומערכות שבנינו, וספריית ניסויי WebGL חיים. בלי לוגואים מזויפים, בלי המלצות קנויות.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Orbo Solutions">
+<meta property="og:title" content="העבודות שלנו | Orbo Solutions">
+<meta property="og:description" content="אתרים חיים בפרודקשן, מוצרים עובדים וספריית ניסויים חיה. הכול אמיתי, הכול שלנו.">
+<meta property="og:url" content="https://orbosolutions.com/work.html">
+<meta property="og:image" content="https://orbosolutions.com/ad/ad-1080x1350.png">
+<meta property="og:locale" content="he_IL">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://orbosolutions.com/work.html">
+<meta name="robots" content="index, follow">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://orbosolutions.com/#org",
+      "name": "Orbo Solutions",
+      "alternateName": ["Orbo", "ORBO SOLUTIONS", "אורבו סולושנס"],
+      "url": "https://orbosolutions.com/",
+      "logo": "https://orbosolutions.com/assets/img/app-icon-512.png",
+      "email": "contact@orbosolutions.com",
+      "telephone": "+972-52-846-3293"
+    },
+    {
+      "@type": "CollectionPage",
+      "@id": "https://orbosolutions.com/work.html#page",
+      "url": "https://orbosolutions.com/work.html",
+      "name": "העבודות שלנו | Orbo Solutions",
+      "inLanguage": "he",
+      "about": { "@id": "https://orbosolutions.com/#org" },
+      "mainEntity": {
+        "@type": "ItemList",
+        "name": "עבודות נבחרות",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Erez Egzozim — אתר עסקי חי", "url": "https://erezegzozim.com/" },
+          { "@type": "ListItem", "position": 2, "name": "BISOMNA — אתר מיזם חי", "url": "https://bisomna.com/" },
+          { "@type": "ListItem", "position": 3, "name": "ORBO LAB — ספריית ניסויים חיה", "url": "https://orbosolutions.com/lab/" }
+        ]
+      }
+    }
+  ]
+}
+</script>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<link rel="manifest" href="site.webmanifest">
+<link rel="apple-touch-icon" href="assets/img/app-icon-180.png">
+<meta name="theme-color" content="#FAFAF9">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@300..900&display=swap">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@300..900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/main.css?v=81">
+<style>
+  /* ---- work page only ---- */
+
+  /* honest status tag on every piece — the page's core promise */
+  .work-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border: 1px solid rgba(91, 76, 245, 0.16);
+    border-radius: var(--radius-pill);
+    padding: 0.36em 0.95em;
+    width: fit-content;
+  }
+  .work-tag::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--grad-accent);
+  }
+  .work-tag.tag-live::before { background: #2FBF71; box-shadow: 0 0 0 3px rgba(47, 191, 113, 0.18); }
+
+  /* — featured rows: one live piece per row, wireframe scene + facts — */
+  .work-feature { position: relative; overflow: hidden; padding-block: clamp(64px, 8vw, 104px); }
+  .work-feature:nth-child(even) { background: var(--surface); }
+  .work-feature .svc-scene {
+    position: absolute;
+    inset-inline-end: -120px;
+    top: 50%;
+    margin-top: -340px;
+    width: 680px;
+    height: 680px;
+    color: var(--accent);
+    opacity: 0.17;
+    pointer-events: none;
+    z-index: 0;
+  }
+  @media (max-width: 860px) { .work-feature .svc-scene { display: none; } }
+
+  .feature-inner {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: clamp(32px, 5vw, 72px);
+    align-items: start;
+  }
+  .feature-side { position: sticky; top: calc(var(--header-h) + 32px); display: grid; gap: 14px; justify-items: start; }
+  .feature-num {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    margin-inline-end: -0.18em;
+    color: var(--accent);
+    direction: ltr;
+  }
+  .feature-side h2 { font-size: clamp(1.5rem, 2.6vw, 2rem); }
+  .feature-domain {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+    direction: ltr;
+  }
+  .feature-body p {
+    font-size: 1.12rem;
+    font-weight: 300;
+    color: var(--ink-soft);
+    max-width: 38em;
+    margin-bottom: 26px;
+  }
+  .feature-facts { display: grid; gap: 12px; margin-bottom: 28px; }
+  .feature-fact { display: flex; gap: 12px; align-items: flex-start; font-size: 0.98rem; color: var(--ink-soft); }
+  .feature-fact svg { width: 18px; height: 18px; color: var(--accent); flex-shrink: 0; margin-top: 4px; }
+  .feature-actions { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+
+  @media (max-width: 1020px) {
+    .feature-inner { grid-template-columns: 1fr; }
+    .feature-side { position: static; }
+  }
+
+  /* — products grid: world-card base + tag row — */
+  .product-card { cursor: default; }
+  .product-card .chips { margin-top: 4px; }
+  .product-card .chip { font-size: 0.8rem; padding: 0.36em 0.9em; box-shadow: none; }
+
+  /* — the lab: a dark shelf inside the light page — */
+  .lab-section {
+    background: #16131F;
+    color: #fff;
+    padding-block: clamp(84px, 11vw, 140px);
+    position: relative;
+    overflow: hidden;
+  }
+  .lab-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(55% 70% at 50% 115%, rgba(108, 92, 255, 0.30), transparent 70%),
+      radial-gradient(35% 45% at 85% -10%, rgba(157, 107, 255, 0.18), transparent 70%);
+    pointer-events: none;
+  }
+  .lab-section > .container { position: relative; }
+  .lab-section h2 { color: #fff; }
+  .lab-section .section-head .lead { color: rgba(255, 255, 255, 0.68); }
+  .lab-section .eyebrow {
+    color: #C9AFFF;
+    background: rgba(157, 140, 255, 0.12);
+    border-color: rgba(157, 140, 255, 0.28);
+  }
+  .lab-section .accent-text {
+    background: linear-gradient(135deg, #9D8CFF 0%, #C9AFFF 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+
+  .lab-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  .lab-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: #0F0D18;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: transform 0.45s var(--ease-out), border-color 0.3s, box-shadow 0.45s var(--ease-out);
+  }
+  .lab-card:hover {
+    transform: translateY(-8px);
+    border-color: rgba(157, 140, 255, 0.45);
+    box-shadow: 0 26px 70px -18px rgba(108, 92, 255, 0.45);
+  }
+  .lab-view {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background:
+      radial-gradient(70% 90% at 50% 110%, rgba(108, 92, 255, 0.24), transparent 70%),
+      #0F0D18;
+  }
+  .lab-view canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .lab-info { display: flex; flex-direction: column; gap: 8px; padding: 20px 22px 22px; flex-grow: 1; }
+  .lab-name {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    direction: ltr;
+    justify-content: flex-end; /* RTL page: latin name reads from the right edge */
+  }
+  .lab-name b { font-size: 1.05rem; color: #fff; }
+  .lab-name span { font-size: 0.78rem; color: rgba(255, 255, 255, 0.42); font-weight: 600; }
+  .lab-card p { font-size: 0.92rem; color: rgba(255, 255, 255, 0.62); flex-grow: 1; }
+  .lab-open {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #C9AFFF;
+  }
+  .lab-open svg { width: 16px; height: 16px; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  .lab-card:hover .lab-open svg { transform: translateX(-6px); }
+  .lab-cta { display: flex; justify-content: center; margin-top: clamp(36px, 5vw, 56px); }
+  .lab-cta .btn-ghost {
+    background: rgba(255, 255, 255, 0.04);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+  .lab-cta .btn-ghost:hover { border-color: #C9AFFF; color: #C9AFFF; }
+
+  @media (max-width: 1020px) { .lab-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px) { .lab-grid { grid-template-columns: 1fr; } }
+
+  /* — the honesty band: the page's thesis, said out loud — */
+  .honesty { padding-block: clamp(70px, 9vw, 110px); background: var(--surface); }
+  .honesty-inner {
+    max-width: 760px;
+    margin-inline: auto;
+    text-align: center;
+  }
+  .honesty-inner .eyebrow { margin-bottom: 22px; }
+  .honesty-inner h2 { margin-bottom: 18px; }
+  .honesty-inner p { color: var(--ink-soft); font-size: 1.1rem; font-weight: 350; line-height: 1.8; }
+  .honesty-marks {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 30px;
+  }
+
+  /* mobile rhythm */
+  @media (max-width: 767px) {
+    .work-feature { padding-block: 44px 38px; }
+    .feature-inner { gap: 18px; }
+    .feature-body p { font-size: 1rem; margin-bottom: 18px; }
+    .feature-fact { font-size: 0.92rem; }
+    .lab-section { padding-block: 56px; }
+  }
+</style>
+</head>
+<body>
+<script>document.documentElement.classList.remove('no-js')</script>
+
+<header class="site-header" id="siteHeader">
+  <div class="container header-inner">
+    <a href="index.html" class="logo" aria-label="Orbo Solutions, דף הבית">
+      <svg class="logo-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <circle cx="16" cy="16" r="11.5" fill="url(#lgh3)"/>
+        <path d="M16 3 L18.6 13.4 L29 16 L18.6 18.6 L16 29 L13.4 18.6 L3 16 L13.4 13.4 Z" fill="url(#lgh4)" stroke="url(#lgh)" stroke-width="1.5" stroke-linejoin="round"/>
+        <circle cx="16" cy="16" r="4.6" fill="url(#lgh2)"/>
+        <defs>
+          <linearGradient id="lgh" x1="6" y1="4" x2="26" y2="28" gradientUnits="userSpaceOnUse"><stop stop-color="#9d8bff"/><stop offset="0.5" stop-color="#7e63ff"/><stop offset="1" stop-color="#5a46d6"/></linearGradient>
+          <radialGradient id="lgh2" cx="16" cy="16" r="4.6" gradientUnits="userSpaceOnUse"><stop stop-color="#ffffff" stop-opacity="0.95"/><stop offset="1" stop-color="#e6deff" stop-opacity="0"/></radialGradient>
+          <radialGradient id="lgh3" cx="16" cy="16" r="11.5" gradientUnits="userSpaceOnUse"><stop stop-color="#8f7bff" stop-opacity="0.28"/><stop offset="1" stop-color="#8f7bff" stop-opacity="0"/></radialGradient>
+          <radialGradient id="lgh4" cx="16" cy="16" r="14" gradientUnits="userSpaceOnUse"><stop stop-color="#b9a6ff" stop-opacity="0.05"/><stop offset="0.8" stop-color="#8f74ff" stop-opacity="0.14"/><stop offset="1" stop-color="#8f74ff" stop-opacity="0.22"/></radialGradient>
+        </defs>
+      </svg>
+      <span class="logo-text">ORBO<span class="logo-sep">·</span>SOLUTIONS</span>
+    </a>
+    <nav class="main-nav" id="mainNav" aria-label="ניווט ראשי">
+      <a href="index.html">בית</a>
+      <a href="services.html">שירותים</a>
+      <a href="work.html" aria-current="page">עבודות</a>
+      <a href="studio.html">הסטודיו</a>
+      <a href="contact.html">צור קשר</a>
+    </nav>
+    <div class="header-actions">
+      <button class="audio-toggle" data-audio-toggle aria-pressed="false" aria-label="מוזיקת רקע">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M11.5 5.5 7 9H3.8v6H7l4.5 3.5z"/>
+          <path class="at-on" d="M14.8 9.4a4 4 0 0 1 0 5.2"/>
+          <path class="at-on" d="M17.4 7a7.4 7.4 0 0 1 0 10"/>
+          <path class="at-off" d="M15.2 9.8l4.4 4.4m0-4.4l-4.4 4.4"/>
+        </svg>
+      </button>
+      <a href="contact.html" class="btn btn-primary btn-sm">שיחת היכרות חינם</a>
+      <button class="nav-toggle" id="navToggle" aria-label="פתיחת תפריט" aria-expanded="false"><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- Page hero -->
+  <section class="page-hero">
+    <div class="page-hero-bg" aria-hidden="true"><canvas class="pageHeroCanvas"></canvas></div>
+    <div class="container">
+      <span class="eyebrow reveal">העבודות שלנו</span>
+      <h1 class="display-xl reveal" style="--d:.08s">דברים אמיתיים,<br><span class="accent-text">שרצים באמת.</span></h1>
+      <p class="lead reveal" style="--d:.16s">כל מה שבעמוד הזה בנינו במו ידינו: אתרים שחיים בפרודקשן, מוצרים ומערכות שעובדים, וניסויים שאפשר לפתוח ולשחק בהם עכשיו. בלי לוגואים מזויפים ובלי המלצות קנויות — רק עבודה שאפשר ללחוץ עליה.</p>
+    </div>
+  </section>
+
+  <!-- ══ Featured: live in production ══ -->
+
+  <!-- 01 · Erez Egzozim -->
+  <section class="work-feature" id="erez">
+    <svg class="svc-scene" viewBox="0 0 240 240" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
+      <g data-rate="0.9" opacity=".5">
+        <circle cx="196" cy="60" r="22" stroke-dasharray="3 5" vector-effect="non-scaling-stroke"/>
+      </g>
+      <g data-rate="1">
+        <path d="M40 96 l80 -46 l80 46 l-80 46 Z" vector-effect="non-scaling-stroke"/>
+        <path d="M40 96 V162 L120 208 V142 Z" vector-effect="non-scaling-stroke"/>
+        <path d="M200 96 V162 L120 208 V142 Z" vector-effect="non-scaling-stroke"/>
+        <path d="M84 120 a38 22 0 1 0 72 -20" vector-effect="non-scaling-stroke"/>
+        <circle cx="92" cy="170" r="9" vector-effect="non-scaling-stroke"/>
+        <circle cx="148" cy="170" r="9" vector-effect="non-scaling-stroke"/>
+        <path d="M60 76 l14 -8 M80 65 l14 -8" stroke-dasharray="2 5" vector-effect="non-scaling-stroke"/>
+      </g>
+    </svg>
+    <div class="container feature-inner">
+      <div class="feature-side reveal">
+        <span class="feature-num"><span class="num-roll">01</span></span>
+        <span class="work-tag tag-live">אתר עסקי · חי בפרודקשן</span>
+        <h2>ארז אגזוזים</h2>
+        <a class="feature-domain" href="https://erezegzozim.com" target="_blank" rel="noopener">erezegzozim.com</a>
+      </div>
+      <div class="feature-body">
+        <p class="reveal" style="--d:.1s">אתר תדמית קולנועי למוסך מערכות פליטה אמיתי בראשון לציון. פתיח וידאו שמופק מצילומים אמיתיים של המוסך, מאתר תסמינים אינטראקטיבי שמאבחן את הבעיה לפי הסימפטום, ווידג׳ט השוואת סאונד — והכול מתנקז למסלול וואטסאפ אחד פשוט: ״שלחו סרטון של הרעש״.</p>
+        <div class="feature-facts reveal" style="--d:.18s">
+          <div class="feature-fact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>עסק אמיתי, כתובת אמיתית, טלפונים אמיתיים — אפשר להתקשר ולבדוק</span></div>
+          <div class="feature-fact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>מאתר תסמינים אינטראקטיבי שממיר גולשים לפניות</span></div>
+          <div class="feature-fact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>וידאו קולנועי שהופק בבית מצילומי המוסך עצמו</span></div>
+        </div>
+        <div class="feature-actions reveal" style="--d:.26s">
+          <a href="https://erezegzozim.com" target="_blank" rel="noopener" class="btn btn-primary" data-magnetic>
+            בקרו באתר החי
+            <svg class="btn-arrow" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg>
+          </a>
+          <ul class="chips" role="list">
+            <li class="chip">Next.js</li>
+            <li class="chip">TypeScript</li>
+            <li class="chip">GSAP</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 · BISOMNA -->
+  <section class="work-feature" id="bisomna">
+    <svg class="svc-scene" viewBox="0 0 240 240" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
+      <g data-rate="0.9" opacity=".5">
+        <path d="M30 200 q60 -30 120 0" stroke-dasharray="3 6" vector-effect="non-scaling-stroke"/>
+      </g>
+      <g data-rate="1">
+        <path d="M48 88 l72 -42 l72 42 l-72 42 Z" vector-effect="non-scaling-stroke"/>
+        <path d="M48 114 l72 42 l72 -42" vector-effect="non-scaling-stroke"/>
+        <path d="M48 140 l72 42 l72 -42" vector-effect="non-scaling-stroke"/>
+        <path d="M48 88 V140 M192 88 V140 M120 130 V182" vector-effect="non-scaling-stroke"/>
+        <path d="M96 60 q10 -14 24 -8 q4 -12 18 -8" stroke-dasharray="2 5" vector-effect="non-scaling-stroke"/>
+        <circle cx="196" cy="52" r="4" vector-effect="non-scaling-stroke"/>
+        <circle cx="208" cy="66" r="2.5" vector-effect="non-scaling-stroke"/>
+      </g>
+    </svg>
+    <div class="container feature-inner">
+      <div class="feature-side reveal">
+        <span class="feature-num"><span class="num-roll">02</span></span>
+        <span class="work-tag tag-live">מיזם · חי בפרודקשן</span>
+        <h2>BISOMNA</h2>
+        <a class="feature-domain" href="https://bisomna.com" target="_blank" rel="noopener">bisomna.com</a>
+      </div>
+      <div class="feature-body">
+        <p class="reveal" style="--d:.1s">אתר שיווק ומשקיעים קולנועי בן 16 עמודים למיזם טכנולוגיית שינה מבוסס ביו־חומרים. סרטוני פתיחה שנגללים פריים־אחר־פריים עם הגלילה, תצוגת מוצר תלת־ממדית שמתפרקת לשכבות, ערכת צבע ייחודית לכל עמוד — בנוי כאתר סטטי מהיר, בלי אף בקשה לצד שלישי.</p>
+        <div class="feature-facts reveal" style="--d:.18s">
+          <div class="feature-fact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>16 עמודים: מוצר, טכנולוגיה, מדע, חנות, שוק, צוות ומפת דרכים</span></div>
+          <div class="feature-fact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>סרטוני הירו מונעי גלילה ותצוגת מוצר מתפרקת אינטראקטיבית</span></div>
+          <div class="feature-fact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>ולצד האתר: פלטפורמת מו״פ שלמה שמנהלת את המיזם עצמו — למטה בעמוד</span></div>
+        </div>
+        <div class="feature-actions reveal" style="--d:.26s">
+          <a href="https://bisomna.com" target="_blank" rel="noopener" class="btn btn-primary" data-magnetic>
+            בקרו באתר החי
+            <svg class="btn-arrow" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg>
+          </a>
+          <ul class="chips" role="list">
+            <li class="chip">אתר סטטי מהיר</li>
+            <li class="chip">Cloudflare Pages</li>
+            <li class="chip">SEO מלא</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 · This very site -->
+  <section class="work-feature" id="orbo">
+    <svg class="svc-scene" viewBox="0 0 240 240" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
+      <g data-rate="0.9" opacity=".5">
+        <ellipse cx="120" cy="120" rx="95" ry="42" stroke-dasharray="3 6" transform="rotate(-18 120 120)" vector-effect="non-scaling-stroke"/>
+      </g>
+      <g data-rate="1">
+        <path d="M120 42 L134 106 L198 120 L134 134 L120 198 L106 134 L42 120 L106 106 Z" vector-effect="non-scaling-stroke"/>
+        <circle cx="120" cy="120" r="14" vector-effect="non-scaling-stroke"/>
+        <circle cx="66" cy="70" r="3" vector-effect="non-scaling-stroke"/>
+        <circle cx="180" cy="64" r="4" vector-effect="non-scaling-stroke"/>
+        <circle cx="188" cy="176" r="3" vector-effect="non-scaling-stroke"/>
+        <circle cx="58" cy="180" r="4" vector-effect="non-scaling-stroke"/>
+      </g>
+    </svg>
+    <div class="container feature-inner">
+      <div class="feature-side reveal">
+        <span class="feature-num"><span class="num-roll">03</span></span>
+        <span class="work-tag tag-live">האתר שאתם בתוכו · חי</span>
+        <h2>האתר הזה עצמו</h2>
+        <a class="feature-domain" href="index.html">orbosolutions.com</a>
+      </div>
+      <div class="feature-body">
+        <p class="reveal" style="--d:.1s">הדוגמה הכי כנה שיש לנו: דף הבית שלנו הוא עולם WebGL רציף אחד, שבו נחיל חלקיקים בודד נשפך בין תצורות בזמן שהגלילה מטיסה אתכם דרך הסיפור. כל הוויזואליה מיוצרת בקוד — אין אף קובץ תמונה, מודל או טקסטורה. אפילו מוזיקת הרקע מנוגנת בקוד, חיה, בדפדפן.</p>
+        <div class="feature-facts reveal" style="--d:.18s">
+          <div class="feature-fact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>עולם תלת־ממד רציף שמגיב לגלילה, לעכבר ולמגע</span></div>
+          <div class="feature-fact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>מתאים את עצמו לעוצמת המכשיר, עם ארבע שכבות גיבוי עד HTML נקי</span></div>
+          <div class="feature-fact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>בעברית מלאה, RTL אמיתי, נגיש וזמין גם בלי JavaScript</span></div>
+        </div>
+        <div class="feature-actions reveal" style="--d:.26s">
+          <a href="index.html" class="btn btn-primary" data-magnetic>
+            חזרו לסיפור
+            <svg class="btn-arrow" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg>
+          </a>
+          <ul class="chips" role="list">
+            <li class="chip">Three.js</li>
+            <li class="chip">שיידרים מותאמים</li>
+            <li class="chip">WebAudio</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ Products & systems ══ -->
+  <section class="section section-tint" id="products">
+    <div class="container">
+      <div class="section-head section-head-center">
+        <span class="eyebrow reveal">מוצרים ומערכות</span>
+        <h2 class="display-md reveal" style="--d:.08s">מה שאנחנו מוכרים, כבר בנינו לעצמנו.</h2>
+        <p class="lead reveal" style="--d:.16s">לפני שהצענו ללקוחות מערכות עסקיות, בנינו אותן. כל כרטיס כאן הוא מוצר עובד שיצא מהסטודיו — עם תווית כנה על מצבו.</p>
+      </div>
+      <div class="worlds-grid">
+
+        <article class="world-card product-card reveal">
+          <span class="work-tag">פלטפורמת מיזם · פעילה</span>
+          <div class="world-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6v4l4 11a2 2 0 0 1-1.9 2.7H6.9A2 2 0 0 1 5 18L9 7z"/><path d="M8.5 13.5h7"/></svg>
+          </div>
+          <h3>BISOMNA · מערכת מו״פ</h3>
+          <p>מערכת הפעלה למחקר ופיתוח: אבות־טיפוס מנוהלים בגרסאות, רישום השערות, ניסויים וראיות — דו־לשונית, עברית ואנגלית. משמשת את המיזם מדי יום.</p>
+          <ul class="chips" role="list"><li class="chip">Next.js</li><li class="chip">TypeScript</li><li class="chip">Drizzle</li></ul>
+        </article>
+
+        <article class="world-card product-card reveal" style="--d:.06s">
+          <span class="work-tag">פלטפורמת מיזם · אב־טיפוס</span>
+          <div class="world-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2.6" width="10" height="18.8" rx="2.6"/><path d="M10.8 5.5h2.4"/><path d="M9.5 12.5l1.8 1.8 3.4-3.6"/></svg>
+          </div>
+          <h3>פלטפורמת שינה · ווב ומובייל</h3>
+          <p>אפליקציית מטופל עם ציון שינה, פורטל רופאים עם ניהול מטופלים, קונסולת קליניקה ועוזר AI — אפליקציית ווב ומובייל מקוד משותף אחד.</p>
+          <ul class="chips" role="list"><li class="chip">React Native</li><li class="chip">Expo</li><li class="chip">Claude API</li></ul>
+        </article>
+
+        <article class="world-card product-card reveal" style="--d:.12s">
+          <span class="work-tag">עבודת לקוח · מסחר</span>
+          <div class="world-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.6"/><circle cx="17.5" cy="20" r="1.6"/><path d="M3 3.5h2.4l2.2 12h11.2l1.9-8.2H6.1"/></svg>
+          </div>
+          <h3>Royal Tattoo Supply</h3>
+          <p>חנות אונליין ליבואן ציוד קעקועים ישראלי: WooCommerce עם מבצעי 1+1, תשלום ב־Apple Pay וקריאייטיבים שיווקיים בעברית להשקות מוצרים.</p>
+          <ul class="chips" role="list"><li class="chip">WooCommerce</li><li class="chip">Apple Pay</li><li class="chip">קמפיינים</li></ul>
+        </article>
+
+        <article class="world-card product-card reveal" style="--d:.18s">
+          <span class="work-tag">מוצר פנימי · עובד</span>
+          <div class="world-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M15.2 4v16"/><path d="M3 12.2h12.2"/><path d="M6.6 17.2v-2M9.2 17.2v-3.4M11.8 17.2v-1.2"/></svg>
+          </div>
+          <h3>LeadForge</h3>
+          <p>מיני־CRM לעצמאים ועסקי שירות: דשבורד KPI עם גרפים, ניהול לידים, פייפליין מכירות בגרירה ושחרור, ובניית הצעות מחיר עם מע״מ והנחות.</p>
+          <ul class="chips" role="list"><li class="chip">Next.js</li><li class="chip">Prisma</li><li class="chip">Kanban</li></ul>
+        </article>
+
+        <article class="world-card product-card reveal" style="--d:.24s">
+          <span class="work-tag">מוצר פנימי · עובד</span>
+          <div class="world-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v11a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 17.5z"/><path d="M8 9h8M8 12.5h8M8 16h4.6"/></svg>
+          </div>
+          <h3>FlowDesk AI</h3>
+          <p>בק־אופיס שלם לעסקי שירות קטנים: CRM, לידים בשלבים, הצעות מחיר עם חישובי מס אוטומטיים, והפיכת הצעה לחשבונית בלחיצה.</p>
+          <ul class="chips" role="list"><li class="chip">Next.js</li><li class="chip">NextAuth</li><li class="chip">חשבוניות</li></ul>
+        </article>
+
+        <article class="world-card product-card reveal" style="--d:.30s">
+          <span class="work-tag">מוצר פנימי · עובד</span>
+          <div class="world-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.7"/><path d="M12 7.6v4.4l3 2"/><path d="M12 3.3v1.6M20.7 12h-1.6M12 20.7v-1.6M3.3 12h1.6"/></svg>
+          </div>
+          <h3>SOMA</h3>
+          <p>עוזר AI שולחני ששומר על פרטיות: בונה זיכרון מקומי וניתן לחיפוש מכל הקבצים והשיחות שלכם — הכול נשאר על המחשב, שום דבר לא עולה לענן.</p>
+          <ul class="chips" role="list"><li class="chip">Python</li><li class="chip">Vector DB</li><li class="chip">מקומי בלבד</li></ul>
+        </article>
+
+        <article class="world-card product-card reveal" style="--d:.36s">
+          <span class="work-tag">אב־טיפוס</span>
+          <div class="world-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15.5a3.2 3.2 0 0 0 3.2-3.2V6.7a3.2 3.2 0 1 0-6.4 0v5.6a3.2 3.2 0 0 0 3.2 3.2z"/><path d="M18 11.5a6 6 0 0 1-12 0"/><path d="M12 17.5v3"/></svg>
+          </div>
+          <h3>CastMark</h3>
+          <p>מעלים פרק פודקאסט — ומקבלים תמלול, תקציר, נקודות מפתח וחותמות זמן לפרקים. תמלול Whisper וסיכום AI, מקצה לקצה.</p>
+          <ul class="chips" role="list"><li class="chip">FastAPI</li><li class="chip">Whisper</li><li class="chip">React</li></ul>
+        </article>
+
+        <article class="world-card product-card reveal" style="--d:.42s">
+          <span class="work-tag">בפיתוח עכשיו</span>
+          <div class="world-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18.5c2-1.4 4-1.4 6 0s4 1.4 6 0 4-1.4 6 0"/><path d="M5.5 15 7 6.5h6.5L19 12"/><path d="M9.5 6.5V4h2"/></svg>
+          </div>
+          <h3>אוטומציה ימית</h3>
+          <p>מערכת סוכני AI לחברת ניהול אוניות: טיפול אוטומטי במסמכי סיווג מול גוף פיקוח ימי, עם אישור אנושי בכל צעד קריטי. נבנית בימים אלה.</p>
+          <ul class="chips" role="list"><li class="chip">סוכני AI</li><li class="chip">Human-in-the-loop</li><li class="chip">שילוח ימי</li></ul>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ The Lab ══ -->
+  <section class="lab-section" id="lab">
+    <div class="container">
+      <div class="section-head section-head-center">
+        <span class="eyebrow reveal">ORBO·LAB</span>
+        <h2 class="display-md reveal" style="--d:.08s">חמישה חדרים של <span class="accent-text">אור, תנועה וקוד.</span></h2>
+        <p class="lead reveal" style="--d:.16s">ספריית הניסויים הפתוחה שלנו: חמישה אתרי WebGL חיים, שכל אחד חוקר פינה אחרת של גרפיקה בזמן אמת. התצוגות המקדימות שלמטה מצוירות חיות, ממש עכשיו, בדף הזה — והניסויים המלאים במרחק לחיצה.</p>
+      </div>
+      <div class="lab-grid">
+
+        <a class="lab-card reveal" href="lab/01-aurora-gsap/" target="_blank" rel="noopener">
+          <span class="lab-view"><canvas class="lab-canvas" data-lab="aurora" aria-hidden="true"></canvas></span>
+          <span class="lab-info">
+            <span class="lab-name"><b>AURORA</b><span>01</span></span>
+            <p>סרטי אור בגרדיאנט, מוכתבים לגלילה חמאתית. כוריאוגרפיה של תנועה.</p>
+            <span class="lab-open">פתחו את הניסוי<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg></span>
+          </span>
+        </a>
+
+        <a class="lab-card reveal" href="lab/02-nebula-three/" target="_blank" rel="noopener" style="--d:.06s">
+          <span class="lab-view"><canvas class="lab-canvas" data-lab="nebula" aria-hidden="true"></canvas></span>
+          <span class="lab-info">
+            <span class="lab-name"><b>NEBULA</b><span>02</span></span>
+            <p>גלקסיה של חלקיקים פרוצדורליים בחלל עמוק, עם זוהר Bloom אמיתי.</p>
+            <span class="lab-open">פתחו את הניסוי<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg></span>
+          </span>
+        </a>
+
+        <a class="lab-card reveal" href="lab/03-prism-r3f/" target="_blank" rel="noopener" style="--d:.12s">
+          <span class="lab-view"><canvas class="lab-canvas" data-lab="prism" aria-hidden="true"></canvas></span>
+          <span class="lab-info">
+            <span class="lab-name"><b>PRISM</b><span>03</span></span>
+            <p>גאומטריה שוברת אור וסצנות תלת־ממד מוצהרות, מורכבות כקומפוננטות React.</p>
+            <span class="lab-open">פתחו את הניסוי<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg></span>
+          </span>
+        </a>
+
+        <a class="lab-card reveal" href="lab/04-flux-shaders/" target="_blank" rel="noopener" style="--d:.18s">
+          <span class="lab-view"><canvas class="lab-canvas" data-lab="flux" aria-hidden="true"></canvas></span>
+          <span class="lab-info">
+            <span class="lab-name"><b>FLUX</b><span>04</span></span>
+            <p>שישה שיידרים שנכתבו ידנית ב־GLSL, ישר מול ה־GPU — בלי שום פריימוורק באמצע.</p>
+            <span class="lab-open">פתחו את הניסוי<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg></span>
+          </span>
+        </a>
+
+        <a class="lab-card reveal" href="lab/05-terra-webgl/" target="_blank" rel="noopener" style="--d:.24s">
+          <span class="lab-view"><canvas class="lab-canvas" data-lab="terra" aria-hidden="true"></canvas></span>
+          <span class="lab-info">
+            <span class="lab-name"><b>TERRA</b><span>05</span></span>
+            <p>סליידר שגולש בין נופים פרוצדורליים, מגולפים מרעש מתמטי טהור.</p>
+            <span class="lab-open">פתחו את הניסוי<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg></span>
+          </span>
+        </a>
+
+        <div class="lab-card reveal" style="--d:.30s; justify-content:center; align-items:center; text-align:center; padding:34px 26px; gap:14px; display:flex">
+          <p style="font-size:1.02rem; color:rgba(255,255,255,0.72); max-width:22em">כל הוויזואליה בניסויים נוצרת בקוד — אפס תמונות, אפס מודלים מוכנים.</p>
+          <a href="lab/" target="_blank" rel="noopener" class="btn btn-ghost" style="background:rgba(255,255,255,0.04); color:#fff; border-color:rgba(255,255,255,0.2)">
+            לספרייה המלאה
+            <svg class="btn-arrow" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ The honesty band ══ -->
+  <section class="honesty">
+    <div class="container honesty-inner">
+      <span class="eyebrow reveal">שקיפות מלאה</span>
+      <h2 class="display-md reveal" style="--d:.08s">אנחנו סטודיו צעיר. <span class="accent-text">וזה בדיוק היתרון שלכם.</span></h2>
+      <p class="reveal" style="--d:.16s">לא תמצאו כאן לוגואים של תאגידים ולא המלצות אנונימיות. תמצאו אתרים חיים שאפשר לגלוש בהם עכשיו, מוצרים שרצים באמת, וקוד שנכתב כולו אצלנו. כשאתם עובדים איתנו, אתם מקבלים את הצוות שבנה את כל מה שבעמוד הזה — ואת הרעב של מי שכל פרויקט חשוב לו באמת.</p>
+      <div class="honesty-marks reveal" style="--d:.24s">
+        <span class="chip">כל אתר כאן — לחיץ ובדיק</span>
+        <span class="chip">מחיר סגור מראש</span>
+        <span class="chip">הקוד שייך לכם</span>
+        <span class="chip">עדכון התקדמות כל שבוע</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-band reveal" data-scene>
+        <canvas class="cta-canvas" aria-hidden="true"></canvas>
+        <svg class="cta-star" style="inset-inline-start:6%;top:10%;width:280px;height:280px;opacity:.12" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <path d="M16 3 L18.6 13.4 L29 16 L18.6 18.6 L16 29 L13.4 18.6 L3 16 L13.4 13.4 Z" stroke="rgba(157,140,255,.35)" stroke-width="0.4" stroke-linejoin="round"/>
+        </svg>
+        <h2 class="display-lg">הפרויקט הבא בעמוד הזה<br><span class="accent-text">יכול להיות שלכם.</span></h2>
+        <p class="cta-line">ספרו לנו על המטרה שלכם, ואנחנו נבנה את הדרך אליה.</p>
+        <a href="contact.html" class="btn btn-primary btn-lg" data-magnetic>
+          לתיאום שיחת היכרות חינם
+          <svg class="btn-arrow" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="footer-brand">
+      <a href="index.html" class="logo" aria-label="Orbo Solutions, דף הבית">
+        <svg class="logo-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <circle cx="16" cy="16" r="11.5" fill="url(#lgf3)"/>
+          <path d="M16 3 L18.6 13.4 L29 16 L18.6 18.6 L16 29 L13.4 18.6 L3 16 L13.4 13.4 Z" fill="url(#lgf4)" stroke="url(#lgf)" stroke-width="1.5" stroke-linejoin="round"/>
+          <circle cx="16" cy="16" r="4.6" fill="url(#lgf2)"/>
+          <defs>
+            <linearGradient id="lgf" x1="6" y1="4" x2="26" y2="28" gradientUnits="userSpaceOnUse"><stop stop-color="#9d8bff"/><stop offset="0.5" stop-color="#7e63ff"/><stop offset="1" stop-color="#5a46d6"/></linearGradient>
+            <radialGradient id="lgf2" cx="16" cy="16" r="4.6" gradientUnits="userSpaceOnUse"><stop stop-color="#ffffff" stop-opacity="0.95"/><stop offset="1" stop-color="#e6deff" stop-opacity="0"/></radialGradient>
+            <radialGradient id="lgf3" cx="16" cy="16" r="11.5" gradientUnits="userSpaceOnUse"><stop stop-color="#8f7bff" stop-opacity="0.28"/><stop offset="1" stop-color="#8f7bff" stop-opacity="0"/></radialGradient>
+            <radialGradient id="lgf4" cx="16" cy="16" r="14" gradientUnits="userSpaceOnUse"><stop stop-color="#b9a6ff" stop-opacity="0.05"/><stop offset="0.8" stop-color="#8f74ff" stop-opacity="0.14"/><stop offset="1" stop-color="#8f74ff" stop-opacity="0.22"/></radialGradient>
+          </defs>
+        </svg>
+        <span class="logo-text">ORBO<span class="logo-sep">·</span>SOLUTIONS</span>
+      </a>
+      <p class="footer-tagline">סטודיו למוצרים דיגיטליים ואוטומציה.<br>מתכננים, מעצבים ובונים, מהרעיון ועד המציאות.</p>
+    </div>
+    <nav class="footer-nav" aria-label="ניווט תחתון">
+      <a href="index.html">בית</a>
+      <a href="services.html">שירותים</a>
+      <a href="work.html">עבודות</a>
+      <a href="studio.html">הסטודיו</a>
+      <a href="lab/">ORBO LAB</a>
+      <a href="contact.html">צור קשר</a>
+    </nav>
+    <div class="footer-contact">
+      <span class="footer-label">דברו איתנו</span>
+      <a href="mailto:contact@orbosolutions.com" class="footer-mail">contact@orbosolutions.com</a>
+      <a href="tel:+972528463293" class="footer-mail">052-846-3293</a>
+    </div>
+  </div>
+  <div class="container footer-bottom">
+    <span>© <span id="year">2026</span> Orbo Solutions. כל הזכויות שמורות.</span>
+    <span class="footer-made">Digital Product &amp; Automation Studio</span>
+  </div>
+</footer>
+
+<nav class="tab-bar" aria-label="ניווט מהיר">
+  <a href="index.html" class="tab-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M4.6 10.6 12 4.3l7.4 6.3"/>
+      <path d="M6.6 9.2V19a.9.9 0 0 0 .9.9h9a.9.9 0 0 0 .9-.9V9.2"/>
+      <path d="M10.3 19.9v-4.6h3.4v4.6"/>
+    </svg>
+    <span>בית</span>
+  </a>
+  <a href="services.html" class="tab-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="4" y="4" width="6.6" height="6.6" rx="1.8"/>
+      <rect x="13.4" y="4" width="6.6" height="6.6" rx="1.8"/>
+      <rect x="4" y="13.4" width="6.6" height="6.6" rx="1.8"/>
+      <rect x="13.4" y="13.4" width="6.6" height="6.6" rx="1.8"/>
+    </svg>
+    <span>שירותים</span>
+  </a>
+  <a href="work.html" class="tab-item active" aria-current="page">
+    <svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <path d="M16 3 L18.6 13.4 L29 16 L18.6 18.6 L16 29 L13.4 18.6 L3 16 L13.4 13.4 Z" fill="url(#tbw2)" stroke="url(#tbw)" stroke-width="1.8" stroke-linejoin="round"/>
+      <circle cx="16" cy="16" r="4.2" fill="url(#tbw3)"/>
+      <defs>
+        <linearGradient id="tbw" x1="6" y1="4" x2="26" y2="28" gradientUnits="userSpaceOnUse"><stop stop-color="#9d8bff"/><stop offset="0.5" stop-color="#7e63ff"/><stop offset="1" stop-color="#5a46d6"/></linearGradient>
+        <radialGradient id="tbw2" cx="16" cy="16" r="14" gradientUnits="userSpaceOnUse"><stop stop-color="#b9a6ff" stop-opacity="0.08"/><stop offset="1" stop-color="#8f74ff" stop-opacity="0.26"/></radialGradient>
+        <radialGradient id="tbw3" cx="16" cy="16" r="4.2" gradientUnits="userSpaceOnUse"><stop stop-color="#ffffff" stop-opacity="0.95"/><stop offset="1" stop-color="#e6deff" stop-opacity="0"/></radialGradient>
+      </defs>
+    </svg>
+    <span>עבודות</span>
+  </a>
+  <a href="studio.html" class="tab-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="8.2" r="3.4"/>
+      <path d="M5.5 19.5a6.5 6.5 0 0 1 13 0"/>
+    </svg>
+    <span>סטודיו</span>
+  </a>
+  <a href="contact.html" class="tab-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="3" y="5.2" width="18" height="13.6" rx="3"/>
+      <path d="M4.5 7.6l6.2 4.6a2.2 2.2 0 0 0 2.6 0l6.2-4.6"/>
+    </svg>
+    <span>קשר</span>
+  </a>
+  <button class="tab-item tab-audio" data-audio-toggle aria-pressed="false" aria-label="מוזיקת רקע">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M11.5 5.5 7 9H3.8v6H7l4.5 3.5z"/>
+      <path class="at-on" d="M14.8 9.4a4 4 0 0 1 0 5.2"/>
+      <path class="at-on" d="M17.4 7a7.4 7.4 0 0 1 0 10"/>
+      <path class="at-off" d="M15.2 9.8l4.4 4.4m0-4.4l-4.4 4.4"/>
+    </svg>
+    <span>מוזיקה</span>
+  </button>
+</nav>
+
+<script src="assets/js/lumen-gl.js" defer></script>
+<script src="assets/js/pagehero-gl.js" defer></script>
+<script src="assets/js/cta-gl.js" defer></script>
+<script src="assets/js/work-gl.js" defer></script>
+<script src="assets/js/audio.js?v=74" defer></script>
+<script src="assets/js/main.js" defer></script>
+<script src="assets/js/motion.js" defer></script>
+</body>
+</html>
