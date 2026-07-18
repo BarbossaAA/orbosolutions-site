@@ -54,7 +54,7 @@
     enterEl.classList.add('no-gl');
     return;
   }
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isTouch ? 1.5 : 1.75));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isTouch ? 1.35 : 1.6));
   renderer.setSize(innerWidth, innerHeight);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.06;
@@ -151,7 +151,7 @@
     rgh.putImageData(rimg, 0, 0);
     var map = asTexture(col.canvas);
     var rough = asTexture(rgh.canvas, true);
-    [map, rough].forEach(function (t) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(3, 6); });
+    [map, rough].forEach(function (t) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(0.125, 0.125); });
     return { map: map, rough: rough };
   }
 
@@ -533,18 +533,17 @@
   var ceilMat = new THREE.MeshStandardMaterial({ color: 0x14111d, roughness: 0.9, metalness: 0.0, side: THREE.DoubleSide });
   var warmLineMat = new THREE.MeshBasicMaterial({ color: 0x8474e8 });
 
-  /* stadium floor: rectangle + two half-discs */
-  var floorGroup = new THREE.Group();
-  var f1 = new THREE.Mesh(new THREE.PlaneGeometry(ROOM.hw * 2, ROOM.straight * 2), floorMat);
-  f1.rotation.x = -Math.PI / 2;
-  floorGroup.add(f1);
-  [1, -1].forEach(function (side) {
-    var half = new THREE.Mesh(new THREE.CircleGeometry(ROOM.hw, 40, side > 0 ? 0 : Math.PI, Math.PI), floorMat);
-    half.rotation.x = -Math.PI / 2;
-    half.position.z = side * ROOM.straight;
-    floorGroup.add(half);
-  });
-  scene.add(floorGroup);
+  /* one seamless stadium floor — a single shape, nothing to fight over */
+  (function () {
+    var sh = new THREE.Shape();
+    sh.absarc(0, -ROOM.straight, ROOM.hw, Math.PI, Math.PI * 2, false);
+    sh.absarc(0, ROOM.straight, ROOM.hw, 0, Math.PI, false);
+    sh.closePath();
+    var geo = new THREE.ShapeGeometry(sh, 40);
+    var f = new THREE.Mesh(geo, floorMat);
+    f.rotation.x = -Math.PI / 2;
+    scene.add(f);
+  })();
 
   /* walls: two straight planes + two half-cylinders, seamless */
   [-1, 1].forEach(function (side) {
@@ -555,7 +554,7 @@
   });
   [1, -1].forEach(function (side) {
     var cyl = new THREE.Mesh(
-      new THREE.CylinderGeometry(ROOM.hw, ROOM.hw, ROOM.h, 40, 1, true, side > 0 ? 0 : Math.PI, Math.PI),
+      new THREE.CylinderGeometry(ROOM.hw, ROOM.hw, ROOM.h, 40, 1, true, side > 0 ? -Math.PI / 2 : Math.PI / 2, Math.PI),
       wallMatIn
     );
     cyl.position.set(0, ROOM.h / 2, side * ROOM.straight);
@@ -575,7 +574,7 @@
     [1, -1].forEach(function (side) {
       var arc = new THREE.Mesh(new THREE.TorusGeometry(ROOM.hw - 0.04, tube, 6, 30, Math.PI), mat);
       arc.rotation.x = -Math.PI / 2;
-      arc.rotation.z = side > 0 ? 0 : Math.PI;
+      arc.rotation.z = side > 0 ? Math.PI : 0;
       arc.position.set(0, y, side * ROOM.straight);
       scene.add(arc);
     });
@@ -647,7 +646,7 @@
   })();
 
   /* light: warm, layered, cheap */
-  scene.add(new THREE.AmbientLight(0x9a8ecf, 0.36));
+  scene.add(new THREE.AmbientLight(0x9a8ecf, 0.42));
   scene.add(new THREE.HemisphereLight(0x6a5fae, 0x0d0b14, 0.44));
   [[0, -4.5], [0, 0], [0, 4.5]].forEach(function (p, i) {
     var pt = new THREE.PointLight(i % 2 ? 0xffe9cc : 0xfff2dd, 20, 16, 1.8);
@@ -956,12 +955,18 @@
     var panelM = new THREE.Mesh(new THREE.BoxGeometry(W + 1.0, H + 1.0, 0.05), linenMat);
     panelM.position.set(0, AY, 0.028);
     group.add(panelM);
-    /* bronze edge around the panel */
-    var edge = new THREE.Mesh(new THREE.TorusGeometry(1, 0.022, 6, 4), bronzeMat);
-    edge.rotation.z = Math.PI / 4;
-    edge.scale.set((W + 1.0) / 1.414, (H + 1.0) / 1.414, 1);
-    edge.position.set(0, AY, 0.055);
-    group.add(edge);
+    /* bronze border around the panel — four clean bars */
+    var PW = W + 1.0, PH = H + 1.0, bt = 0.035;
+    [[0, AY + PH / 2, PW + bt * 2, bt], [0, AY - PH / 2, PW + bt * 2, bt]].forEach(function (bb) {
+      var bar = new THREE.Mesh(new THREE.BoxGeometry(bb[2], bb[3], 0.03), bronzeMat);
+      bar.position.set(bb[0], bb[1], 0.05);
+      group.add(bar);
+    });
+    [[-PW / 2, AY], [PW / 2, AY]].forEach(function (bb) {
+      var bar = new THREE.Mesh(new THREE.BoxGeometry(bt, PH, 0.03), bronzeMat);
+      bar.position.set(bb[0], bb[1], 0.05);
+      group.add(bar);
+    });
 
     /* soft accent glow on the linen */
     var glow = new THREE.Mesh(
@@ -1040,7 +1045,7 @@
   });
 
   /* ---------- player ---------- */
-  var yaw = Math.PI;    /* enter facing the hall from the door end */
+  var yaw = 0;    /* enter facing down the hall, toward the finale */
   var pitch = 0;
   var pos = new THREE.Vector3(0, EYE, 10.6);
   var vel = new THREE.Vector3();
@@ -1054,7 +1059,7 @@
     camera.position.copy(pos);
     camera.rotation.set(pitch, yaw, 0);
   }
-  yaw = Math.PI;
+  yaw = 0;
   pos.set(0, 2.7, 12.6);
   pitch = -0.05;
   applyCamera();
