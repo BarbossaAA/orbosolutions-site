@@ -225,13 +225,14 @@ h1, h2, h3 { font-weight: 750; line-height: 1.16; letter-spacing: -0.015em; }
 }
 .logo-sep { color: var(--accent); margin-inline: 1px; }
 
-.main-nav { display: flex; align-items: center; gap: 34px; }
+.main-nav { display: flex; align-items: center; gap: clamp(18px, 2.2vw, 30px); }
 .main-nav a {
   font-size: 0.97rem;
   font-weight: 500;
   color: var(--ink-soft);
   position: relative;
   padding-block: 6px;
+  white-space: nowrap;
   transition: color 0.25s;
 }
 .main-nav a::after {
@@ -250,6 +251,7 @@ h1, h2, h3 { font-weight: 750; line-height: 1.16; letter-spacing: -0.015em; }
 .main-nav a:hover::after, .main-nav a[aria-current="page"]::after { transform: scaleX(1); }
 
 .header-actions { display: flex; align-items: center; gap: 16px; }
+.header-actions .btn { white-space: nowrap; }
 
 .nav-toggle { display: none; flex-direction: column; gap: 6px; padding: 8px; }
 .nav-toggle span {

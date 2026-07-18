@@ -1,60 +1,14 @@
-/* ORBO — work page: live lab previews.
-   Five tiny 2D-canvas scenes, one per lab card — each a real-time echo of
-   the full experiment it links to (aurora ribbons, particle galaxy,
-   refracting prism, flow field, terrain ridges). All procedural, no assets.
+/* ORBO — lab preview engine.
+   Five tiny 2D-canvas scenes (aurora ribbons, particle galaxy, refracting
+   prism, flow field, terrain ridges). All procedural, no assets.
+   Exposed as window.ORBO_LAB so two surfaces share one engine:
+     - the lab cards on work.html (this file wires them below)
+     - the living paintings inside the 3D gallery (gallery.js)
    Tiers: reduced-motion / no-canvas → the cards' CSS gradient stands alone.
    Offscreen cards don't animate (IntersectionObserver). DPR-aware, capped
    at 2 to keep phones cool. */
 (function () {
   'use strict';
-
-  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (reduced) return;
-
-  var canvases = document.querySelectorAll('.lab-canvas');
-  if (!canvases.length) return;
-
-  /* one shared clock; each scene draws only while visible */
-  var scenes = [];
-
-  function makeScene(canvas) {
-    var kind = canvas.getAttribute('data-lab');
-    var ctx = canvas.getContext('2d');
-    if (!ctx) return null;
-
-    var s = { canvas: canvas, ctx: ctx, kind: kind, visible: false, w: 0, h: 0, t: Math.random() * 100, seed: [] };
-
-    /* per-kind particle/geometry setup, re-run on resize */
-    s.init = function () {
-      var dpr = Math.min(devicePixelRatio || 1, 2);
-      var r = canvas.getBoundingClientRect();
-      if (!r.width || !r.height) return;
-      canvas.width = Math.round(r.width * dpr);
-      canvas.height = Math.round(r.height * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      s.w = r.width;
-      s.h = r.height;
-      s.seed = [];
-      var i, n;
-      if (kind === 'nebula') {
-        n = 260;
-        for (i = 0; i < n; i++) {
-          var arm = i % 3;
-          var d = Math.pow(Math.random(), 0.6);
-          s.seed.push({ d: d, a: arm * (Math.PI * 2 / 3) + d * 3.2 + (Math.random() - 0.5) * 0.5, sz: Math.random() < 0.12 ? 1.8 : 1, tw: Math.random() * Math.PI * 2 });
-        }
-      } else if (kind === 'flux') {
-        n = 110;
-        for (i = 0; i < n; i++) s.seed.push({ x: Math.random() * s.w, y: Math.random() * s.h, px: 0, py: 0 });
-      } else if (kind === 'terra') {
-        /* three ridge layers of fixed random phases */
-        for (i = 0; i < 3; i++) s.seed.push({ p1: Math.random() * 9, p2: Math.random() * 9, p3: Math.random() * 9 });
-      }
-    };
-
-    s.init();
-    return s;
-  }
 
   /* value noise — cheap, good enough for ribbons/ridges/fields */
   function n2(x, y) {
@@ -68,6 +22,26 @@
     return n2(xi, yi) * (1 - u) * (1 - v) + n2(xi + 1, yi) * u * (1 - v) + n2(xi, yi + 1) * (1 - u) * v + n2(xi + 1, yi + 1) * u * v;
   }
 
+  /* per-kind particle/geometry seeds for a given canvas size */
+  function makeSeed(kind, w, h) {
+    var seed = [], i, n;
+    if (kind === 'nebula') {
+      n = 260;
+      for (i = 0; i < n; i++) {
+        var arm = i % 3;
+        var d = Math.pow(Math.random(), 0.6);
+        seed.push({ d: d, a: arm * (Math.PI * 2 / 3) + d * 3.2 + (Math.random() - 0.5) * 0.5, sz: Math.random() < 0.12 ? 1.8 : 1, tw: Math.random() * Math.PI * 2 });
+      }
+    } else if (kind === 'flux') {
+      n = 110;
+      for (i = 0; i < n; i++) seed.push({ x: Math.random() * w, y: Math.random() * h, px: 0, py: 0 });
+    } else if (kind === 'terra') {
+      for (i = 0; i < 3; i++) seed.push({ p1: Math.random() * 9, p2: Math.random() * 9, p3: Math.random() * 9 });
+    }
+    return seed;
+  }
+
+  /* each draw takes a state {ctx, w, h, t, seed} */
   var draw = {
     /* AURORA — three luminous ribbons breathing across the frame */
     aurora: function (s) {
@@ -175,7 +149,7 @@
     /* FLUX — particles surfing a curling noise field, fading trails */
     flux: function (s) {
       var c = s.ctx, w = s.w, h = s.h, t = s.t;
-      /* translucent wipe = trails (dark card base painted by CSS) */
+      /* translucent wipe = trails (dark base painted by the surface) */
       c.fillStyle = 'rgba(15, 13, 24, 0.10)';
       c.fillRect(0, 0, w, h);
       c.globalCompositeOperation = 'lighter';
@@ -234,9 +208,44 @@
     }
   };
 
+  /* shared engine surface (gallery.js consumes this) */
+  window.ORBO_LAB = { draw: draw, makeSeed: makeSeed, noise: smooth };
+
+  /* ---- lab cards on work.html (no-op elsewhere) ---- */
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduced) return;
+
+  var canvases = document.querySelectorAll('.lab-canvas');
+  if (!canvases.length) return;
+
+  var scenes = [];
+
+  function makeScene(canvas) {
+    var kind = canvas.getAttribute('data-lab');
+    var ctx = canvas.getContext('2d');
+    if (!ctx || !draw[kind]) return null;
+
+    var s = { canvas: canvas, ctx: ctx, kind: kind, visible: false, w: 0, h: 0, t: Math.random() * 100, seed: [] };
+
+    s.init = function () {
+      var dpr = Math.min(devicePixelRatio || 1, 2);
+      var r = canvas.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      canvas.width = Math.round(r.width * dpr);
+      canvas.height = Math.round(r.height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      s.w = r.width;
+      s.h = r.height;
+      s.seed = makeSeed(kind, s.w, s.h);
+    };
+
+    s.init();
+    return s;
+  }
+
   for (var i = 0; i < canvases.length; i++) {
     var sc = makeScene(canvases[i]);
-    if (sc && draw[sc.kind]) scenes.push(sc);
+    if (sc) scenes.push(sc);
   }
   if (!scenes.length) return;
 
