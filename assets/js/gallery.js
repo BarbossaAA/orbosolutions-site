@@ -79,12 +79,12 @@
       m.rotation.y = ry || 0;
       env.add(m);
     };
-    env.background = new THREE.Color(0xD8D2C4);
-    mk(0xfff4e0, 16, 4, 0, 7, -8);                 /* warm cove ahead */
-    mk(0xbfc6de, 20, 3, 0, 8, 8, Math.PI);         /* cool sky hint behind */
-    mk(0xffe2b8, 4, 1.6, -9, 4, 0, Math.PI / 2);
-    mk(0xffe2b8, 4, 1.6, 9, 4, 0, -Math.PI / 2);
-    mk(0xcfc6b2, 30, 30, 0, -4, 0);                /* stone floor bounce */
+    env.background = new THREE.Color(0x030309);
+    mk(0x7a68e8, 16, 3, 0, 7, -8);                 /* violet cove ahead */
+    mk(0x342b58, 20, 3, 0, 8, 8, Math.PI);
+    mk(0xffb080, 4, 1.6, -9, 4, 0, Math.PI / 2);
+    mk(0x58c8f0, 4, 1.6, 9, 4, 0, -Math.PI / 2);
+    mk(0x161226, 30, 30, 0, -4, 0);                /* dark floor bounce */
     var pmrem = new THREE.PMREMGenerator(renderer);
     scene.environment = pmrem.fromScene(env, 0.04).texture;
     pmrem.dispose();
@@ -133,14 +133,14 @@
         var tone = fbm(u + seed, v + seed * 2, 3);                 /* per-tile drift */
         var w = fbm(u * 2.0 + seed * 9, v * 2.0 + 4.2, 5);
         var vein = Math.pow(1 - Math.abs(Math.sin(w * 7.2 + tone * 2.4)), 16);
-        /* warm greige stone, amber veins */
-        var r = 208 + tone * 18 + vein * 26;
-        var g = 199 + tone * 16 + vein * 16;
-        var b = 184 + tone * 14 + vein * 4;
+        /* deep night stone, silver-violet veins */
+        var r = 30 + tone * 12 + vein * 74;
+        var g = 27 + tone * 11 + vein * 66;
+        var b = 44 + tone * 16 + vein * 96;
         /* grout: darker seams between slabs */
         var gx = x % tileSz, gy = y % tileSz;
         var gd = Math.min(gx, tileSz - gx, gy, tileSz - gy);
-        if (gd < 3) { var k = 0.62 + gd * 0.1; r *= k; g *= k; b *= k; }
+        if (gd < 3) { var k = 0.45 + gd * 0.12; r *= k; g *= k; b *= k; }
         var o = (y * S + x) * 4;
         img.data[o] = r; img.data[o + 1] = g; img.data[o + 2] = b; img.data[o + 3] = 255;
         var ro = 95 + tone * 55 - vein * 35 + (gd < 3 ? 70 : 0);   /* veins polished, grout matte */
@@ -167,9 +167,9 @@
         /* strokes stretched horizontally — a trowel's memory */
         var p = fbm(u * 3.2, v * 9, 4);
         var drift = fbm(u * 1.1 + 7, v * 1.1, 3);
-        var base = 224 + p * 14 + drift * 10 - v * 10;   /* gently darker downward */
+        var base = 40 + p * 13 + drift * 9 - v * 7;   /* gently darker downward */
         var o = (y * S + x) * 4;
-        img.data[o] = base; img.data[o + 1] = base - 5; img.data[o + 2] = base - 16; img.data[o + 3] = 255;
+        img.data[o] = base; img.data[o + 1] = base - 3; img.data[o + 2] = base + 10; img.data[o + 3] = 255;
         var h = 116 + p * 46 + drift * 22;
         bimg.data[o] = h; bimg.data[o + 1] = h; bimg.data[o + 2] = h; bimg.data[o + 3] = 255;
       }
@@ -191,7 +191,7 @@
       for (var x = 0; x < S; x++) {
         var weave = (noise(x * 0.9, y * 0.13) + noise(x * 0.13, y * 0.9)) * 0.5;
         var drift = fbm(x / S * 3, y / S * 3, 3);
-        var base = 52 + weave * 14 + drift * 8;
+        var base = 24 + weave * 10 + drift * 6;
         var o = (y * S + x) * 4;
         img.data[o] = base; img.data[o + 1] = base - 3; img.data[o + 2] = base - 6; img.data[o + 3] = 255;
       }
@@ -530,8 +530,8 @@
   var bronzeMat = new THREE.MeshStandardMaterial({ color: 0x9a7b52, roughness: 0.34, metalness: 0.85, envMapIntensity: 1.15 });
   var darkBronze = new THREE.MeshStandardMaterial({ color: 0x4a3b2a, roughness: 0.4, metalness: 0.7, envMapIntensity: 1.0 });
   var linenMat = new THREE.MeshStandardMaterial({ map: linenTexture(), roughness: 0.92, metalness: 0.02 });
-  var ceilMat = new THREE.MeshStandardMaterial({ color: 0xEFE9DC, roughness: 0.9, metalness: 0.0, side: THREE.DoubleSide });
-  var warmLineMat = new THREE.MeshBasicMaterial({ color: 0xffe3b8 });
+  var ceilMat = new THREE.MeshStandardMaterial({ color: 0x14111d, roughness: 0.9, metalness: 0.0, side: THREE.DoubleSide });
+  var warmLineMat = new THREE.MeshBasicMaterial({ color: 0x8474e8 });
 
   /* stadium floor: rectangle + two half-discs */
   var floorGroup = new THREE.Group();
@@ -595,42 +595,36 @@
     shape.lineTo(-W2, L2);
     shape.closePath();
     var hole = new THREE.Path();
-    hole.absellipse(0, 0, 4.4, 7.2, 0, Math.PI * 2, false, 0);
+    hole.moveTo(-2.2, -10);
+    hole.lineTo(2.2, -10);
+    hole.lineTo(2.2, 10);
+    hole.lineTo(-2.2, 10);
+    hole.closePath();
     shape.holes.push(hole);
     var geo = new THREE.ShapeGeometry(shape, 36);
     var ceil = new THREE.Mesh(geo, ceilMat);
     ceil.rotation.x = Math.PI / 2;
     ceil.position.y = ROOM.h;
     scene.add(ceil);
-    /* bronze rim + warm glow ring around the oval */
-    var rim = new THREE.Mesh(new THREE.TorusGeometry(1, 0.055, 8, 60), bronzeMat);
-    rim.rotation.x = Math.PI / 2;
-    rim.scale.set(4.4, 7.2, 1);
-    rim.position.y = ROOM.h - 0.02;
-    scene.add(rim);
-    var glowRing = new THREE.Mesh(new THREE.TorusGeometry(1, 0.028, 6, 60), warmLineMat);
-    glowRing.rotation.x = Math.PI / 2;
-    glowRing.scale.set(4.15, 6.95, 1);
-    glowRing.position.y = ROOM.h - 0.06;
-    scene.add(glowRing);
-  })();
-
-  /* clerestory windows: stars through bronze-framed openings, high on the long walls */
-  var windowTex = starsTexture(900, 2.6, 8);
-  [-1, 1].forEach(function (side) {
-    [-4.6, 0, 4.6].forEach(function (z) {
-      var win = new THREE.Mesh(new THREE.PlaneGeometry(2.7, 1.4), new THREE.MeshBasicMaterial({ map: windowTex }));
-      win.position.set(side * (ROOM.hw - 0.05), 5.05, z);
-      win.rotation.y = side > 0 ? -Math.PI / 2 : Math.PI / 2;
-      scene.add(win);
-      var frame = new THREE.Mesh(new THREE.TorusGeometry(1, 0.04, 6, 4), bronzeMat);
-      frame.rotation.y = side > 0 ? -Math.PI / 2 : Math.PI / 2;
-      frame.rotation.z = Math.PI / 4;
-      frame.scale.set(1.98, 1.06, 1);
-      frame.position.set(side * (ROOM.hw - 0.07), 5.05, z);
-      scene.add(frame);
+    /* bronze rim on the strip's edges + the two violet rails of the original */
+    [[-2.24, 20.2, 0.055], [2.24, 20.2, 0.055]].forEach(function (r) {
+      var edge = new THREE.Mesh(new THREE.CylinderGeometry(r[2], r[2], r[1], 8), bronzeMat);
+      edge.rotation.x = Math.PI / 2;
+      edge.position.set(r[0], ROOM.h - 0.02, 0);
+      scene.add(edge);
     });
-  });
+    [[-10.05], [10.05]].forEach(function (r) {
+      var cap = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 4.5, 8), bronzeMat);
+      cap.rotation.z = Math.PI / 2;
+      cap.position.set(0, ROOM.h - 0.02, r[0]);
+      scene.add(cap);
+    });
+    [-2.05, 2.05].forEach(function (x) {
+      var railGlow = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.05, 19.6), warmLineMat);
+      railGlow.position.set(x, ROOM.h - 0.05, 0);
+      scene.add(railGlow);
+    });
+  })();
 
   /* the entry: a bronze-arched door on the near curve, brand sign above */
   (function () {
@@ -653,15 +647,15 @@
   })();
 
   /* light: warm, layered, cheap */
-  scene.add(new THREE.AmbientLight(0xfff4e6, 0.52));
-  scene.add(new THREE.HemisphereLight(0xd9deee, 0xe6d9c4, 0.55));
+  scene.add(new THREE.AmbientLight(0x9a8ecf, 0.36));
+  scene.add(new THREE.HemisphereLight(0x6a5fae, 0x0d0b14, 0.44));
   [[0, -4.5], [0, 0], [0, 4.5]].forEach(function (p, i) {
     var pt = new THREE.PointLight(i % 2 ? 0xffe9cc : 0xfff2dd, 20, 16, 1.8);
     pt.position.set(p[0], ROOM.h - 0.7, p[1]);
     scene.add(pt);
   });
   /* starlight breath through the oval */
-  var moon = new THREE.PointLight(0xcdd4f2, 9, 18, 1.8);
+  var moon = new THREE.PointLight(0xcdd4f2, 16, 20, 1.7);
   moon.position.set(0, ROOM.h + 1.2, 0);
   scene.add(moon);
 
@@ -697,7 +691,7 @@
     var g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(pos0, 3));
     dust = new THREE.Points(g, new THREE.PointsMaterial({
-      color: 0xd8c9a8, size: 0.018, transparent: true, opacity: 0.45, depthWrite: false
+      color: 0xa79aff, size: 0.02, transparent: true, opacity: 0.42, blending: THREE.AdditiveBlending, depthWrite: false
     }));
     scene.add(dust);
   })();
@@ -705,7 +699,7 @@
   /* a soft pool of light follows the visitor across the stone */
   var playerHalo = new THREE.Mesh(
     new THREE.PlaneGeometry(2.8, 2.8),
-    new THREE.MeshBasicMaterial({ map: radialTexture('rgba(255, 236, 200, 0.13)', 'rgba(255, 236, 200, 0)'), transparent: true, depthWrite: false })
+    new THREE.MeshBasicMaterial({ map: radialTexture('rgba(140, 120, 255, 0.30)', 'rgba(140, 120, 255, 0)'), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false })
   );
   playerHalo.rotation.x = -Math.PI / 2;
   playerHalo.position.y = 0.014;
@@ -713,10 +707,10 @@
 
   /* ---------- holograms (saturated — they read in daylight) ---------- */
   var holoLineMat = function (color) {
-    return new THREE.LineBasicMaterial({ color: color, transparent: true, opacity: 0.92, depthWrite: false });
+    return new THREE.LineBasicMaterial({ color: color, transparent: true, opacity: 0.88, blending: THREE.AdditiveBlending, depthWrite: false });
   };
   var holoFillMat = function (color) {
-    return new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: 0.10, depthWrite: false, side: THREE.DoubleSide });
+    return new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: 0.08, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
   };
 
   function starShape(r) {
@@ -737,7 +731,7 @@
     var g = new THREE.Group();
     var aura = new THREE.Mesh(
       new THREE.PlaneGeometry(2.2, 2.2),
-      new THREE.MeshBasicMaterial({ map: radialTexture('rgba(108, 92, 255, 0.28)', 'rgba(108, 92, 255, 0)'), transparent: true, depthWrite: false, side: THREE.DoubleSide })
+      new THREE.MeshBasicMaterial({ map: radialTexture('rgba(108, 92, 255, 0.30)', 'rgba(108, 92, 255, 0)'), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })
     );
     g.add(aura);
     var core = new THREE.Group();
@@ -848,7 +842,7 @@
 
     var cone = new THREE.Mesh(
       new THREE.CylinderGeometry(0.16, 0.8, 2.4, 20, 1, true),
-      new THREE.MeshBasicMaterial({ map: coneTex, transparent: true, opacity: 0.12, depthWrite: false, side: THREE.DoubleSide })
+      new THREE.MeshBasicMaterial({ map: coneTex, transparent: true, opacity: 0.15, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })
     );
     cone.position.set(def.x, 2.25, def.z);
     scene.add(cone);
@@ -895,7 +889,7 @@
     for (var i = 0; i < 3; i++) {
       var m = new THREE.Mesh(
         new THREE.PlaneGeometry(0.45, 0.45),
-        new THREE.MeshBasicMaterial({ map: cometTex, transparent: true, opacity: 0.85, depthWrite: false, side: THREE.DoubleSide })
+        new THREE.MeshBasicMaterial({ map: cometTex, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })
       );
       scene.add(m);
       comets.push({ mesh: m, r: 2.4 + i * 0.4, sp: 0.5 + i * 0.17, ph: i * 2.1, tilt: 0.35 + i * 0.22 });
