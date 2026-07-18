@@ -1,6 +1,8 @@
 /* ==========================================================================
-   5 SITES PROJECT — hub launcher
-   Dark, elegant index page. No WebGL here — CSS + GSAP polish only.
+   5 SITES PROJECT — hub launcher v2
+   Dark, elegant index page. CSS + GSAP polish, plus one small live WebGL2
+   thumbnail per row (enabled via html.thumbs-on only when WebGL2 exists —
+   without it the layout is identical to v1).
    ========================================================================== */
 
 :root {
@@ -247,6 +249,46 @@ code {
     border-color 0.35s ease;
 }
 
+/* Live WebGL2 thumbnail — hidden until JS confirms WebGL2 (html.thumbs-on).
+   Backing store is a fixed 200x120 at DPR 1; CSS scales it down responsively. */
+.row-thumb {
+  display: none;
+}
+
+html.thumbs-on .row-thumb {
+  display: block;
+  width: clamp(150px, 15vw, 200px);
+  aspect-ratio: 5 / 3;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--bg-raised);
+  opacity: 0.72;
+  filter: saturate(0.85);
+  pointer-events: none;
+  transition:
+    opacity 0.45s ease,
+    filter 0.45s ease,
+    border-color 0.35s ease;
+}
+
+html.thumbs-on .row {
+  grid-template-columns: clamp(3rem, 6vw, 5.5rem) minmax(0, 1.1fr) minmax(0, 1fr) auto auto;
+}
+
+.row-thumb canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+html.thumbs-on .row:hover .row-thumb,
+html.thumbs-on .row:focus-visible .row-thumb {
+  opacity: 1;
+  filter: saturate(1);
+  border-color: var(--accent);
+}
+
 .row-arrow {
   width: clamp(2.25rem, 4vw, 3rem);
   color: var(--accent);
@@ -443,7 +485,8 @@ html.cursor-on body {
    -------------------------------------------------------------------------- */
 
 @media (max-width: 860px) {
-  .row {
+  .row,
+  html.thumbs-on .row {
     grid-template-columns: 3rem minmax(0, 1fr) auto;
     grid-template-areas:
       "num name  arrow"
@@ -452,9 +495,22 @@ html.cursor-on body {
     row-gap: 0.85rem;
   }
 
+  /* Third grid row exists only when the live thumbnails do */
+  html.thumbs-on .row {
+    grid-template-areas:
+      "num name  arrow"
+      "num body  arrow"
+      "num thumb arrow";
+  }
+
   .row-num  { grid-area: num; padding-top: 0.4rem; }
   .row-name { grid-area: name; white-space: normal; }
   .row-body { grid-area: body; }
+
+  html.thumbs-on .row-thumb {
+    grid-area: thumb;
+    margin-top: 0.2rem;
+  }
 
   .row-arrow {
     grid-area: arrow;

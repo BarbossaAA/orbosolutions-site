@@ -32,8 +32,8 @@ body {
   font-family: var(--font-body);
   color: var(--ink);
   background-color: var(--bg);
+  /* The violet glow lives on the .ambience layer so it can lerp per preset. */
   background-image:
-    radial-gradient(1100px 750px at 72% 38%, rgba(108, 76, 255, 0.10), rgba(108, 76, 255, 0) 60%),
     radial-gradient(900px 700px at 12% 88%, rgba(214, 189, 138, 0.20), rgba(214, 189, 138, 0) 62%),
     linear-gradient(180deg, #F1EFEB 0%, #ECEAE6 45%, #E4E0D9 100%);
   background-attachment: fixed;
@@ -80,8 +80,32 @@ button:focus-visible {
 }
 
 /* ----------------------------------------------------------------
-   Scene (fixed full-viewport canvas)
+   Lenis smooth-scroll compatibility
    ---------------------------------------------------------------- */
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* ----------------------------------------------------------------
+   Ambience layer (per-preset glow, painted from JS) + fixed scene
+   ---------------------------------------------------------------- */
+
+.ambience {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
 
 .scene {
   position: fixed;
@@ -170,25 +194,168 @@ button:focus-visible {
 }
 
 /* ----------------------------------------------------------------
-   Left panel
+   Scroll story: four viewport-height sections in a left column
    ---------------------------------------------------------------- */
 
-.panel {
+.story {
   position: relative;
   z-index: 10;
+  pointer-events: none;
+}
+
+.sec {
+  position: relative;
   min-height: 100vh;
   max-width: min(660px, 100%);
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: flex-start;
   gap: clamp(18px, 2.6vh, 28px);
   padding: 120px clamp(20px, 4.5vw, 60px) 110px;
   pointer-events: none;
 }
 
-.panel a,
-.panel button {
+.sec a,
+.sec button {
   pointer-events: auto;
+}
+
+.hl-2 {
+  font-size: clamp(34px, 4.8vw, 62px);
+}
+
+/* Scroll-triggered reveals (non-hero sections). --d staggers per element. */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.9s ease var(--d, 0s),
+    transform 0.9s cubic-bezier(0.19, 0.9, 0.22, 1) var(--d, 0s);
+  will-change: opacity, transform;
+}
+
+[data-reveal].is-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* Hero scroll cue */
+.scroll-cue {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 6px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-30);
+}
+
+.cue-line {
+  position: relative;
+  width: 1.5px;
+  height: 38px;
+  background: var(--ink-12);
+  overflow: hidden;
+}
+
+.cue-line::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  transform: translateY(-100%);
+  animation: cue-drop 2.2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+@keyframes cue-drop {
+  45% {
+    transform: translateY(0);
+  }
+  90%,
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+/* Macro stats */
+.stats {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(24px, 4vw, 54px);
+  border-top: 1px solid var(--ink-12);
+  padding-top: 22px;
+  max-width: 520px;
+}
+
+.stats li {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stat-num {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(26px, 3vw, 38px);
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-key {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-30);
+}
+
+/* CTA row */
+.cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+
+.btn-primary,
+.btn-ghost {
+  font-family: var(--font-display);
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  padding: 15px 30px;
+  border-radius: 999px;
+  transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease,
+    transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.btn-primary {
+  color: #fff;
+  background: var(--ink);
+}
+
+.btn-primary:hover {
+  background: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px rgba(108, 76, 255, 0.35);
+}
+
+.btn-ghost {
+  color: var(--ink);
+  border: 1px solid var(--ink-12);
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.btn-ghost:hover {
+  border-color: var(--ink-30);
+  transform: translateY(-2px);
 }
 
 .eyebrow {
@@ -438,10 +605,9 @@ button:focus-visible {
    Intro reveal (driven by .is-ready on the site wrapper)
    ---------------------------------------------------------------- */
 
-.eyebrow,
-.copy,
-.presets,
-.spec {
+.sec-hero .eyebrow,
+.sec-hero .copy,
+.sec-hero .scroll-cue {
   opacity: 0;
   transform: translateY(16px);
   transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.19, 0.9, 0.22, 1);
@@ -453,7 +619,7 @@ button:focus-visible {
   transition: opacity 0.9s ease;
 }
 
-.is-ready .eyebrow {
+.is-ready .sec-hero .eyebrow {
   opacity: 1;
   transform: none;
   transition-delay: 0.1s;
@@ -469,22 +635,16 @@ button:focus-visible {
   transition-delay: 0.28s;
 }
 
-.is-ready .copy {
+.is-ready .sec-hero .copy {
   opacity: 1;
   transform: none;
   transition-delay: 0.4s;
 }
 
-.is-ready .presets {
+.is-ready .sec-hero .scroll-cue {
   opacity: 1;
   transform: none;
-  transition-delay: 0.52s;
-}
-
-.is-ready .spec {
-  opacity: 1;
-  transform: none;
-  transition-delay: 0.64s;
+  transition-delay: 0.56s;
 }
 
 .is-ready .topbar {
@@ -675,11 +835,15 @@ button:focus-visible {
    ---------------------------------------------------------------- */
 
 @media (max-width: 900px) {
-  .panel {
+  .sec {
     min-height: 100svh;
     justify-content: flex-end;
     padding-top: 42vh;
     padding-bottom: 96px;
+  }
+
+  .stats {
+    gap: 22px;
   }
 
   .nav a:not(.cta) {
@@ -714,5 +878,10 @@ button:focus-visible {
     transition-duration: 0.01ms !important;
     transition-delay: 0s !important;
     scroll-behavior: auto !important;
+  }
+
+  .cue-line::after {
+    animation: none;
+    transform: translateY(0);
   }
 }

@@ -11,8 +11,12 @@ const VERT = /* glsl */ `
 uniform float uTime;
 uniform float uProj;
 uniform float uSize;
+uniform float uMaxSize;
 uniform float uRotation;
 uniform vec3  uCenter;
+uniform vec3  uWarpPos;
+uniform float uWarpStrength;
+uniform float uWarpAmp;
 
 attribute float aScale;
 attribute float aSeed;
@@ -20,6 +24,7 @@ attribute vec3  aColor;
 
 varying vec3  vColor;
 varying float vSeed;
+varying float vFade;
 
 void main() {
   vec3 p = position - uCenter;
@@ -31,11 +36,31 @@ void main() {
   p.z = sin(angle) * r;
   p += uCenter;
 
+  /* mouse gravity: stars near the cursor's world point are drawn
+     in and swirled, with a smooth gaussian falloff */
+  float warp = uWarpStrength * uWarpAmp;
+  if (warp > 0.001) {
+    vec3 dw = uWarpPos - p;
+    float d2 = dot(dw, dw);
+    float fall = exp(-d2 * 0.42);
+    vec3 dirw = dw * inversesqrt(max(d2, 0.0001));
+    vec3 tang = cross(dirw, vec3(0.0, 1.0, 0.0));
+    float tl = length(tang);
+    tang = tl > 0.001 ? tang / tl : vec3(1.0, 0.0, 0.0);
+    float wob = 0.85 + 0.15 * sin(uTime * 1.8 + aSeed);
+    p += (dirw * 0.5 + tang * 0.85) * fall * warp * wob;
+  }
+
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
   gl_Position = projectionMatrix * mv;
 
-  /* perspective size attenuation, clamped so near stars stay sprites */
-  gl_PointSize = min(uSize * aScale * uProj / max(0.15, -mv.z), 120.0);
+  /* perspective size attenuation, hard-capped (~22px at DPR 1) so
+     near stars can never balloon into screen-filling discs */
+  gl_PointSize = min(uSize * aScale * uProj / max(0.15, -mv.z), uMaxSize);
+
+  /* points close to the lens ease OUT instead of stacking to white:
+     the additive sum stays luminous, never clips */
+  vFade = smoothstep(0.3, 2.4, -mv.z);
 
   vColor = aColor;
   vSeed = aSeed;
@@ -45,9 +70,11 @@ void main() {
 const FRAG = /* glsl */ `
 uniform float uTime;
 uniform float uTwinkle;
+uniform float uCoreDim;
 
 varying vec3  vColor;
 varying float vSeed;
+varying float vFade;
 
 void main() {
   float d = length(gl_PointCoord - 0.5) * 2.0;
@@ -59,13 +86,13 @@ void main() {
   /* per-star twinkle, seeded so neighbours stay out of phase */
   float tw = 1.0 - uTwinkle * 0.45 * (0.5 + 0.5 * sin(uTime * (1.2 + fract(vSeed * 0.137) * 2.6) + vSeed));
 
-  gl_FragColor = vec4(vColor * tw, glow);
+  gl_FragColor = vec4(vColor * (tw * vFade * uCoreDim), glow);
 }
 `;
 
 export const NURSERY_CENTER = new THREE.Vector3(7.4, 0.5, -4.8);
 
-function makeStarMaterial({ size, rotation, twinkle, center = new THREE.Vector3() }) {
+function makeStarMaterial({ size, rotation, twinkle, center = new THREE.Vector3(), warp = 1 }) {
   return new THREE.ShaderMaterial({
     vertexShader: VERT,
     fragmentShader: FRAG,
@@ -76,9 +103,14 @@ function makeStarMaterial({ size, rotation, twinkle, center = new THREE.Vector3(
       uTime: { value: 0 },
       uProj: { value: 1000 },
       uSize: { value: size },
+      uMaxSize: { value: 24 },
+      uCoreDim: { value: 1 },
       uRotation: { value: rotation },
       uTwinkle: { value: twinkle },
       uCenter: { value: center },
+      uWarpPos: { value: new THREE.Vector3(0, 0, 0) },
+      uWarpStrength: { value: 0 },
+      uWarpAmp: { value: warp },
     },
   });
 }
@@ -127,7 +159,8 @@ export function createGalaxy(count) {
   const rim = new THREE.Color();
   const mixed = new THREE.Color();
 
-  const material = makeStarMaterial({ size: 0.055, rotation: 0.45, twinkle: 0.9 });
+  /* size bumped 0.055 -> 0.066 to visually cover the 80k -> 60k count cut */
+  const material = makeStarMaterial({ size: 0.066, rotation: 0.45, twinkle: 0.9 });
 
   return buildPoints(count, material, (pos, col, scl, seed) => {
     for (let i = 0; i < count; i++) {
@@ -187,7 +220,7 @@ export function createNursery(count) {
   ];
 
   const material = makeStarMaterial({
-    size: 0.06,
+    size: 0.07, /* bumped to cover the 14k -> 10k count cut */
     rotation: 0.16,
     twinkle: 1.1,
     center: NURSERY_CENTER.clone(),
@@ -231,7 +264,8 @@ export function createStarfield(count) {
   const cMag = new THREE.Color('#FF6EC7');
   const mixed = new THREE.Color();
 
-  const material = makeStarMaterial({ size: 0.14, rotation: 0.015, twinkle: 0.7 });
+  /* deep field sits on a far shell: gravity warp would look wrong there */
+  const material = makeStarMaterial({ size: 0.14, rotation: 0.015, twinkle: 0.7, warp: 0 });
 
   return buildPoints(count, material, (pos, col, scl, seed) => {
     for (let i = 0; i < count; i++) {

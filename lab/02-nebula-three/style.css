@@ -430,8 +430,18 @@ a {
   color: var(--ink-dim);
   white-space: nowrap;
   opacity: 0;
+  padding: 0.4em 0.7em 0.4em 0.8em;
+  background: rgba(2, 4, 12, 0.72);
+  border: 1px solid var(--hairline);
+  border-radius: 2px;
+  backdrop-filter: blur(5px);
   transition: opacity 0.3s ease, transform 0.3s ease;
   pointer-events: none;
+}
+
+.rail-dot.is-active .dot-label {
+  color: var(--ink);
+  border-color: rgba(125, 249, 255, 0.35);
 }
 
 .rail-dot:hover .dot-label,
@@ -569,6 +579,60 @@ a {
   background: linear-gradient(90deg, var(--cyan), var(--magenta));
 }
 
+.loader-steps {
+  list-style: none;
+  margin-top: 1.5rem;
+  display: grid;
+  gap: 0.55rem;
+  font-family: var(--font-mono);
+  font-size: 0.54rem;
+  letter-spacing: 0.28em;
+  color: var(--ink-faint);
+}
+
+.loader-steps li {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  transition: color 0.4s ease;
+}
+
+.step-box {
+  width: 6px;
+  height: 6px;
+  border: 1px solid var(--ink-faint);
+  transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.loader-steps li.is-live {
+  color: var(--ink-dim);
+}
+
+.loader-steps li.is-live .step-box {
+  border-color: var(--cyan);
+  animation: step-pulse 1s ease-in-out infinite alternate;
+}
+
+.loader-steps li.is-done {
+  color: var(--ink-dim);
+}
+
+.loader-steps li.is-done .step-box {
+  background: var(--cyan);
+  border-color: var(--cyan);
+  box-shadow: 0 0 10px rgba(125, 249, 255, 0.55);
+  animation: none;
+}
+
+@keyframes step-pulse {
+  from {
+    box-shadow: 0 0 0 rgba(125, 249, 255, 0);
+  }
+  to {
+    box-shadow: 0 0 9px rgba(125, 249, 255, 0.7);
+  }
+}
+
 .loader-sub {
   margin-top: 1.6rem;
   text-align: center;
@@ -654,7 +718,8 @@ a {
 
 @media (prefers-reduced-motion: reduce) {
   .cue-line,
-  .mark-svg {
+  .mark-svg,
+  .loader-steps li.is-live .step-box {
     animation: none;
   }
 

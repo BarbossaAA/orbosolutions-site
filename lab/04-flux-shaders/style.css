@@ -22,6 +22,9 @@ html {
   color: var(--fg);
   font-family: var(--mono);
   scrollbar-color: var(--line) var(--bg);
+  /* keep the gutter when the inspector locks scroll, so the FLIP
+     start rect matches exactly where the tile sits on screen */
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -33,6 +36,11 @@ body {
 }
 
 body.modal-open { overflow: hidden; }
+
+/* Lenis smooth scroll (UI layer) */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-stopped { overflow: hidden; }
 
 ::selection { background: var(--accent); color: #000; }
 
@@ -107,12 +115,12 @@ button:focus-visible,
   color: var(--dim);
   margin-top: 12px;
 }
-#boot-log { margin-top: 42px; min-height: 176px; }
+#boot-log { margin-top: 36px; min-height: 176px; max-height: 44vh; overflow: hidden; }
 .boot-line {
   font-size: 11px;
   color: var(--faint);
   letter-spacing: 0.06em;
-  line-height: 1.8;
+  line-height: 1.7;
 }
 .boot-line.bad { color: var(--accent); }
 .intro-bar {
@@ -163,7 +171,8 @@ button:focus-visible,
   color: var(--dim);
   white-space: nowrap;
 }
-.hud b { color: var(--fg); font-weight: 500; }
+.hud b { color: var(--fg); font-weight: 500; font-variant-numeric: tabular-nums; }
+.hud .hud-spec b { display: inline-block; min-width: 11ch; color: var(--accent); }
 
 /* ---------------- hero --------------------------------------- */
 
@@ -265,14 +274,24 @@ html.has-cursor .tile { cursor: none; }
 .tile:hover::before, .tile:hover::after,
 .tile:focus-visible::before, .tile:focus-visible::after { opacity: 1; }
 
-/* staggered reveal */
+/* staggered reveal — CSS path (fallback when GSAP is absent) */
 body.booting .tile { opacity: 0; transform: translateY(14px); }
 body.revealed .tile {
   opacity: 1;
   transform: none;
-  transition: opacity 0.65s ease, transform 0.65s ease;
-  transition-delay: calc(var(--i, 0) * 70ms);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  transition-delay: calc(var(--i, 0) * 45ms);
 }
+/* when GSAP owns the reveal, the CSS path stands down */
+body.gsap .tile {
+  opacity: 1;
+  transform: none;
+  transition: none;
+  transition-delay: 0s;
+}
+
+/* 008 FLOW — painting must beat scrolling on touch */
+.tile--flow { touch-action: none; }
 
 /* compile-error state */
 .tile--error canvas { opacity: 0.4; }
@@ -415,13 +434,28 @@ body.revealed .tile {
 .source-head {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 12px;
-  padding: 14px 20px;
+  padding: 10px 20px;
   border-bottom: 1px solid var(--line);
   font-size: 10px;
   letter-spacing: 0.18em;
   color: var(--dim);
   text-transform: uppercase;
+}
+.source-tools { display: flex; align-items: center; gap: 14px; }
+#btn-copy { padding: 5px 12px; font-size: 9px; }
+#btn-copy:active { border-color: var(--accent); color: var(--accent); }
+
+/* source view v2: the typing caret */
+.type-caret {
+  display: inline-block;
+  width: 7px;
+  height: 12px;
+  margin-left: 1px;
+  vertical-align: -2px;
+  background: var(--accent);
+  animation: blink 0.9s steps(2, start) infinite;
 }
 #source-pre {
   flex: 1;
@@ -493,9 +527,14 @@ html.has-cursor #cursor { display: block; }
   .foot-grid > div { border-left: none; border-top: 1px solid var(--line); }
   .foot-grid > div:first-child { border-top: none; }
 }
+@media (max-width: 900px) {
+  .hud { gap: 16px; }
+  .hud .hud-t { display: none; }
+}
 @media (max-width: 680px) {
   .grid { grid-template-columns: 1fr; }
-  .hud span:nth-child(2), .hud span:nth-child(3) { display: none; }
+  .hud .hud-dpr, .hud .hud-q { display: none; }
+  .hud .hud-spec b { min-width: 0; }
   .modal-info { right: 20px; }
   .noscript, #fallback, #intro { padding: 32px 24px; }
 }

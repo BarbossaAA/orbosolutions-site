@@ -926,7 +926,7 @@
     { id: 'mosaic', px: ROOM.hw - 0.06, pz: 0, ry: -Math.PI / 2, gen: mosaicTexture, title: 'MOSAIC', tag: 'אמנות גנרטיבית', accent: '#6C5CFF',
       body: 'פסיפס שנבנה מחלוקת המרחב בין ארבעים ושש נקודות אקראיות. כל ריצה מייצרת פסיפס שלא היה קיים מעולם.' },
     { id: 'flux', px: ROOM.hw - 0.06, pz: 4.6, ry: -Math.PI / 2, live: 'flux', title: 'FLUX', tag: 'ציור חי · המעבדה', accent: '#E0402F', link: 'lab/04-flux-shaders/',
-      body: 'שדות צבע שזורמים על המסך לפי כללים מתמטיים. בגרסה המלאה — שישה שדות שונים, ישר מול המעבד הגרפי.' },
+      body: 'שדות צבע שזורמים על המסך לפי כללים מתמטיים. בגרסה המלאה — שמונה יצירות, כולל נוזל שמציירים בו עם הסמן.' },
     /* far curve: the finale flanked by two living paintings */
     { id: 'nebula', px: farL.px, pz: farL.pz, ry: farL.ry, live: 'nebula', title: 'NEBULA', tag: 'ציור חי · המעבדה', accent: '#1F8FD8', link: 'lab/02-nebula-three/',
       body: 'גלקסיה של חלקיקים שמסתחררת לאט. בגרסה המלאה גוללים אל תוך מרכז הגלקסיה.' },

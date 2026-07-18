@@ -8,6 +8,7 @@
   <meta name="theme-color" content="#0A0A0A">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230A0A0A'/%3E%3Ccircle cx='32' cy='32' r='17' fill='%23C6FF3F'/%3E%3C/svg%3E">
 
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -22,7 +23,11 @@
   </noscript>
 </head>
 <body>
+
   <a href="../" aria-label="Back to the ORBO LAB index" style="position:fixed;top:18px;left:18px;z-index:2147483000;font:600 11px/1 &quot;Space Grotesk&quot;,system-ui,sans-serif;letter-spacing:.14em;color:rgba(255,255,255,.66);text-decoration:none;padding:10px 15px;border:1px solid rgba(255,255,255,.16);border-radius:999px;background:rgba(10,10,14,.42);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)">&larr; ORBO LAB</a>
+
+  <!-- WebGL aurora backdrop (raw WebGL2, behind everything) -->
+  <canvas id="aurora-gl" class="aurora-gl" aria-hidden="true"></canvas>
 
   <!-- Preloader -->
   <div class="preloader" aria-hidden="true">
@@ -59,6 +64,7 @@
         <defs>
           <path id="badge-circle" d="M 100,100 m -74,0 a 74,74 0 1,1 148,0 a 74,74 0 1,1 -148,0"></path>
         </defs>
+        <circle class="badge-ring" cx="100" cy="100" r="96"></circle>
         <text class="badge-text">
           <textPath href="#badge-circle" textLength="464" lengthAdjust="spacing">Independent digital studio &#8226; est. 2019 &#8226; Aurora &#8226;</textPath>
         </text>
@@ -139,6 +145,13 @@
         </article>
       </div>
     </section>
+
+    <!-- Divider stroke (DrawSVG) -->
+    <div class="divider" aria-hidden="true">
+      <svg viewBox="0 0 1440 60" preserveAspectRatio="none">
+        <path class="divider-path" d="M0,32 C240,8 480,52 720,30 C960,8 1200,52 1440,28"></path>
+      </svg>
+    </div>
 
     <!-- Work: pinned horizontal gallery -->
     <section class="work" id="work">
@@ -254,6 +267,13 @@
       <p class="manifesto-text">We believe a website is not a page. It is <em>a place</em>. A place has weather, gravity, a pulse. So we obsess over the half-second between click and response, the way type breathes when a viewport narrows, the light a color leaves behind after you scroll past it. Most of the internet is built to be skimmed. Ours is built to be <em>felt</em>. We work slowly, ship deliberately, and measure everything in <em>goosebumps per visit</em>.</p>
     </section>
 
+    <!-- Divider stroke (DrawSVG) -->
+    <div class="divider" aria-hidden="true">
+      <svg viewBox="0 0 1440 60" preserveAspectRatio="none">
+        <path class="divider-path" d="M0,28 C300,52 560,10 820,34 C1080,56 1260,14 1440,30"></path>
+      </svg>
+    </div>
+
     <!-- Stats -->
     <section class="stats" id="stats">
       <div class="section-head">
@@ -283,7 +303,35 @@
       </ul>
     </section>
 
+    <!-- Divider stroke (DrawSVG) -->
+    <div class="divider" aria-hidden="true">
+      <svg viewBox="0 0 1440 60" preserveAspectRatio="none">
+        <path class="divider-path" d="M0,30 C260,12 520,50 780,26 C1040,4 1240,48 1440,32"></path>
+      </svg>
+    </div>
+
   </main>
+
+  <!-- Work detail overlay (Flip) -->
+  <div class="work-overlay" aria-hidden="true">
+    <div class="overlay-media-slot"></div>
+    <div class="overlay-content">
+      <div class="overlay-head">
+        <span class="overlay-num">01</span>
+        <button class="overlay-close magnetic" data-strength="0.4" type="button" aria-label="Close project">&times;</button>
+      </div>
+      <div class="overlay-body">
+        <h3 class="overlay-title">Project</h3>
+        <p class="overlay-desc"></p>
+        <ul class="overlay-meta">
+          <li><span>Client</span><b class="ov-client"></b></li>
+          <li><span>Sector</span><b class="ov-sector"></b></li>
+          <li><span>Year</span><b class="ov-year"></b></li>
+          <li><span>Deliverables</span><b class="ov-scope"></b></li>
+        </ul>
+      </div>
+    </div>
+  </div>
 
   <!-- Footer -->
   <footer class="footer" id="contact">
@@ -331,7 +379,7 @@
 
     <div class="footer-bottom">
       <span>&copy; 2026 Aurora Studio Ltd. All rights reserved.</span>
-      <span class="footer-credit">Built loud with GSAP.</span>
+      <span class="footer-credit">Built loud with GSAP + raw WebGL.</span>
       <button class="to-top magnetic" data-strength="0.4" type="button" aria-label="Back to top">&uarr;</button>
     </div>
   </footer>
@@ -347,7 +395,12 @@
   <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrambleTextPlugin.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/DrawSVGPlugin.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/CustomEase.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/Flip.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/lenis@1.3.4/dist/lenis.min.js"></script>
+  <script defer src="aurora-gl.js"></script>
   <script defer src="main.js"></script>
 </body>
 </html>

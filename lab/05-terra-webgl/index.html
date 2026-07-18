@@ -9,6 +9,10 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Both connection flavours: classic scripts (gsap) use no-cors,
+       module scripts (three) use cors — they need separate sockets. -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="./style.css">
@@ -20,10 +24,20 @@
       }
     }
   </script>
+  <!-- Flatten the module waterfall: fetch three + local modules in
+       parallel with main.js instead of discovering them one hop late. -->
+  <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js">
+  <link rel="modulepreload" href="./data.js">
+  <link rel="modulepreload" href="./noise.js">
+  <link rel="modulepreload" href="./textures.js">
+  <link rel="modulepreload" href="./gl.js">
+  <link rel="modulepreload" href="./report.js">
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js" defer></script>
   <script type="module" src="./main.js"></script>
 </head>
 <body>
+
   <a href="../" aria-label="Back to the ORBO LAB index" style="position:fixed;top:18px;left:18px;z-index:2147483000;font:600 11px/1 &quot;Space Grotesk&quot;,system-ui,sans-serif;letter-spacing:.14em;color:rgba(255,255,255,.66);text-decoration:none;padding:10px 15px;border:1px solid rgba(255,255,255,.16);border-radius:999px;background:rgba(10,10,14,.42);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)">&larr; ORBO LAB</a>
 
   <noscript>
@@ -80,7 +94,53 @@
     </div>
 
     <p class="hint" id="hint">Scroll &middot; Drag &middot; Arrow keys</p>
+
+    <!-- Field report trigger -->
+    <button class="report-cta" id="reportCta" type="button" aria-haspopup="dialog" aria-controls="report">
+      <span class="report-cta__dot" aria-hidden="true"></span>
+      <span>Open field report</span>
+      <span class="report-cta__arrow" aria-hidden="true">&nearr;</span>
+    </button>
   </main>
+
+  <!-- Field report dossier -->
+  <section class="report" id="report" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="reportTitle">
+    <div class="report__scroll" id="reportScroll">
+      <div class="report__inner">
+        <header class="report__head">
+          <p class="report__eyebrow" id="reportEyebrow"></p>
+          <h2 class="report__title" id="reportTitle"></h2>
+          <p class="report__coords" id="reportCoords"></p>
+          <p class="report__lede" id="reportLede"></p>
+        </header>
+
+        <section class="r-sec" data-sec="stats" aria-label="Survey figures">
+          <p class="r-sec__label">Survey figures</p>
+          <div class="report__stats" id="reportStats"></div>
+        </section>
+
+        <section class="r-sec" data-sec="map" aria-label="Topographic model">
+          <p class="r-sec__label">Topographic model</p>
+          <figure class="report__map" id="reportMapWrap">
+            <canvas id="reportMap" aria-hidden="true"></canvas>
+            <figcaption class="report__mapcap" id="reportMapCap"></figcaption>
+          </figure>
+        </section>
+
+        <section class="r-sec" data-sec="quote" aria-label="Closing note">
+          <blockquote class="report__quote">
+            <p id="reportQuote"></p>
+            <cite id="reportCite"></cite>
+          </blockquote>
+        </section>
+
+        <p class="r-sec report__end" data-sec="end">End of field report &mdash; Terra archive</p>
+      </div>
+    </div>
+    <button class="report__close" id="reportClose" type="button" aria-label="Close field report">
+      <span aria-hidden="true">&times;</span><span class="report__close-label">Close</span>
+    </button>
+  </section>
 
   <!-- Custom cursor -->
   <div class="cursor-ring" id="cursorRing" aria-hidden="true">

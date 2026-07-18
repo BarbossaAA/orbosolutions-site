@@ -9,6 +9,8 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20rx='16'%20fill='%236C4CFF'/%3E%3Cpath%20d='M32%2015%20L51%2047%20L13%2047%20Z'%20fill='none'%20stroke='%23ECEAE6'%20stroke-width='4.5'%20stroke-linejoin='round'/%3E%3Cpath%20d='M32%2015%20L32%2047'%20stroke='%23ECEAE6'%20stroke-width='4.5'%20opacity='.85'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="preconnect" href="https://esm.sh" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./style.css">
   <script type="importmap">
@@ -18,13 +20,25 @@
       "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
       "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
       "three": "https://esm.sh/three@0.160.1",
+      "three/examples/jsm/environments/RoomEnvironment.js": "https://esm.sh/three@0.160.1/examples/jsm/environments/RoomEnvironment.js?external=three",
       "@react-three/fiber": "https://esm.sh/@react-three/fiber@8.17.10?external=react,react-dom,three",
       "htm": "https://esm.sh/htm@3.1.1"
     }
   }
   </script>
+  <!-- Warm the module chain: app.js is dynamically imported by main.js, and the
+       esm.sh entry modules are the first hop of every vendor fetch. URLs must
+       match the importmap resolutions exactly. -->
+  <link rel="modulepreload" href="./app.js">
+  <link rel="modulepreload" href="https://esm.sh/react@18.3.1" crossorigin>
+  <link rel="modulepreload" href="https://esm.sh/react-dom@18.3.1/client" crossorigin>
+  <link rel="modulepreload" href="https://esm.sh/three@0.160.1" crossorigin>
+  <link rel="modulepreload" href="https://esm.sh/three@0.160.1/examples/jsm/environments/RoomEnvironment.js?external=three" crossorigin>
+  <link rel="modulepreload" href="https://esm.sh/@react-three/fiber@8.17.10?external=react,react-dom,three" crossorigin>
+  <link rel="modulepreload" href="https://esm.sh/htm@3.1.1" crossorigin>
 </head>
 <body>
+
   <a href="../" aria-label="Back to the ORBO LAB index" style="position:fixed;top:18px;left:18px;z-index:2147483000;font:600 11px/1 &quot;Space Grotesk&quot;,system-ui,sans-serif;letter-spacing:.14em;color:rgba(255,255,255,.66);text-decoration:none;padding:10px 15px;border:1px solid rgba(255,255,255,.16);border-radius:999px;background:rgba(10,10,14,.42);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)">&larr; ORBO LAB</a>
 
   <div id="loader" aria-hidden="true">
@@ -49,6 +63,12 @@
     </div>
   </noscript>
 
+  <!-- Scroll story stack: GSAP core + plugins, Lenis smooth scroll (all pinned).
+       Deferred classic scripts execute in order before the module below. -->
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrambleTextPlugin.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>
   <script type="module" src="./main.js"></script>
 </body>
 </html>

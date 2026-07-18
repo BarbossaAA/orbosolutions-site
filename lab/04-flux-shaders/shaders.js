@@ -1,9 +1,10 @@
 /* ============================================================
    FLUX — shaders.js
-   Six hand-written GLSL ES 3.00 fragment programs.
+   Eight hand-written GLSL ES 3.00 fragment programs.
    Shared uniform contract: u_time / u_mouse / u_resolution.
-   These strings ARE the content — they are compiled live and
-   displayed verbatim in the inspector's SOURCE view.
+   008 FLOW adds a ping-pong feedback contract: u_prev / u_dt /
+   u_mouseVel / u_inject. These strings ARE the content — they
+   are compiled live and displayed verbatim in the inspector.
    ============================================================ */
 
 export const VERT_SRC = `#version 300 es
@@ -422,6 +423,213 @@ void main(){
 
 /* ------------------------------------------------------------ */
 
+const PORTAL = `#version 300 es
+// 007 PORTAL — kaleidoscopic tunnel flight
+// the plane folds into seven mirrored sectors; the camera never stops
+precision highp float;
+
+uniform float u_time;
+uniform vec2  u_mouse;
+uniform vec2  u_resolution;
+out vec4 fragColor;
+
+const float TAU = 6.28318530718;
+const float SECTORS = 7.0;
+const vec3  ACCENT = vec3(1.0, 0.231, 0.188);
+
+// the tunnel bends; the camera follows this curve
+vec2 path(float z){
+  return vec2(0.52 * sin(z * 0.25) + 0.24 * cos(z * 0.11),
+              0.42 * cos(z * 0.19) + 0.20 * sin(z * 0.13));
+}
+
+mat2 rot(float a){
+  float c = cos(a), s = sin(a);
+  return mat2(c, -s, s, c);
+}
+
+// kaleidoscope fold: mirror the angle into a single sector
+vec2 kalei(vec2 p){
+  float sec = TAU / SECTORS;
+  float a = mod(atan(p.y, p.x), sec);
+  a = abs(a - sec * 0.5);
+  return vec2(cos(a), sin(a)) * length(p);
+}
+
+float sdBox2(vec2 p, vec2 b){
+  vec2 d = abs(p) - b;
+  return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
+}
+
+// tunnel wall with windows punched through; ed carries the frame edge
+float map(vec3 p, out float ed){
+  p.xy -= path(p.z);
+  p.xy = rot(p.z * 0.16) * p.xy;          // slow twist with depth
+  vec2 k = kalei(p.xy);                   // mirrored cross-section
+  float wall = 1.30 - k.x;                // hollow tube, flown from inside
+  float zc = mod(p.z, 0.9) - 0.45;        // repeat cells along depth
+  float win = sdBox2(vec2(k.y, zc), vec2(0.30, 0.24)) - 0.05;
+  ed = abs(win);                          // neon lives on the window frame
+  return max(wall, -win);                 // punch the holes
+}
+
+float mapd(vec3 p){ float e; return map(p, e); }
+
+vec3 calcNormal(vec3 p){
+  vec2 e = vec2(1.0, -1.0) * 0.0012;
+  return normalize(e.xyy * mapd(p + e.xyy) + e.yyx * mapd(p + e.yyx)
+                 + e.yxy * mapd(p + e.yxy) + e.xxx * mapd(p + e.xxx));
+}
+
+void main(){
+  vec2 uv = (gl_FragCoord.xy * 2.0 - u_resolution)
+          / min(u_resolution.x, u_resolution.y);
+
+  // hover overdrives u_time, so flight speed reacts to attention
+  float z = u_time * 1.15;
+  vec3 ro = vec3(path(z), z);
+  vec3 ahead = vec3(path(z + 1.6), z + 1.6);
+  vec3 fwd = normalize(ahead - ro);
+  vec3 rgt = normalize(cross(vec3(0.0, 1.0, 0.0), fwd));
+  vec3 up  = cross(fwd, rgt);
+  vec2 m = (u_mouse - 0.5) * 0.9;
+  vec3 rd = normalize(fwd * 1.35 + rgt * (uv.x + m.x * 0.5)
+                                 + up  * (uv.y + m.y * 0.5));
+
+  float t = 0.0, glow = 0.0, ed;
+  float d = 0.0;
+  for (int i = 0; i < 84; i++){
+    vec3 p = ro + rd * t;
+    d = map(p, ed);
+    glow += exp(-ed * 20.0) * 0.014;      // neon gathered along the ray
+    if (d < 0.0015 || t > 22.0) break;
+    t += d * 0.75;                        // conservative step: twisted SDF
+  }
+
+  vec3 col = vec3(0.0);
+  if (d < 0.0015){
+    vec3 p = ro + rd * t;
+    vec3 n = calcNormal(p);
+    map(p, ed);
+    float head = clamp(dot(n, -rd), 0.0, 1.0);       // headlight
+    float neon = exp(-ed * 24.0);                     // window frame glow
+    col = vec3(0.16) * head * head;                   // dark panels
+    col += vec3(0.65) * pow(head, 6.0) * 0.4;         // specular kiss
+    col += ACCENT * neon * 1.9;                       // the neon edge
+    col *= exp(-0.16 * t);                            // depth falloff
+  }
+  col += ACCENT * glow * 0.85;                        // accumulated haze
+  col += vec3(1.0) * pow(glow, 3.0) * 0.10;           // hot core burns white
+  col *= 1.0 - 0.28 * dot(uv, uv);                    // vignette
+  col = pow(col, vec3(0.4545));
+  fragColor = vec4(col, 1.0);
+}
+`;
+
+/* ------------------------------------------------------------ */
+
+const FLOW_SIM = `#version 300 es
+// 008 FLOW — feedback pass (ping-pong: reads the last frame,
+// writes the next). Advect upstream, decay, inject at the pointer.
+precision highp float;
+
+uniform sampler2D u_prev;      // the previous state of this very image
+uniform float u_time;
+uniform float u_dt;
+uniform vec2  u_resolution;    // sim buffer resolution
+uniform vec2  u_mouse;         // pointer, 0..1
+uniform vec2  u_mouseVel;      // pointer velocity, uv/sec
+uniform float u_inject;        // > 0 while ink is being poured
+out vec4 fragColor;
+
+float hash(vec2 p){
+  p = fract(p * vec2(123.34, 456.21));
+  p += dot(p, p + 45.32);
+  return fract(p.x * p.y);
+}
+float noise(vec2 p){
+  vec2 i = floor(p), f = fract(p);
+  vec2 u = f * f * (3.0 - 2.0 * f);
+  return mix(mix(hash(i),                  hash(i + vec2(1.0, 0.0)), u.x),
+             mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x), u.y);
+}
+
+// curl of the noise field: divergence-free, so the drift never pools
+vec2 curl(vec2 p){
+  float e = 0.13;
+  float a = noise(p + vec2(0.0, e)) - noise(p - vec2(0.0, e));
+  float b = noise(p + vec2(e, 0.0)) - noise(p - vec2(e, 0.0));
+  return vec2(a, -b) / (2.0 * e);
+}
+
+void main(){
+  vec2 uv = gl_FragCoord.xy / u_resolution;
+  float asp = u_resolution.x / u_resolution.y;
+  vec2 st = vec2(uv.x * asp, uv.y);            // aspect-true space
+  vec2 ms = vec2(u_mouse.x * asp, u_mouse.y);
+  vec2 dm = st - ms;
+
+  // velocity field: ambient curl drift + a directed push at the pointer
+  vec2 vel = curl(st * 2.1 + u_time * 0.05) * 0.060;
+  float infl = exp(-dot(dm, dm) * 70.0);
+  vel += u_mouseVel * infl * 0.55;             // pointer momentum bends the flow
+  vel += vec2(-dm.y, dm.x) * infl * 0.10;      // slight swirl around the pointer
+
+  // advect: read the previous frame upstream of the velocity
+  vec2 puv = uv - vel * u_dt * vec2(1.0 / asp, 1.0) * 3.4;
+  vec2 px = 1.0 / u_resolution;
+  vec4 c  = texture(u_prev, puv);
+  vec4 nb = (texture(u_prev, puv + vec2(px.x, 0.0))
+           + texture(u_prev, puv - vec2(px.x, 0.0))
+           + texture(u_prev, puv + vec2(0.0, px.y))
+           + texture(u_prev, puv - vec2(0.0, px.y))) * 0.25;
+  vec3 ink = mix(c, nb, 0.38).rgb;             // diffuse: the liquid feel
+
+  ink *= pow(0.86, u_dt);                      // decay, framerate-independent
+
+  // pour: white core, red charge that grows with pointer speed
+  float spd = length(u_mouseVel);
+  float core = exp(-dot(dm, dm) * 1100.0);
+  float halo = exp(-dot(dm, dm) * 150.0);
+  vec3 add = vec3(1.0) * core * 1.5
+           + vec3(1.0, 0.231, 0.188) * halo * (0.22 + min(spd * 0.30, 1.1));
+  ink += add * u_inject * min(u_dt * 60.0, 2.5);
+
+  fragColor = vec4(min(ink, vec3(6.0)), 1.0);
+}
+`;
+
+const FLOW_VIEW = `#version 300 es
+// 008 FLOW — view pass (screens the feedback state to the display)
+precision highp float;
+
+uniform sampler2D u_state;
+uniform float u_time;
+uniform vec2  u_resolution;
+out vec4 fragColor;
+
+void main(){
+  vec2 uv = gl_FragCoord.xy / u_resolution;
+  vec3 s = texture(u_state, uv).rgb;
+  vec3 col = 1.0 - exp(-s * 1.6);              // soft shoulder, cores stay white
+  float grain = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453);
+  col *= 0.94 + 0.06 * grain;                  // paper grain
+  vec2 q = uv - 0.5;
+  col *= 1.0 - 0.55 * dot(q, q);               // vignette
+  fragColor = vec4(col, 1.0);
+}
+`;
+
+/* ------------------------------------------------------------ */
+
+/* Tile-mode variants: the grid runs the raymarchers with fewer
+   steps — at ~0.6 DPR tile size the difference is invisible.
+   def.src (displayed in the inspector and compiled fullscreen)
+   is the full-step original. */
+const capSteps = (src, pairs) => pairs.reduce((s, [from, to]) => s.replace(from, to), src);
+const MORPH_TILE  = capSteps(MORPH,  [['i < 96', 'i < 56'], ['i < 40', 'i < 24']]);
+const PORTAL_TILE = capSteps(PORTAL, [['i < 84', 'i < 64']]);
+
 export const SHADERS = [
   {
     id: '001',
@@ -429,6 +637,7 @@ export const SHADERS = [
     tech: 'RAYMARCHED SDF · SOFT SHADOWS',
     desc: 'A single signed distance field interpolates between sphere, cube and torus while a raymarcher walks each ray through space. Lighting is computed analytically: one key light with penumbra soft shadows, ambient occlusion sampled along the normal, and a fresnel rim that catches the silhouette in red. Drag the pointer to orbit the solid.',
     src: MORPH,
+    tileSrc: MORPH_TILE,
   },
   {
     id: '002',
@@ -464,5 +673,23 @@ export const SHADERS = [
     tech: 'VORONOI · BORDER DISTANCE',
     desc: 'A Voronoi diagram whose seed points orbit inside their own lattice cells. A second pass measures the true perpendicular distance to each cell wall, which keeps every edge the same width no matter how the diagram deforms. Cells breathe on independent phases; a marked few flash the accent. Walls ignite near the pointer.',
     src: CELLS,
+  },
+  {
+    id: '007',
+    name: 'PORTAL',
+    tech: 'KALEIDOSCOPIC RAYMARCH · TUNNEL',
+    desc: 'A raymarched flight down an endless tunnel whose cross-section is folded into seven mirrored sectors — a kaleidoscope in polar space. Windows are punched through the wall on a repeating lattice and their frames carry the neon; glow is integrated along every ray, so the haze is real light, not a post effect. The camera rides a drifting curve and never stops. Hover overdrives the clock: attention is throttle. The pointer steers the gaze.',
+    src: PORTAL,
+    tileSrc: PORTAL_TILE,
+  },
+  {
+    id: '008',
+    name: 'FLOW',
+    tech: 'PING-PONG FBO FEEDBACK',
+    desc: 'The only program here that remembers. Two framebuffers trade places every frame: one is read as the previous state while the other is written as the next — advected upstream along a curl-noise field, diffused, decayed, and re-injected wherever you pour. Press and drag to paint ink into the loop; your pointer velocity bends the current and charges the ink red. Left alone, a ghost emitter wanders the field. State is RGBA16F when the GPU allows it, RGBA8 otherwise.',
+    src: (FLOW_SIM.trim() + '\n\n' + FLOW_VIEW.trim() + '\n'),
+    feedback: true,
+    simSrc: FLOW_SIM,
+    viewSrc: FLOW_VIEW,
   },
 ];

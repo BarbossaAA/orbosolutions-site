@@ -43,13 +43,32 @@ body {
   color: var(--ink);
 }
 
-a:focus-visible {
+a:focus-visible,
+button:focus-visible {
   outline: 1px solid var(--accent);
   outline-offset: 4px;
 }
 
+/* The dossier scrolls natively — re-enable touch panning while open. */
+html.is-report {
+  touch-action: auto;
+}
+
+/* While the dossier is open the slider chrome bows out.
+   (Containers only — GSAP tweens their children, never these.) */
+main,
+.site-head {
+  transition: opacity 0.45s ease;
+}
+
+html.is-report main,
+html.is-report .site-head {
+  opacity: 0;
+  pointer-events: none;
+}
+
 /* Gate the UI until the intro runs — avoids a flash before GSAP takes over. */
-body:not(.is-ready) :is(.site-head, .slide-ui, .counter, .rail, .hint) {
+body:not(.is-ready) :is(.site-head, .slide-ui, .counter, .rail, .hint, .report-cta) {
   visibility: hidden;
 }
 
@@ -75,11 +94,11 @@ body.no-webgl {
     var(--ink);
 }
 
-/* film grain over everything */
+/* film grain over everything (incl. the field-report dossier) */
 .grain {
   position: fixed;
   inset: -60px;
-  z-index: 40;
+  z-index: 60;
   pointer-events: none;
   opacity: 0.055;
   mix-blend-mode: overlay;
@@ -424,7 +443,8 @@ body.no-webgl {
 /* ------------------------------------------------------------ cursor */
 
 body.has-cursor,
-body.has-cursor a {
+body.has-cursor a,
+body.has-cursor button {
   cursor: none;
 }
 
@@ -537,6 +557,15 @@ body.is-dragging .cursor__label {
     display: none;
   }
 
+  /* CTA takes the bottom-left slot; hide the hint to avoid collision. */
+  .hint {
+    display: none;
+  }
+
+  .report-cta {
+    padding: 10px 14px;
+  }
+
   .rail {
     right: 14px;
     height: 28vh;
@@ -563,5 +592,362 @@ body.is-dragging .cursor__label {
 
   .slide-ui {
     bottom: 64px;
+  }
+}
+
+/* --------------------------------------------------- field report CTA */
+
+.report-cta {
+  position: fixed;
+  left: var(--pad-x);
+  bottom: clamp(26px, 5vh, 44px);
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+  background: transparent;
+  border: 1px solid var(--bone-40);
+  border-radius: 2px;
+  color: var(--bone);
+  font-family: 'Archivo', system-ui, sans-serif;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transition:
+    background-color 0.35s ease,
+    border-color 0.35s ease,
+    color 0.35s ease;
+}
+
+.report-cta:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--ink);
+}
+
+.report-cta__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  transition: background-color 0.35s ease;
+}
+
+.report-cta:hover .report-cta__dot {
+  background: var(--ink);
+}
+
+.report-cta__arrow {
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+/* ------------------------------------------------ field report dossier */
+
+.report {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.report.is-open {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* Legibility wash — the WebGL stage also dims via its uReport uniform. */
+.report::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(16, 14, 12, 0.3) 0%,
+    rgba(16, 14, 12, 0.55) 55%,
+    rgba(16, 14, 12, 0.72) 100%
+  );
+}
+
+.report__scroll {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(232, 226, 214, 0.25) transparent;
+}
+
+.report__scroll::-webkit-scrollbar {
+  width: 5px;
+}
+
+.report__scroll::-webkit-scrollbar-thumb {
+  background: var(--bone-16);
+  border-radius: 3px;
+}
+
+.report__inner {
+  position: relative;
+  max-width: 820px;
+  margin: 0 auto;
+  padding: clamp(96px, 16vh, 160px) var(--pad-x) 22vh;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(56px, 9vh, 96px);
+}
+
+.report__eyebrow {
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 26px;
+}
+
+.report__title {
+  font-family: 'Fraunces', serif;
+  font-variation-settings: 'opsz' 144;
+  font-weight: 380;
+  font-size: clamp(3rem, 9vw, 7.5rem);
+  line-height: 0.98;
+  letter-spacing: -0.015em;
+  color: var(--bone);
+}
+
+.report__tline-mask {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+
+.report__tline {
+  display: inline-block;
+}
+
+.report__tline.is-italic {
+  font-style: italic;
+  font-weight: 310;
+}
+
+.report__coords {
+  margin-top: 24px;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--bone-55);
+}
+
+.report__lede {
+  margin-top: 26px;
+  max-width: 46ch;
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-variation-settings: 'opsz' 30;
+  font-weight: 340;
+  font-size: 1.15rem;
+  line-height: 1.6;
+  color: var(--bone-70);
+}
+
+.r-sec__label {
+  font-size: 0.575rem;
+  font-weight: 600;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--bone-40);
+  padding-bottom: 10px;
+  margin-bottom: 22px;
+  border-bottom: 1px solid var(--bone-16);
+}
+
+.rstat {
+  display: grid;
+  grid-template-columns: 1fr auto minmax(64px, auto);
+  align-items: baseline;
+  gap: 18px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--bone-16);
+}
+
+.rstat__label {
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--bone-55);
+}
+
+.rstat__value {
+  font-family: 'Fraunces', serif;
+  font-variation-settings: 'opsz' 100;
+  font-weight: 340;
+  font-size: clamp(2rem, 5.4vw, 3.4rem);
+  line-height: 1;
+  color: var(--bone);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.rstat__suffix {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.report__map {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+#reportMap {
+  width: min(460px, 100%);
+  aspect-ratio: 1;
+  display: block;
+  background: rgba(232, 226, 214, 0.03);
+  border: 1px solid var(--bone-16);
+}
+
+.report__mapcap {
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--bone-40);
+}
+
+.report__quote {
+  position: relative;
+  padding-left: clamp(28px, 5vw, 56px);
+}
+
+.report__quote::before {
+  content: '\201C';
+  position: absolute;
+  left: 0;
+  top: -0.12em;
+  font-family: 'Fraunces', serif;
+  font-size: 3.4rem;
+  font-weight: 340;
+  line-height: 1;
+  color: var(--accent);
+}
+
+.report__quote p {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-variation-settings: 'opsz' 60;
+  font-weight: 340;
+  font-size: clamp(1.5rem, 3.4vw, 2.3rem);
+  line-height: 1.35;
+  color: var(--bone);
+  max-width: 26ch;
+}
+
+.report__quote cite {
+  display: block;
+  margin-top: 20px;
+  font-family: 'Archivo', system-ui, sans-serif;
+  font-style: normal;
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--bone-55);
+}
+
+.report__end {
+  text-align: center;
+  font-size: 0.575rem;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--bone-40);
+  padding-top: 8px;
+}
+
+/* Scroll-reveal state for dossier sections. */
+.r-sec {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.9s ease,
+    transform 0.9s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.r-sec.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .r-sec {
+    transition: none;
+    transform: none;
+  }
+}
+
+.report__close {
+  position: absolute;
+  top: 22px;
+  right: var(--pad-x);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  background: transparent;
+  border: 1px solid var(--bone-40);
+  border-radius: 999px;
+  color: var(--bone);
+  font-family: 'Archivo', system-ui, sans-serif;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    color 0.3s ease;
+}
+
+.report__close:hover {
+  background: var(--bone);
+  border-color: var(--bone);
+  color: var(--ink);
+}
+
+.report__close span[aria-hidden] {
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+@media (max-width: 700px) {
+  .report__inner {
+    gap: 48px;
+  }
+
+  .rstat {
+    gap: 12px;
+  }
+
+  .report__close .report__close-label {
+    display: none;
+  }
+
+  .report__close {
+    padding: 10px 13px;
   }
 }

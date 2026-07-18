@@ -56,6 +56,17 @@ em { font-style: italic; color: var(--lime); }
 
 :focus-visible { outline: 2px solid var(--lime); outline-offset: 3px; }
 
+/* ---------------- WebGL aurora backdrop ---------------- */
+
+.aurora-gl {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;          /* behind everything; body bg propagates to root canvas */
+  pointer-events: none;
+}
+
 /* ---------------- Film grain (inline SVG feTurbulence) ---------------- */
 
 .grain {
@@ -288,6 +299,13 @@ html.cursor-hot .cursor-dot i {
   height: auto;
 }
 
+.badge-ring {
+  fill: none;
+  stroke: var(--lime);
+  stroke-opacity: 0.45;
+  stroke-width: 1.2;
+}
+
 .badge-text {
   fill: var(--ink);
   font-family: var(--font-body);
@@ -308,6 +326,9 @@ html.cursor-hot .cursor-dot i {
 
 .hero-line { display: block; overflow: hidden; padding: 0.025em 0; }
 .hero-line-inner { display: inline-block; will-change: transform; }
+
+/* after the intro mask reveal, unclip so chars can drift with depth */
+html.intro-done .hero-line { overflow: visible; }
 
 .hero-line:nth-child(2) { margin-left: clamp(1.5rem, 9vw, 10rem); }
 .hero-line:nth-child(3) { margin-left: clamp(0.5rem, 3vw, 3.5rem); }
@@ -371,6 +392,26 @@ html.cursor-hot .cursor-dot i {
   text-transform: uppercase;
   letter-spacing: -0.01em;
   font-weight: 400;
+}
+
+/* ---------------- Section dividers (DrawSVG strokes) ---------------- */
+
+.divider {
+  padding: 0 var(--pad);
+  margin: clamp(1rem, 4vh, 2.5rem) 0;
+}
+
+.divider svg {
+  width: 100%;
+  height: clamp(30px, 6vh, 60px);
+  overflow: visible;
+}
+
+.divider-path {
+  fill: none;
+  stroke: rgba(242, 240, 234, 0.28);
+  stroke-width: 1.2;
+  stroke-linecap: round;
 }
 
 /* ---------------- Services: stacking cards ---------------- */
@@ -568,6 +609,130 @@ html.cursor-hot .cursor-dot i {
 }
 
 .poster-num { color: var(--lime); }
+
+html:not(.reduced) .poster { cursor: pointer; }
+
+.poster-word { transition: opacity 0.45s ease; }
+
+/* ---------------- Work detail overlay (Flip) ---------------- */
+
+.work-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 140;               /* above nav (100), below grain (150) */
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.work-overlay.is-open {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.overlay-media-slot {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #050505;
+}
+
+.poster-media.is-overlay {
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  border-color: transparent;
+}
+
+.poster-media.is-overlay .poster-word { opacity: 0; }
+
+.overlay-content {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: calc(var(--pad) * 1.1) var(--pad) var(--pad);
+  background: linear-gradient(180deg,
+    rgba(5, 5, 5, 0.3) 0%,
+    rgba(5, 5, 5, 0) 26%,
+    rgba(5, 5, 5, 0) 52%,
+    rgba(5, 5, 5, 0.62) 100%);
+  opacity: 0;
+}
+
+.overlay-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.overlay-num {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  color: var(--lime);
+}
+
+.overlay-close {
+  flex: none;
+  width: 3.25rem;
+  height: 3.25rem;
+  border: 1px solid rgba(242, 240, 234, 0.45);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--ink);
+  background: rgba(10, 10, 10, 0.35);
+  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  will-change: transform;
+}
+
+.overlay-close:hover {
+  background: var(--lime);
+  border-color: var(--lime);
+  color: #0A0A0A;
+}
+
+.overlay-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.6rem, 8vw, 7rem);
+  line-height: 0.95;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  font-weight: 400;
+}
+
+.overlay-desc {
+  margin-top: 1rem;
+  max-width: 54ch;
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
+  color: rgba(242, 240, 234, 0.82);
+}
+
+.overlay-meta {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.8rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid rgba(242, 240, 234, 0.28);
+}
+
+.overlay-meta li {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.overlay-meta span { color: rgba(242, 240, 234, 0.55); }
+.overlay-meta b { font-weight: 600; color: var(--ink); }
 
 /* ---------------- Marquee ---------------- */
 
@@ -772,6 +937,7 @@ html.cursor-hot .cursor-dot i {
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
   .footer-grid { grid-template-columns: repeat(2, 1fr); row-gap: 3rem; }
   .hero-meta-cities { display: none; }
+  .overlay-meta { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem 1.5rem; }
 }
 
 @media (max-width: 720px) {

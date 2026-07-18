@@ -1,15 +1,21 @@
 /*
  * TERRA — textures.js
- * Procedural 1024x1024 "aerial landscape" textures.
+ * Procedural 768x768 "aerial landscape" textures.
  * Each project renders a height field (fBm + domain warp) at 512^2,
  * then a full-resolution colour pass applies a palette ramp, directional
  * relief shading, optional contour lines, grain and layered canvas
  * gradients. Everything is deterministic (seeded) — no image assets.
+ *
+ * 768 (not 1024): the texture is cover-fit fullscreen, so at DPR<=1.5 it
+ * is magnified ~2.8-3.8x either way (pure linear-filter upscale, soft
+ * organic content). The in-shader film grain + CSS grain overlay + radial
+ * CA sit on top and mask the difference entirely, while the colour pass
+ * does ~44% less work per slide.
  */
 
 import { makeFbm } from './noise.js';
 
-const SIZE = 1024;   // final texture resolution
+const SIZE = 768;    // final texture resolution
 const HF = 512;      // height-field resolution
 
 /* ---------------------------------------------------------------- utils */
@@ -76,8 +82,21 @@ function bilinear(grid, size, u, v) {
 function microYield() {
   if (document.hidden) return Promise.resolve();
   return new Promise((resolve) => {
-    const t = setTimeout(resolve, 80);
+    const t = setTimeout(resolve, 40);
     requestAnimationFrame(() => { clearTimeout(t); resolve(); });
+  });
+}
+
+/* Idle-time yield for the background slides (2-5): waits for real browser
+   idle so generation never fights the render loop or user input. The
+   timeout keeps progress moving on busy or throttled tabs. */
+function idleYield() {
+  return new Promise((resolve) => {
+    if (typeof requestIdleCallback === 'function') {
+      requestIdleCallback(() => resolve(), { timeout: 300 });
+    } else {
+      setTimeout(resolve, 32);
+    }
   });
 }
 
@@ -235,12 +254,23 @@ const RECIPES = {
 /* ------------------------------------------------------------ generator */
 
 /*
- * Generates one project texture. onProgress receives 0..1.
+ * Generates one project texture set. onProgress receives 0..1.
  * Work is chunked with event-loop yields so the loader bar repaints.
+ * With { idle: true } the chunks are smaller and scheduled through
+ * requestIdleCallback so slides 2-5 build behind live interaction.
+ *
+ * Returns:
+ *   canvas        768^2 colour texture
+ *   heightCanvas  512^2 normalised grayscale height map (parallax)
+ *   mapField      160^2 Float32Array of the SAME height field, 0..1,
+ *                 used by the field-report topographic mini-map
+ *   mapSize       side length of mapField
  */
-export async function generateProjectCanvas(id, onProgress = () => {}) {
+export async function generateProjectCanvas(id, onProgress = () => {}, { idle = false } = {}) {
   const recipe = RECIPES[id];
   if (!recipe) throw new Error(`Unknown texture recipe: ${id}`);
+
+  const pause = idle ? idleYield : microYield;
 
   const canvas = document.createElement('canvas');
   canvas.width = SIZE;
@@ -250,8 +280,8 @@ export async function generateProjectCanvas(id, onProgress = () => {}) {
   const noise = recipe.makeNoise();
   const heights = new Float32Array(HF * HF);
 
-  const H_CHUNK = 64;                 // 8 chunks for the height pass
-  const C_CHUNK = 128;                // 8 chunks for the colour pass
+  const H_CHUNK = idle ? 64 : 128;    // rows per slice, height pass
+  const C_CHUNK = idle ? 96 : 192;    // rows per slice, colour pass
   const totalChunks = HF / H_CHUNK + SIZE / C_CHUNK;
   let done = 0;
 
@@ -266,13 +296,35 @@ export async function generateProjectCanvas(id, onProgress = () => {}) {
     }
     done++;
     onProgress((done / totalChunks) * 0.97);
-    await microYield();
+    await pause();
   }
 
-  /* Pass 2 — colour, relief light, contours and grain at 1024^2 */
+  /* Pass 1b — precomputed gradient grids for the relief light.
+     One central difference per cell here replaces four extra bilinear
+     height samples per OUTPUT pixel in the colour pass (~40% of it).
+     The 3/(span) scale matches the old eps = 1.5 texel sampling span,
+     so the relief contrast is unchanged. */
+  const gxGrid = new Float32Array(HF * HF);
+  const gyGrid = new Float32Array(HF * HF);
+  for (let y = 0; y < HF; y++) {
+    const ym = y > 0 ? y - 1 : 0;
+    const yp = y < HF - 1 ? y + 1 : HF - 1;
+    const row = y * HF;
+    const rowm = ym * HF;
+    const rowp = yp * HF;
+    const ky = 3 / ((yp - ym) || 1);
+    for (let x = 0; x < HF; x++) {
+      const xm = x > 0 ? x - 1 : 0;
+      const xp = x < HF - 1 ? x + 1 : HF - 1;
+      gxGrid[row + x] = (heights[row + xp] - heights[row + xm]) * (3 / ((xp - xm) || 1));
+      gyGrid[row + x] = (heights[rowp + x] - heights[rowm + x]) * ky;
+    }
+  }
+  await pause();
+
+  /* Pass 2 — colour, relief light, contours and grain at 768^2 */
   const img = ctx.createImageData(SIZE, SIZE);
   const data = img.data;
-  const eps = 1.5 / HF;
   const ldx = recipe.lightDir[0];
   const ldy = recipe.lightDir[1];
   const ls = recipe.lightStrength;
@@ -289,9 +341,9 @@ export async function generateProjectCanvas(id, onProgress = () => {}) {
         const h = bilinear(heights, HF, u, v);
         recipe.color(h, out);
 
-        // Directional relief shading from the height gradient.
-        const dhx = bilinear(heights, HF, u + eps, v) - bilinear(heights, HF, u - eps, v);
-        const dhy = bilinear(heights, HF, u, v + eps) - bilinear(heights, HF, u, v - eps);
+        // Directional relief shading from the precomputed gradient.
+        const dhx = bilinear(gxGrid, HF, u, v);
+        const dhy = bilinear(gyGrid, HF, u, v);
         let light = 1 + (dhx * ldx + dhy * ldy) * ls;
         light = light < 0.45 ? 0.45 : light > 1.5 ? 1.5 : light;
 
@@ -319,7 +371,7 @@ export async function generateProjectCanvas(id, onProgress = () => {}) {
     }
     done++;
     onProgress((done / totalChunks) * 0.97);
-    await microYield();
+    await pause();
   }
 
   ctx.putImageData(img, 0, 0);
@@ -342,6 +394,48 @@ export async function generateProjectCanvas(id, onProgress = () => {}) {
   ctx.fillRect(0, 0, SIZE, SIZE);
 
   ctx.globalCompositeOperation = 'source-over';
+
+  /* Pass 4 — derived height products from the same field.
+     (a) 512^2 grayscale height canvas for shader parallax.
+     (b) 160^2 normalised float grid for the report mini-map contours. */
+  let mn = Infinity;
+  let mx = -Infinity;
+  for (let i = 0; i < heights.length; i++) {
+    const h = heights[i];
+    if (h < mn) mn = h;
+    if (h > mx) mx = h;
+  }
+  const span = (mx - mn) || 1;
+
+  const heightCanvas = document.createElement('canvas');
+  heightCanvas.width = HF;
+  heightCanvas.height = HF;
+  const hctx = heightCanvas.getContext('2d');
+  const himg = hctx.createImageData(HF, HF);
+  const hdata = himg.data;
+  for (let i = 0, o = 0; i < heights.length; i++, o += 4) {
+    const g = (((heights[i] - mn) / span) * 255) | 0;
+    hdata[o] = g;
+    hdata[o + 1] = g;
+    hdata[o + 2] = g;
+    hdata[o + 3] = 255;
+  }
+  hctx.putImageData(himg, 0, 0);
+  // Soften slightly so parallax offsets never tear on sharp ridges.
+  hctx.filter = 'blur(1.5px)';
+  hctx.drawImage(heightCanvas, 0, 0);
+  hctx.filter = 'none';
+
+  const MAP = 160;
+  const mapField = new Float32Array(MAP * MAP);
+  for (let y = 0; y < MAP; y++) {
+    const v = y / (MAP - 1);
+    for (let x = 0; x < MAP; x++) {
+      mapField[y * MAP + x] =
+        (bilinear(heights, HF, x / (MAP - 1), v) - mn) / span;
+    }
+  }
+
   onProgress(1);
-  return canvas;
+  return { canvas, heightCanvas, mapField, mapSize: MAP };
 }

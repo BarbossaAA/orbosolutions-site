@@ -1,6 +1,7 @@
 /* ============================================================
    AURORA(R) — main.js
-   GSAP 3.13 (ScrollTrigger + SplitText) + Lenis 1.3.4
+   GSAP 3.13 (ScrollTrigger + SplitText + ScrambleText + DrawSVG
+   + CustomEase + Flip) + Lenis 1.3.4 + aurora-gl.js (WebGL2 backdrop)
    No build step. Everything animated lives here.
    ============================================================ */
 (() => {
@@ -43,7 +44,8 @@
 
   /* ------------------------------------------------ static fallback:
      no GSAP (CDN failure) or the user prefers reduced motion.
-     Site renders as a fully readable static page. */
+     Site renders as a fully readable static page.
+     (aurora-gl.js handles its own reduced-motion still frame.) */
   if (!window.gsap || reduceMotion) {
     docEl.classList.add('reduced');
     dropPreloader();
@@ -54,17 +56,37 @@
   gsap.registerPlugin(ScrollTrigger);
   const hasSplit = typeof SplitText !== 'undefined';
   if (hasSplit) gsap.registerPlugin(SplitText);
+  const hasScramble = typeof ScrambleTextPlugin !== 'undefined';
+  if (hasScramble) gsap.registerPlugin(ScrambleTextPlugin);
+  const hasDraw = typeof DrawSVGPlugin !== 'undefined';
+  if (hasDraw) gsap.registerPlugin(DrawSVGPlugin);
+  const hasFlip = typeof Flip !== 'undefined';
+  if (hasFlip) gsap.registerPlugin(Flip);
   ScrollTrigger.config({ ignoreMobileResize: true });
+
+  /* the one signature ease: fast attack, long luminous settle.
+     Used for every reveal on the page. */
+  let EASE = 'power4.out';
+  if (typeof CustomEase !== 'undefined') {
+    gsap.registerPlugin(CustomEase);
+    CustomEase.create('aurora', 'M0,0 C0.19,0.62 0.24,1 1,1');
+    EASE = 'aurora';
+  }
+
+  const SCRAMBLE_CHARS = '#/\\_<>[]AURORA01';
 
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   window.scrollTo(0, 0);
 
   /* ------------------------------------------------ Lenis smooth scroll,
-     driven by gsap.ticker and feeding ScrollTrigger */
+     driven by gsap.ticker and feeding ScrollTrigger + the WebGL backdrop */
   let lenis = null;
   if (typeof Lenis !== 'undefined') {
     lenis = new Lenis({ duration: 1.1, smoothWheel: true });
     lenis.on('scroll', ScrollTrigger.update);
+    lenis.on('scroll', (e) => {
+      if (window.AURORA_GL) window.AURORA_GL.setVelocity(e.velocity || 0);
+    });
     gsap.ticker.add((time) => lenis.raf(time * 1000));
     gsap.ticker.lagSmoothing(0);
     lenis.stop(); // released after the preloader curtain wipe
@@ -109,9 +131,16 @@
       const ringX = gsap.quickTo(ring, 'x', { duration: 0.5,  ease: 'power3.out' });
       const ringY = gsap.quickTo(ring, 'y', { duration: 0.5,  ease: 'power3.out' });
 
+      /* rAF-gated: pointer events can fire at 120-250Hz, one update per frame is enough */
+      let px = 0, py = 0, cursorRaf = 0;
       window.addEventListener('mousemove', (e) => {
-        dotX(e.clientX); dotY(e.clientY);
-        ringX(e.clientX); ringY(e.clientY);
+        px = e.clientX; py = e.clientY;
+        if (cursorRaf) return;
+        cursorRaf = requestAnimationFrame(() => {
+          cursorRaf = 0;
+          dotX(px); dotY(py);
+          ringX(px); ringY(py);
+        });
       }, { passive: true });
 
       const HOVER_SELECTOR = 'a, button, .service-card, .poster';
@@ -125,17 +154,34 @@
 
     $$('.magnetic').forEach((el) => {
       const strength = parseFloat(el.dataset.strength || '0.35');
-      el.addEventListener('mousemove', (e) => {
+      let cx = 0, cy = 0, ex = 0, ey = 0, raf = 0;
+
+      /* one layout read per hover (not per event); subtract any in-flight
+         magnetic offset so the cached center is the rest position */
+      const cacheCenter = () => {
         const r = el.getBoundingClientRect();
+        cx = r.left + r.width / 2 - (parseFloat(gsap.getProperty(el, 'x')) || 0);
+        cy = r.top + r.height / 2 - (parseFloat(gsap.getProperty(el, 'y')) || 0);
+      };
+
+      const apply = () => {
+        raf = 0;
         gsap.to(el, {
-          x: (e.clientX - (r.left + r.width / 2)) * strength,
-          y: (e.clientY - (r.top + r.height / 2)) * strength,
+          x: (ex - cx) * strength,
+          y: (ey - cy) * strength,
           duration: 0.6,
           ease: 'power3.out',
           overwrite: 'auto'
         });
-      });
+      };
+
+      el.addEventListener('mouseenter', cacheCenter);
+      el.addEventListener('mousemove', (e) => {
+        ex = e.clientX; ey = e.clientY;
+        if (!raf) raf = requestAnimationFrame(apply); /* rAF-gated */
+      }, { passive: true });
       el.addEventListener('mouseleave', () => {
+        if (raf) { cancelAnimationFrame(raf); raf = 0; }
         gsap.to(el, { x: 0, y: 0, duration: 0.9, ease: 'elastic.out(1, 0.35)', overwrite: 'auto' });
       });
     });
@@ -146,14 +192,16 @@
   const countEl = $('.preloader-count b');
   const counterTween = gsap.to(counter, {
     value: 100,
-    duration: 2.1,
+    duration: 0.5,
     ease: 'power2.inOut',
     onUpdate: () => { if (countEl) countEl.textContent = pad(counter.value, 3); }
   });
 
+  /* fonts get 0.8s max — display=swap means text renders regardless,
+     and the intro must never gate interaction on the network */
   const fontsReady = Promise.race([
     (document.fonts && document.fonts.ready) || Promise.resolve(),
-    new Promise((res) => setTimeout(res, 3000))
+    new Promise((res) => setTimeout(res, 800))
   ]);
 
   /* ------------------------------------------------ hero */
@@ -171,7 +219,7 @@
     gsap.set('.site-nav', { yPercent: -130, autoAlpha: 0 });
     gsap.set(['.hero-meta', '.hero-badge'], { autoAlpha: 0, y: 28 });
 
-    introTl = gsap.timeline({ paused: true, defaults: { ease: 'power4.out' } });
+    introTl = gsap.timeline({ paused: true, defaults: { ease: EASE } });
 
     if (chars) {
       gsap.set(chars, { yPercent: 120 });
@@ -182,9 +230,34 @@
     }
 
     introTl
-      .to('.site-nav', { yPercent: 0, autoAlpha: 1, duration: 0.9, ease: 'power3.out' }, 0.5)
-      .to('.hero-meta', { autoAlpha: 1, y: 0, duration: 0.9, ease: 'power3.out' }, 0.62)
-      .to('.hero-badge', { autoAlpha: 1, y: 0, duration: 1, ease: 'back.out(1.5)' }, 0.72);
+      .to('.site-nav', { yPercent: 0, autoAlpha: 1, duration: 0.9, ease: EASE }, 0.5)
+      .to('.hero-meta', { autoAlpha: 1, y: 0, duration: 0.9, ease: EASE }, 0.62)
+      .to('.hero-badge', { autoAlpha: 1, y: 0, duration: 1, ease: EASE }, 0.72);
+
+    /* badge ring draws itself in around the rotating text */
+    if (hasDraw && $('.badge-ring')) {
+      gsap.set('.badge-ring', { drawSVG: '0%' });
+      introTl.to('.badge-ring', { drawSVG: '100%', duration: 1.4, ease: EASE }, 0.85);
+    }
+
+    /* once the mask reveal is done, unclip the lines so chars can drift */
+    introTl.add(() => docEl.classList.add('intro-done'), 1.3);
+
+    /* hero v2: chars drift up at slightly different rates on scroll (depth) */
+    const driftTargets = chars || lines;
+    if (driftTargets.length) {
+      gsap.to(driftTargets, {
+        y: (i) => -(40 + ((i * 53) % 7) * 24),
+        ease: 'none',
+        scrollTrigger: {
+          trigger: '.hero',
+          start: 'top top',
+          end: 'bottom top',
+          scrub: 0.4,
+          invalidateOnRefresh: true
+        }
+      });
+    }
 
     // Slowly rotating circular badge + drifting glow (decorative, looped)
     gsap.to('.hero-badge', { rotation: 360, duration: 26, repeat: -1, ease: 'none', transformOrigin: '50% 50%' });
@@ -285,8 +358,167 @@
     });
   };
 
+  /* ------------------------------------------------ work detail overlay:
+     Flip a poster's media fullscreen; its gradient becomes the backdrop */
+  const buildOverlay = () => {
+    const overlay = $('.work-overlay');
+    if (!overlay) return;
+    const slot = $('.overlay-media-slot', overlay);
+    const closeBtn = $('.overlay-close', overlay);
+    const content = $('.overlay-content', overlay);
+    const posters = $$('.poster');
+    if (!slot || !closeBtn || !content || !posters.length) return;
+
+    const fields = {
+      num:    $('.overlay-num', overlay),
+      title:  $('.overlay-title', overlay),
+      desc:   $('.overlay-desc', overlay),
+      client: $('.ov-client', overlay),
+      sector: $('.ov-sector', overlay),
+      year:   $('.ov-year', overlay),
+      scope:  $('.ov-scope', overlay)
+    };
+
+    /* fake case-study copy, keyed by poster title */
+    const CASES = {
+      Nocturne: {
+        client: 'Maison Nocturne',
+        scope: 'Art direction, e-commerce, motion',
+        desc: 'A darkened runway for a Paris fashion house — velvet blacks, silver type and a checkout that moves like a catwalk.'
+      },
+      Helios: {
+        client: 'Helios Energy',
+        scope: 'Product design, WebGL, design system',
+        desc: 'A clean-energy platform that treats sunlight as an interface — live irradiance data drawn as slow, warm gradients.'
+      },
+      Pulse: {
+        client: 'Pulse Festival',
+        scope: 'Campaign site, identity, ticketing',
+        desc: 'Three days, ninety artists, one heartbeat — a campaign site that syncs its palette to 128 BPM.'
+      },
+      Meridian: {
+        client: 'Meridian Journal',
+        scope: 'Editorial design, CMS, photo direction',
+        desc: 'A travel editorial that scrolls like a long-haul flight — slow, panoramic and impossible to skim.'
+      },
+      Obsidian: {
+        client: 'Obsidian Architects',
+        scope: 'Portfolio, 3D, brand system',
+        desc: 'A monolithic portfolio for brutalist architects — concrete greys, razor grids and light used like material.'
+      }
+    };
+
+    let active = null; // { media, parent, next, poster }
+    let busy = false;
+
+    const populate = (poster) => {
+      const titleEl = $('.poster-meta h3', poster);
+      const numEl = $('.poster-num', poster);
+      const metaSpans = $$('.poster-meta span:not(.poster-num)', poster);
+      const title = titleEl ? titleEl.textContent.trim() : '';
+      const data = CASES[title] || { client: title, scope: 'Design, development', desc: '' };
+
+      if (fields.num)    fields.num.textContent = numEl ? numEl.textContent : '';
+      if (fields.title)  fields.title.textContent = title;
+      if (fields.desc)   fields.desc.textContent = data.desc;
+      if (fields.client) fields.client.textContent = data.client;
+      if (fields.sector) fields.sector.textContent = metaSpans[0] ? metaSpans[0].textContent : '';
+      if (fields.year)   fields.year.textContent = metaSpans[1] ? metaSpans[1].textContent : '';
+      if (fields.scope)  fields.scope.textContent = data.scope;
+    };
+
+    const open = (poster) => {
+      if (busy || active) return;
+      const media = $('.poster-media', poster);
+      if (!media) return;
+      busy = true;
+
+      populate(poster);
+      active = { media, parent: media.parentNode, next: media.nextSibling, poster };
+
+      if (lenis) lenis.stop();
+      overlay.classList.add('is-open');
+      overlay.setAttribute('aria-hidden', 'false');
+
+      const place = () => {
+        slot.appendChild(media);
+        media.classList.add('is-overlay');
+      };
+
+      if (hasFlip) {
+        const state = Flip.getState(media);
+        place();
+        Flip.from(state, {
+          duration: 0.9,
+          ease: EASE,
+          absolute: true,
+          props: 'borderRadius',
+          onComplete: () => { busy = false; }
+        });
+      } else {
+        place();
+        busy = false;
+      }
+
+      gsap.fromTo(content,
+        { autoAlpha: 0, y: 30 },
+        { autoAlpha: 1, y: 0, duration: 0.7, delay: 0.45, ease: EASE, overwrite: true });
+
+      closeBtn.focus({ preventScroll: true });
+    };
+
+    const close = () => {
+      if (busy || !active) return;
+      busy = true;
+      const { media, parent, next, poster } = active;
+
+      gsap.to(content, { autoAlpha: 0, y: 16, duration: 0.25, ease: 'power2.in', overwrite: true });
+
+      const finish = () => {
+        overlay.classList.remove('is-open');
+        overlay.setAttribute('aria-hidden', 'true');
+        if (lenis) lenis.start();
+        active = null;
+        busy = false;
+        poster.focus({ preventScroll: true });
+      };
+
+      const restore = () => {
+        parent.insertBefore(media, next);
+        media.classList.remove('is-overlay');
+      };
+
+      if (hasFlip) {
+        const state = Flip.getState(media);
+        restore();
+        Flip.from(state, {
+          duration: 0.8,
+          ease: EASE,
+          absolute: true,
+          props: 'borderRadius',
+          onComplete: finish
+        });
+      } else {
+        restore();
+        finish();
+      }
+    };
+
+    posters.forEach((poster) => {
+      poster.setAttribute('tabindex', '0');
+      poster.setAttribute('role', 'button');
+      poster.addEventListener('click', () => open(poster));
+      poster.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(poster); }
+      });
+    });
+
+    closeBtn.addEventListener('click', (e) => { e.stopPropagation(); close(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+  };
+
   /* ------------------------------------------------ marquee: two rows,
-     opposite directions, timeScale follows scroll velocity */
+     opposite directions, timeScale + skew follow scroll velocity */
   const buildMarquee = () => {
     const rows = $$('.marquee-row');
     if (!rows.length) return;
@@ -301,21 +533,40 @@
       });
     });
 
-    const state = { current: 1, target: 1, dir: 1 };
+    const skewSetters = rows.map((row) => gsap.quickSetter($('.marquee-inner', row), 'skewX', 'deg'));
+
+    const state = { current: 1, target: 1, dir: 1, skew: 0, skewTarget: 0 };
+    let onscreen = true;
 
     if (lenis) {
       lenis.on('scroll', (e) => {
+        if (!onscreen) return; /* velocity reaction only matters when visible */
         const v = e.velocity || 0;
         if (Math.abs(v) > 0.2) state.dir = v > 0 ? 1 : -1;
         state.target = state.dir * (1 + Math.min(Math.abs(v) / 30, 3));
+        state.skewTarget = gsap.utils.clamp(-6, 6, v * 0.14);
       });
     }
 
     gsap.ticker.add(() => {
+      if (!onscreen) return; /* no per-frame work while offscreen */
       state.target += (state.dir - state.target) * 0.04;      // relax toward cruise speed
       state.current += (state.target - state.current) * 0.1;  // smooth the reaction
       tweens.forEach((t) => t.timeScale(state.current));
+
+      state.skewTarget *= 0.9;                                // relax toward upright
+      state.skew += (state.skewTarget - state.skew) * 0.12;
+      skewSetters.forEach((set, i) => set(i % 2 === 0 ? state.skew : -state.skew));
     });
+
+    /* don't animate the loop while the marquee is offscreen */
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries) => {
+        onscreen = entries[0].isIntersecting;
+        tweens.forEach((t) => (onscreen ? t.play() : t.pause()));
+      }, { rootMargin: '120px' });
+      io.observe(rows[0].closest('.marquee') || rows[0]);
+    }
   };
 
   /* ------------------------------------------------ manifesto: word scrub */
@@ -351,7 +602,7 @@
         y: 44,
         autoAlpha: 0,
         duration: 0.9,
-        ease: 'power3.out',
+        ease: EASE,
         delay: i * 0.08,
         scrollTrigger: { trigger: '.stats-grid', start: 'top 82%', once: true }
       });
@@ -367,6 +618,54 @@
     });
   };
 
+  /* ------------------------------------------------ scramble: nav hover +
+     section labels settle out of noise (mono-ish charset, fast settle) */
+  const buildScramble = () => {
+    if (!hasScramble) return;
+
+    $$('.nav-links a').forEach((link) => {
+      const original = link.textContent;
+      link.addEventListener('mouseenter', () => {
+        gsap.to(link, {
+          duration: 0.6,
+          scrambleText: { text: original, chars: SCRAMBLE_CHARS, speed: 1.2 },
+          overwrite: 'auto'
+        });
+      });
+    });
+
+    $$('.tag-name').forEach((el) => {
+      const original = el.textContent;
+      gsap.to(el, {
+        duration: 0.9,
+        scrambleText: { text: original, chars: SCRAMBLE_CHARS, speed: 0.6, revealDelay: 0.15 },
+        scrollTrigger: { trigger: el, start: 'top 88%', once: true }
+      });
+    });
+  };
+
+  /* ------------------------------------------------ dividers: thin SVG
+     strokes draw themselves outward from center on enter */
+  const buildDividers = () => {
+    $$('.divider-path').forEach((path) => {
+      if (hasDraw) {
+        gsap.fromTo(path, { drawSVG: '50% 50%' }, {
+          drawSVG: '0% 100%',
+          duration: 1.4,
+          ease: EASE,
+          scrollTrigger: { trigger: path, start: 'top 88%', once: true }
+        });
+      } else {
+        gsap.from(path, {
+          autoAlpha: 0,
+          duration: 1,
+          ease: EASE,
+          scrollTrigger: { trigger: path, start: 'top 88%', once: true }
+        });
+      }
+    });
+  };
+
   /* ------------------------------------------------ generic reveals */
   const buildReveals = () => {
     $$('[data-reveal]').forEach((el) => {
@@ -374,7 +673,7 @@
         y: 60,
         autoAlpha: 0,
         duration: 1,
-        ease: 'power3.out',
+        ease: EASE,
         scrollTrigger: { trigger: el, start: 'top 85%', once: true }
       });
     });
@@ -384,7 +683,7 @@
         scaleX: 0,
         transformOrigin: 'left center',
         duration: 1.1,
-        ease: 'power3.inOut',
+        ease: EASE,
         scrollTrigger: { trigger: el, start: 'top 92%', once: true }
       });
     });
@@ -393,15 +692,18 @@
   /* ------------------------------------------------ curtain wipe reveal */
   const revealSite = () => {
     gsap.timeline({ defaults: { ease: 'power4.inOut' }, onComplete: dropPreloader })
-      .to('.preloader-inner', { autoAlpha: 0, y: -40, duration: 0.5, ease: 'power2.in' }, '+=0.15')
-      .to('.panel-dark', { yPercent: -100, duration: 0.9 }, '-=0.1')
-      .to('.panel-lime', { yPercent: -100, duration: 0.9 }, '<0.14')
+      .to('.preloader-inner', { autoAlpha: 0, y: -40, duration: 0.3, ease: 'power2.in' }, 0)
+      .to('.panel-dark', { yPercent: -100, duration: 0.55 }, 0.1)
+      .to('.panel-lime', { yPercent: -100, duration: 0.5 }, 0.2)
       .add(() => {
+        /* release everything as soon as the wipe starts — never gate input */
+        const pre = $('.preloader');
+        if (pre) pre.style.pointerEvents = 'none';
         docEl.classList.remove('is-loading');
         if (lenis) lenis.start();
         ScrollTrigger.refresh();
         introTl.play();
-      }, '-=0.55');
+      }, 0.2);
   };
 
   /* ------------------------------------------------ boot */
@@ -409,9 +711,12 @@
     buildHero();
     buildServices();
     buildWork();
+    buildOverlay();
     buildMarquee();
     buildManifesto();
     buildStats();
+    buildScramble();
+    buildDividers();
     buildReveals();
     ScrollTrigger.refresh();
   };

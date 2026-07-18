@@ -1,15 +1,18 @@
 /*
  * TERRA — main.js
  * Loader, slider state machine, input (wheel / drag / keys),
- * DOM choreography and the custom cursor. One rAF loop drives
- * the WebGL stage and the cursor.
+ * DOM choreography, custom cursor, height-parallax mouse feed
+ * and the field-report overlay wiring. One rAF loop drives the
+ * WebGL stage and the cursor.
  */
 
 import { PROJECTS } from './data.js';
 import { generateProjectCanvas } from './textures.js';
 import { Stage } from './gl.js';
+import { createReport } from './report.js';
 
 const gsap = window.gsap;
+if (window.SplitText) gsap.registerPlugin(window.SplitText);
 
 const RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const FINE = window.matchMedia('(pointer: fine)').matches;
@@ -29,14 +32,19 @@ const els = {
   counterWin: document.getElementById('counterWin'),
   railFill: document.getElementById('railFill'),
   hint: document.getElementById('hint'),
+  reportCta: document.getElementById('reportCta'),
   cursorRing: document.getElementById('cursorRing'),
   cursorDot: document.getElementById('cursorDot')
 };
 
 let stage = null;
-let textures = [];
+let report = null;
+let textures = [];         // [{ tex, height }] — sparse; slides fill in from idle time
+let mapFields = [];        // [{ field, size }] — same noise field as the textures
+let placeholderSlot = null; // tiny neutral slot for not-yet-generated slides
+let slotBIndex = -1;       // which slide currently occupies shader slot B
 let index = 0;
-let state = 'loading';            // loading | idle | drag | anim
+let state = 'loading';     // loading | idle | drag | anim | report
 const trans = { p: 0 };
 let prevP = 0;
 let vel = 0;
@@ -55,6 +63,14 @@ let ringX = mouseX;
 let ringY = mouseY;
 let cursorSeen = false;
 
+/* Render gating */
+let pageVisible = !document.hidden;
+let onScreen = true;
+
+/* SplitText bookkeeping for the slide title */
+let titleSplit = null;
+let titleInTween = null;
+
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 const pad2 = (n) => String(n).padStart(2, '0');
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -69,6 +85,11 @@ boot();
 async function boot() {
   document.documentElement.style.setProperty('--accent', PROJECTS[0].accent);
 
+  // Fonts load in parallel with texture generation. display=swap means
+  // text never blocks on them — this short race only steadies SplitText
+  // metrics for the intro; it does not gate first paint on the network.
+  const fontsReady = Promise.race([document.fonts.ready, delay(800)]);
+
   try {
     stage = new Stage(els.canvas, { reducedMotion: RM });
   } catch (err) {
@@ -76,16 +97,23 @@ async function boot() {
   }
 
   if (stage) {
-    for (let i = 0; i < N; i++) {
-      const project = PROJECTS[i];
-      const canvas = await generateProjectCanvas(project.id, (f) => {
-        setLoad((i + f) / N, project.name, i);
-      });
-      textures.push(stage.makeTexture(canvas));
-    }
-    stage.setTextures(textures[0], textures[0]);
+    // Slide 1 only — the loader reflects first-slide readiness. The other
+    // four fields generate in idle time while the user is already looking.
+    placeholderSlot = stage.makePlaceholder();
+    const first = PROJECTS[0];
+    const gen = await generateProjectCanvas(first.id, (f) => setLoad(f, first.name, 0));
+    textures[0] = {
+      tex: stage.makeTexture(gen.canvas),
+      height: stage.makeTexture(gen.heightCanvas)
+    };
+    mapFields[0] = { field: gen.mapField, size: gen.mapSize };
+    stage.setSlide(textures[0], textures[0]);
+    stage.setPalette(first.accent);
+    stage.initTexture(textures[0]);
   }
-  setLoad(1, PROJECTS[N - 1].name, N - 1);
+  setLoad(1, PROJECTS[0].name, 0);
+
+  report = createReport({ stage, RM, onRequestClose: closeReport });
 
   buildSlideDom(PROJECTS[0]);
   buildCounter();
@@ -94,11 +122,13 @@ async function boot() {
   titleQuickX = gsap.quickSetter(els.title, 'x', 'px');
   titleQuickO = gsap.quickSetter(els.title, 'opacity');
 
-  await Promise.race([document.fonts.ready, delay(2500)]);
+  await fontsReady;
 
   bindInput();
   startLoop();
   intro();
+
+  if (stage) generateRemaining();
 
   // Verification hook, only active with ?debug in the URL.
   if (new URLSearchParams(window.location.search).has('debug')) {
@@ -107,6 +137,8 @@ async function boot() {
       textures,
       trans,
       advance,
+      openReport,
+      closeReport,
       getState: () => state,
       getIndex: () => index
     };
@@ -119,6 +151,47 @@ function setLoad(fraction, name, i) {
   els.loaderFill.style.transform = `scaleX(${fraction})`;
   if (name) {
     els.loaderNote.textContent = `Rendering ${name.toUpperCase()} field — ${pad2(i + 1)}/${pad2(N)}`;
+  }
+}
+
+/* ------------------------------------------- background texture stream */
+
+/* Slides 2-5 build in requestIdleCallback slices after first paint.
+   Each finished set is pre-uploaded to the GPU and hot-swapped into any
+   slot currently showing its shimmer placeholder. */
+async function generateRemaining() {
+  for (let i = 1; i < N; i++) {
+    const gen = await generateProjectCanvas(PROJECTS[i].id, undefined, { idle: true });
+    const slot = {
+      tex: stage.makeTexture(gen.canvas),
+      height: stage.makeTexture(gen.heightCanvas)
+    };
+    stage.initTexture(slot);         // upload now, not on first swipe
+    textures[i] = slot;
+    mapFields[i] = { field: gen.mapField, size: gen.mapSize };
+    onTextureReady(i);
+  }
+}
+
+function slotFor(i) {
+  return textures[i] || placeholderSlot;
+}
+
+function onTextureReady(i) {
+  const slot = textures[i];
+  if (i === index) {
+    stage.uniforms.uTexA.value = slot.tex;
+    stage.uniforms.uHeightA.value = slot.height;
+    gsap.to(stage.uniforms.uPlaceholderA, {
+      value: 0, duration: 0.8, ease: 'power2.out', overwrite: true
+    });
+  }
+  if (i === slotBIndex) {
+    stage.uniforms.uTexB.value = slot.tex;
+    stage.uniforms.uHeightB.value = slot.height;
+    gsap.to(stage.uniforms.uPlaceholderB, {
+      value: 0, duration: 0.5, ease: 'power2.out', overwrite: true
+    });
   }
 }
 
@@ -166,7 +239,17 @@ function rollCounter(next) {
   gsap.to(span, { yPercent: 0, duration: 0.75, delay: 0.28, ease: 'power3.out' });
 }
 
-function playDomSwap(next) {
+/* Split the title's line inners into chars; null when unavailable. */
+function splitTitle() {
+  if (!window.SplitText || RM) return null;
+  try {
+    return new window.SplitText(els.title.querySelectorAll('.t-line__in'), { type: 'chars' });
+  } catch (e) {
+    return null;
+  }
+}
+
+function playDomSwap(next, dir = 1) {
   const project = PROJECTS[next];
 
   rollCounter(next);
@@ -189,16 +272,38 @@ function playDomSwap(next) {
     return;
   }
 
-  const oldLines = els.title.querySelectorAll('.t-line__in');
+  // Clear any in-flight title split from the previous swap.
+  if (titleInTween) { titleInTween.kill(); titleInTween = null; }
+  if (titleSplit) { titleSplit.revert(); titleSplit = null; }
+
+  const outSplit = splitTitle();
+  const outTargets = outSplit ? outSplit.chars : els.title.querySelectorAll('.t-line__in');
   const tl = gsap.timeline();
-  tl.to(oldLines, { yPercent: -112, duration: 0.5, stagger: 0.05, ease: 'power2.in' }, 0)
-    .to([els.eyebrow, els.meta, els.desc], { y: -12, opacity: 0, duration: 0.4, ease: 'power2.in' }, 0.02)
+  tl.to(outTargets, {
+    yPercent: -115,
+    duration: outSplit ? 0.55 : 0.5,
+    stagger: outSplit ? { each: 0.015, from: dir === 1 ? 'start' : 'end' } : 0.05,
+    ease: 'power2.in'
+  }, 0)
+    // overwrite:'auto' kills any still-running intro tweens on these
+    // elements — input now unlocks before the intro fully settles.
+    .to([els.eyebrow, els.meta, els.desc], { y: -12, opacity: 0, duration: 0.4, ease: 'power2.in', overwrite: 'auto' }, 0.02)
     .add(() => {
       buildSlideDom(project);
       gsap.set([els.eyebrow, els.meta, els.desc], { y: 0, opacity: 1 });
-      const inners = els.title.querySelectorAll('.t-line__in');
+      titleSplit = splitTitle();
+      const inTargets = titleSplit ? titleSplit.chars : els.title.querySelectorAll('.t-line__in');
       const chips = els.meta.querySelectorAll('.meta__item');
-      gsap.from(inners, { yPercent: 114, duration: 0.95, stagger: 0.075, ease: 'power3.out' });
+      titleInTween = gsap.from(inTargets, {
+        yPercent: 115,
+        duration: 0.95,
+        stagger: titleSplit ? { each: 0.02, from: dir === 1 ? 'start' : 'end' } : 0.075,
+        ease: 'power3.out',
+        onComplete: () => {
+          if (titleSplit) { titleSplit.revert(); titleSplit = null; }
+          titleInTween = null;
+        }
+      });
       gsap.from(els.eyebrow, { y: 14, opacity: 0, duration: 0.55, ease: 'power3.out' });
       gsap.from(chips, { y: 12, opacity: 0, duration: 0.55, stagger: 0.05, delay: 0.08, ease: 'power3.out' });
       gsap.from(els.desc, { y: 10, opacity: 0, duration: 0.55, delay: 0.14, ease: 'power2.out' });
@@ -221,8 +326,14 @@ function advance(dir) {
 function startTransition(next, dir, fromP) {
   state = 'anim';
   if (stage) {
-    stage.uniforms.uTexB.value = textures[next];
+    const slot = slotFor(next);
+    gsap.killTweensOf(stage.uniforms.uPlaceholderB);
+    stage.uniforms.uTexB.value = slot.tex;
+    stage.uniforms.uHeightB.value = slot.height;
+    stage.uniforms.uPlaceholderB.value = textures[next] ? 0 : 1;
     stage.uniforms.uDirection.value = dir;
+    stage.setPalette(PROJECTS[next].accent);
+    slotBIndex = next;
   }
   const remaining = Math.max(0.35, 1 - fromP);
   gsap.to(trans, {
@@ -232,15 +343,32 @@ function startTransition(next, dir, fromP) {
     overwrite: true,
     onComplete: () => finishTransition(next)
   });
-  playDomSwap(next);
+  playDomSwap(next, dir);
   dimHint();
 }
 
 function finishTransition(next) {
   index = next;
   if (stage) {
-    stage.uniforms.uTexA.value = textures[next];
+    const slot = slotFor(next);
+    const ready = !!textures[next];
+    gsap.killTweensOf(stage.uniforms.uPlaceholderA);
+    stage.uniforms.uTexA.value = slot.tex;
+    stage.uniforms.uHeightA.value = slot.height;
+    // If the texture landed mid-transition its B-slot shimmer may still
+    // be fading — carry that fade over to A so there is no pop.
+    const pb = stage.uniforms.uPlaceholderB.value;
+    gsap.killTweensOf(stage.uniforms.uPlaceholderB);
+    if (ready && pb > 0.001) {
+      stage.uniforms.uPlaceholderA.value = pb;
+      gsap.to(stage.uniforms.uPlaceholderA, {
+        value: 0, duration: 0.4, ease: 'power2.out', overwrite: true
+      });
+    } else {
+      stage.uniforms.uPlaceholderA.value = ready ? 0 : 1;
+    }
     stage.uniforms.uProgress.value = 0;
+    slotBIndex = -1;
   }
   trans.p = 0;
   prevP = 0;
@@ -248,6 +376,28 @@ function finishTransition(next) {
   wheelAcc = 0;
   wheelArmed = false;                       // require a fresh gesture
   lockUntil = performance.now() + 300;      // swallow inertia tail
+}
+
+/* ------------------------------------------------------ field report */
+
+function openReport() {
+  if (state !== 'idle' || !report) return;
+  state = 'report';
+  document.documentElement.classList.add('is-report');
+  document.body.classList.remove('is-dragging');
+  report.open(PROJECTS[index], mapFields[index] || null);
+}
+
+function closeReport() {
+  if (state !== 'report' || !report) return;
+  report.close(() => {
+    document.documentElement.classList.remove('is-report');
+    state = 'idle';
+    wheelArmed = false;
+    wheelAcc = 0;
+    lockUntil = performance.now() + 350;
+    els.reportCta.focus({ preventScroll: true });
+  });
 }
 
 /* ------------------------------------------------------------- input */
@@ -259,12 +409,33 @@ function bindInput() {
   window.addEventListener('pointermove', onPointerMove);
   window.addEventListener('pointerup', onPointerUp);
   window.addEventListener('pointercancel', onPointerUp);
-  window.addEventListener('resize', () => { if (stage) stage.resize(); });
+
+  // rAF-gated resize: renderer.setSize is expensive, drag-resizes spam it.
+  let resizeQueued = false;
+  window.addEventListener('resize', () => {
+    if (resizeQueued) return;
+    resizeQueued = true;
+    requestAnimationFrame(() => {
+      resizeQueued = false;
+      if (stage) stage.resize();
+    });
+  });
+
+  els.reportCta.addEventListener('click', openReport);
+
+  document.addEventListener('visibilitychange', () => {
+    pageVisible = !document.hidden;
+  });
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver((entries) => {
+      onScreen = entries[0].isIntersecting;
+    }).observe(els.canvas);
+  }
 
   if (FINE && !RM) {
     document.body.classList.add('has-cursor');
     document.addEventListener('mouseover', (e) => {
-      document.body.classList.toggle('is-hover', !!e.target.closest('a'));
+      document.body.classList.toggle('is-hover', !!e.target.closest('a, button'));
     });
     document.addEventListener('mouseleave', () => {
       document.body.classList.remove('is-cursor-active');
@@ -297,6 +468,14 @@ function onWheel(e) {
 }
 
 function onKey(e) {
+  if (state === 'report') {
+    if (e.key === 'Escape') closeReport();
+    return;                                  // let the dossier scroll natively
+  }
+  if (e.key === 'Enter' && state === 'idle' && e.target === document.body) {
+    openReport();
+    return;
+  }
   if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown') {
     e.preventDefault();
     advance(1);
@@ -307,27 +486,44 @@ function onKey(e) {
 }
 
 let drag = null;
+let dragX = 0;
+let dragDirty = false;
 
 function onPointerDown(e) {
   if (e.pointerType === 'mouse' && e.button !== 0) return;
   trackCursor(e);
   if (state !== 'idle') return;
   drag = { x0: e.clientX, active: false, dir: 0, target: -1 };
+  dragX = e.clientX;
+  dragDirty = false;
 }
 
+/* pointermove only records the position; the actual drag math and DOM
+   writes run once per frame in the rAF loop (processDrag). */
 function onPointerMove(e) {
   trackCursor(e);
   if (!drag) return;
+  dragX = e.clientX;
+  dragDirty = true;
+}
 
-  const dx = e.clientX - drag.x0;
+function processDrag() {
+  if (!drag) return;
+
+  const dx = dragX - drag.x0;
   if (!drag.active) {
     if (Math.abs(dx) < 8) return;
     drag.active = true;
     drag.dir = dx < 0 ? 1 : -1;
     drag.target = (index + drag.dir + N) % N;
     if (stage) {
-      stage.uniforms.uTexB.value = textures[drag.target];
+      const slot = slotFor(drag.target);
+      gsap.killTweensOf(stage.uniforms.uPlaceholderB);
+      stage.uniforms.uTexB.value = slot.tex;
+      stage.uniforms.uHeightB.value = slot.height;
+      stage.uniforms.uPlaceholderB.value = textures[drag.target] ? 0 : 1;
       stage.uniforms.uDirection.value = drag.dir;
+      slotBIndex = drag.target;
     }
     state = 'drag';
     document.body.classList.add('is-dragging');
@@ -345,6 +541,7 @@ function onPointerMove(e) {
 function onPointerUp() {
   document.body.classList.remove('is-dragging');
   if (!drag) return;
+  if (dragDirty) { dragDirty = false; processDrag(); }  // final position
   const d = drag;
   drag = null;
   if (!d.active) return;
@@ -360,7 +557,7 @@ function onPointerUp() {
       duration: 0.55,
       ease: 'power3.out',
       overwrite: true,
-      onComplete: () => { trans.p = 0; prevP = 0; state = 'idle'; }
+      onComplete: () => { trans.p = 0; prevP = 0; slotBIndex = -1; state = 'idle'; }
     });
   }
 }
@@ -385,6 +582,9 @@ function startLoop() {
     const dt = Math.min(50, now - lastT) / 1000;
     lastT = now;
 
+    // Coalesced drag input — at most one drag update per frame.
+    if (drag && dragDirty) { dragDirty = false; processDrag(); }
+
     // Velocity: smoothed dp/dt, decays to zero after each tween.
     const dp = trans.p - prevP;
     prevP = trans.p;
@@ -402,9 +602,14 @@ function startLoop() {
     }
 
     if (stage) {
+      stage.setMouse(
+        mouseX / Math.max(1, window.innerWidth),
+        1 - mouseY / Math.max(1, window.innerHeight)
+      );
+      stage.update(dt);
       stage.uniforms.uProgress.value = trans.p;
       stage.uniforms.uVelocity.value = RM ? 0 : vel;
-      stage.render(now / 1000);
+      if (pageVisible && onScreen) stage.render(now / 1000);
     }
     requestAnimationFrame(tick);
   };
@@ -430,20 +635,44 @@ function intro() {
     return;
   }
 
-  const inners = els.title.querySelectorAll('.t-line__in');
+  titleSplit = splitTitle();
+  const titleTargets = titleSplit
+    ? titleSplit.chars
+    : els.title.querySelectorAll('.t-line__in');
   const chips = els.meta.querySelectorAll('.meta__item');
 
-  const tl = gsap.timeline({ onComplete: () => { state = 'idle'; } });
-  tl.to(els.loaderFill, { scaleX: 1, duration: 0.25, ease: 'power1.inOut' })
-    .to(els.loader, { yPercent: -100, duration: 0.95, ease: 'power4.inOut', delay: 0.3 })
+  const tl = gsap.timeline({
+    onComplete: () => {
+      if (state === 'loading') state = 'idle';
+    }
+  });
+  tl.to(els.loaderFill, { scaleX: 1, duration: 0.2, ease: 'power1.inOut' })
+    .to(els.loader, { yPercent: -100, duration: 0.85, ease: 'power4.inOut', delay: 0.15 })
     .set(els.loader, { display: 'none' })
-    .from(els.canvas, { opacity: 0, scale: 1.06, duration: 1.4, ease: 'power2.out' }, '-=0.55')
+    .from(els.canvas, { opacity: 0, scale: 1.06, duration: 1.3, ease: 'power2.out' }, '-=0.5')
+    // Unlock input as soon as the landscape is on screen — the rest of
+    // the intro is chrome settling in and should not block interaction.
+    .add(() => { if (state === 'loading') state = 'idle'; }, 1.35)
     .from('.site-head > *', { y: -18, opacity: 0, duration: 0.7, stagger: 0.08, ease: 'power3.out' }, '-=1.0')
-    .from(els.eyebrow, { y: 16, opacity: 0, duration: 0.6, ease: 'power3.out' }, '-=0.7')
-    .from(inners, { yPercent: 112, duration: 1.0, stagger: 0.09, ease: 'power3.out' }, '-=0.65')
+    .from(els.eyebrow, { y: 16, opacity: 0, duration: 0.6, ease: 'power3.out' }, '-=0.7');
+
+  // Kept out of the timeline chain so playDomSwap's existing kill path
+  // handles an early swipe cleanly (it kills titleInTween + reverts).
+  titleInTween = gsap.from(titleTargets, {
+    yPercent: 114,
+    duration: 1.0,
+    stagger: titleSplit ? 0.028 : 0.09,
+    ease: 'power3.out',
+    onComplete: () => {
+      if (titleSplit) { titleSplit.revert(); titleSplit = null; }
+      titleInTween = null;
+    }
+  });
+  tl.add(titleInTween, '-=0.65')
     .from(chips, { y: 14, opacity: 0, duration: 0.6, stagger: 0.06, ease: 'power3.out' }, '-=0.7')
     .from(els.desc, { y: 12, opacity: 0, duration: 0.6, ease: 'power2.out' }, '-=0.6')
     .from('.counter', { y: 12, opacity: 0, duration: 0.6, ease: 'power2.out' }, '-=0.55')
+    .from(els.reportCta, { y: 12, opacity: 0, duration: 0.6, ease: 'power2.out' }, '-=0.5')
     .fromTo(els.railFill, { scaleY: 0 }, { scaleY: 1 / N, duration: 0.9, ease: 'power3.inOut' }, '-=0.6')
     .from('.rail', { opacity: 0, duration: 0.5 }, '<')
     .from(els.hint, { opacity: 0, duration: 0.6 }, '-=0.4');
