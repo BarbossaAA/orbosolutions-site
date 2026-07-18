@@ -386,9 +386,10 @@
     return t;
   }
 
-  /* gallery card: warm white, ink text, bronze pin line */
+  /* gallery card: warm white, ink text, bronze pin line, and since v9 a
+     bronze station numeral + a "מדגים" line that says what the piece proves */
   function plaqueTexture(art) {
-    var W = 512, H = 256;
+    var W = 512, H = 384;
     var c = ctx2d(W, H);
     var accent = art.accent || '#5B4CF5';
     var redraw = function () {
@@ -399,14 +400,37 @@
       c.strokeRect(4, 4, W - 8, H - 8);
       c.fillStyle = '#9a7b52';
       c.fillRect(W - 14, 18, 4, H - 36);
+      if (art.num) {
+        /* the station numeral, bronze, with its little underline */
+        c.textAlign = 'left';
+        c.direction = 'ltr';
+        var ng = c.createLinearGradient(0, 20, 0, 96);
+        ng.addColorStop(0, '#c9a05c');
+        ng.addColorStop(1, '#9a7b52');
+        c.fillStyle = ng;
+        c.font = '800 74px ' + FONT;
+        c.fillText(art.num, 36, 96);
+        c.fillStyle = 'rgba(154, 123, 82, 0.55)';
+        c.fillRect(38, 112, 96, 3);
+        c.textAlign = 'right';
+        c.direction = 'rtl';
+        c.fillStyle = 'rgba(90, 86, 104, 0.85)';
+        c.font = '500 25px ' + FONT;
+        c.fillText('תחנה', W - 42, 66);
+      }
       c.textAlign = 'right';
       c.direction = 'rtl';
       c.fillStyle = '#17141F';
-      c.font = '700 44px ' + FONT;
-      c.fillText(art.title, W - 42, 100, W - 80);
+      c.font = '700 46px ' + FONT;
+      c.fillText(art.title, W - 42, 196, W - 80);
       c.fillStyle = accent;
-      c.font = '500 30px ' + FONT;
-      c.fillText(art.tag, W - 42, 162, W - 80);
+      c.font = '500 29px ' + FONT;
+      c.fillText(art.tag, W - 42, 252, W - 80);
+      if (art.demo) {
+        c.fillStyle = '#6b657a';
+        c.font = '400 25px ' + FONT;
+        c.fillText(art.demo, W - 42, 316, W - 80);
+      }
     };
     redraw();
     var t = asTexture(c.canvas);
@@ -430,6 +454,43 @@
       c.font = '850 190px ' + FONT;
       c.fillText('ORBO·GALLERY', W / 2, 262, W - 100);
       c.shadowBlur = 0;
+    };
+    redraw();
+    var t = asTexture(c.canvas);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { redraw(); t.needsUpdate = true; });
+    return t;
+  }
+
+  /* the welcome board: warm ivory, the mark, three lines that explain
+     the whole idea of this place */
+  function introTexture() {
+    var W = 1024, H = 720;
+    var c = ctx2d(W, H);
+    var redraw = function () {
+      c.fillStyle = '#FBFAF6';
+      c.fillRect(0, 0, W, H);
+      c.strokeStyle = 'rgba(20, 18, 31, 0.16)';
+      c.lineWidth = 3;
+      c.strokeRect(8, 8, W - 16, H - 16);
+      c.strokeStyle = 'rgba(154, 123, 82, 0.5)';
+      c.lineWidth = 2;
+      c.strokeRect(22, 22, W - 44, H - 44);
+      drawStar(c, W / 2, 118, 44, '#5B4CF5', 'rgba(108, 92, 255, 0.25)');
+      c.textAlign = 'center';
+      c.direction = 'rtl';
+      c.fillStyle = '#14121F';
+      c.font = '850 92px ' + FONT;
+      c.fillText('ברוכים הבאים', W / 2, 292, W - 140);
+      c.fillStyle = '#3d3950';
+      c.font = '500 44px ' + FONT;
+      c.fillText('במקום תיק עבודות — בנינו מקום.', W / 2, 392, W - 160);
+      c.fillText('כל מה שסביבכם נוצר אצלנו, בקוד.', W / 2, 458, W - 160);
+      c.fillStyle = 'rgba(154, 123, 82, 0.65)';
+      c.fillRect(W / 2 - 60, 512, 120, 3);
+      c.fillStyle = '#5A5668';
+      c.font = '400 33px ' + FONT;
+      c.fillText('במרכז — ארבע עמדות של מה אנחנו בונים.', W / 2, 578, W - 150);
+      c.fillText('על הקירות — תחנות 01–14. לחצו על כל מוצג לפרטים.', W / 2, 632, W - 150);
     };
     redraw();
     var t = asTexture(c.canvas);
@@ -993,13 +1054,13 @@
   var coneTex = coneTexture();
   var pedestalDefs = [
     { id: 'cap-web', holo: 'globe', x: -3.3, z: -2.5, label: 'אתרים וחוויות', tag: 'מה אנחנו בונים', accent: '#1F8FD8',
-      body: 'אתרים שמרגישים כמו מקום, לא כמו דף. האולם שאתם עומדים בו עכשיו נבנה באותם כלים בדיוק — ורץ בדפדפן, בלי להתקין כלום.', link: 'services.html', linkText: 'לעמוד השירותים' },
+      body: 'אתרים שמרגישים כמו מקום, לא כמו דף. האולם שאתם עומדים בו עכשיו נבנה באותם כלים בדיוק — ורץ בדפדפן, בלי להתקין כלום. הקייס המלא תלוי על הקיר הסמוך: BISOMNA, תחנה 05.', link: 'services.html', linkText: 'לעמוד השירותים' },
     { id: 'cap-sys', holo: 'device', x: 3.3, z: -2.5, label: 'אפליקציות ומערכות', tag: 'מה אנחנו בונים', accent: '#0FA88C',
-      body: 'מהרעיון ועד מוצר שרץ בענן: אפליקציות, מערכות ניהול וכלים פנימיים שנתפרים בדיוק לצורת העבודה של העסק.', link: 'services.html', linkText: 'לעמוד השירותים' },
+      body: 'מהרעיון ועד מוצר שרץ בענן: אפליקציות, מערכות ניהול וכלים פנימיים שנתפרים בדיוק לצורת העבודה של העסק. ההדגמה על הקיר הסמוך: חדר הבקרה, תחנה 10.', link: 'services.html', linkText: 'לעמוד השירותים' },
     { id: 'cap-ai', holo: 'neural', x: -3.3, z: 2.5, label: 'AI ואוטומציה', tag: 'מה אנחנו בונים', accent: '#6C5CFF',
-      body: 'תהליכים שקורים מעצמם: מיון פניות, טיוטות מסמכים, חיבורים בין מערכות — עם בקרה אנושית בנקודות שחשוב.', link: 'services.html', linkText: 'לעמוד השירותים' },
+      body: 'תהליכים שקורים מעצמם: מיון פניות, טיוטות מסמכים, חיבורים בין מערכות — עם בקרה אנושית בנקודות שחשוב. ההדגמה על הקיר הסמוך: העוזר שלא ישן, תחנה 03.', link: 'services.html', linkText: 'לעמוד השירותים' },
     { id: 'cap-play', holo: 'game', x: 3.3, z: 2.5, label: 'משחקים וחוויות', tag: 'מה אנחנו בונים', accent: '#E8722E',
-      body: 'הדרך הכי טובה להבין מוצר היא לשחק בו: סימולטורים, קונפיגורטורים וחוויות אינטראקטיביות שהופכות סקרנות להחלטה.', link: 'services.html', linkText: 'לעמוד השירותים' }
+      body: 'הדרך הכי טובה להבין מוצר היא לשחק בו: סימולטורים, קונפיגורטורים וחוויות אינטראקטיביות שהופכות סקרנות להחלטה. ההדגמה על הקיר הסמוך: המגרש, תחנה 12.', link: 'services.html', linkText: 'לעמוד השירותים' }
   ];
 
   var pickables = [];
@@ -1051,7 +1112,7 @@
   atriumHit.position.copy(atriumStar.position);
   atriumHit.userData.art = {
     title: 'ORBO', tag: 'הסטודיו', _holo: atriumStar, _glow: null, self: true,
-    body: 'הכוכב של אורבו. כל מה שסביבכם — האולם, השמיים, ההולוגרמות והציורים החיים — נבנה כאן, בקוד, בלי אף קובץ מוכן. ככה נראית אצלנו גישה לפרויקט.',
+    body: 'הסמל של אורבו, פרוש בתלת־ממד וצף מתחת לפס הכוכבים. כל מה שסביבכם — האולם, השמיים, ההולוגרמות והציורים החיים — נבנה כאן, בקוד, בלי אף קובץ מוכן. ככה נראית אצלנו גישה לפרויקט.',
     link: 'studio.html', linkText: 'להכיר אותנו'
   };
   scene.add(atriumHit);
@@ -1085,42 +1146,954 @@
     };
   }
   var farL = curvePos(-1, -38), farR = curvePos(-1, 38);
-  var nearL = curvePos(1, -42), nearR = curvePos(1, 42);
+  var farLL = curvePos(-1, -66), farRR = curvePos(-1, 66);
+  var nearL = curvePos(1, -40), nearR = curvePos(1, 40);
+  var nearLL = curvePos(1, -68), nearRR = curvePos(1, 68);
 
+  /* ---------- case displays: rich product-screen compositions ----------
+     six deliberate 1024x640 drawings — real-looking screens, not posters.
+     registered here and rendered off the critical path via deferredArt. */
+  function drawCaseBisomna(c) {
+    function rr(x, y, w, h, r) { c.beginPath(); if (c.roundRect) { c.roundRect(x, y, w, h, r); } else { c.rect(x, y, w, h); } }
+    var W = 1024, H = 640, i;
+    c.textBaseline = 'middle';
+
+    /* ---- night background + low violet glow ---- */
+    c.fillStyle = '#14121F'; c.fillRect(0, 0, W, H);
+    var glow = c.createRadialGradient(500, 630, 40, 500, 630, 560);
+    glow.addColorStop(0, 'rgba(91,76,245,0.28)');
+    glow.addColorStop(0.55, 'rgba(91,76,245,0.10)');
+    glow.addColorStop(1, 'rgba(91,76,245,0)');
+    c.fillStyle = glow; c.fillRect(0, 0, W, H);
+    for (i = 0; i < 46; i++) {
+      c.fillStyle = 'rgba(250,250,249,' + (0.03 + Math.random() * 0.08).toFixed(3) + ')';
+      c.fillRect(Math.random() * W, Math.random() * H * 0.5, 1.4, 1.4);
+    }
+    var vg = c.createRadialGradient(512, 320, 220, 512, 320, 720);
+    vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(8,6,14,0.35)');
+    c.fillStyle = vg; c.fillRect(0, 0, W, H);
+
+    /* ---- browser window ---- */
+    var bx = 44, by = 76, bw = 620, bh = 470, cx = bx + bw / 2;
+    c.save(); c.shadowColor = 'rgba(0,0,0,0.55)'; c.shadowBlur = 36; c.shadowOffsetY = 18;
+    c.fillStyle = '#FAFAF9'; rr(bx, by, bw, bh, 16); c.fill();
+    c.restore();
+
+    c.save(); rr(bx, by, bw, bh, 16); c.clip();
+    /* chrome bar */
+    c.fillStyle = '#F1EFE8'; c.fillRect(bx, by, bw, 44);
+    c.fillStyle = 'rgba(20,18,31,0.08)'; c.fillRect(bx, by + 44, bw, 1);
+    var dots = ['#FF5F57', '#FEBC2E', '#28C840'];
+    for (i = 0; i < 3; i++) { c.fillStyle = dots[i]; c.beginPath(); c.arc(bx + 24 + i * 18, by + 22, 5, 0, Math.PI * 2); c.fill(); }
+    var uw = 220, ux = bx + (bw - uw) / 2;
+    c.fillStyle = '#FBFAF6'; rr(ux, by + 10, uw, 24, 12); c.fill();
+    c.strokeStyle = 'rgba(20,18,31,0.10)'; c.lineWidth = 1; rr(ux + 0.5, by + 10.5, uw - 1, 23, 12); c.stroke();
+    c.direction = 'ltr'; c.textAlign = 'center';
+    c.fillStyle = '#5A5668'; c.font = '500 13px ' + FONT;
+    c.fillText('bisomna.com', cx, by + 23);
+
+    /* hero */
+    c.direction = 'rtl'; c.textAlign = 'center';
+    c.fillStyle = '#14121F'; c.font = '700 36px ' + FONT;
+    c.fillText('ישנים טוב. חיים טוב.', cx, by + 96);
+    c.fillStyle = '#5A5668'; c.font = '400 15px ' + FONT;
+    c.fillText('מזרן מודולרי בארבע שכבות, שנבנה סביב איך שאתם ישנים', cx, by + 130);
+
+    /* product-layers motif */
+    var lx = bx + 120, lw = 290, lh = 30, gap = 16, ly0 = by + 168;
+    var layers = [
+      ['#F2EFE7', 'שכבת נוחות עליונה', '#5A5668'],
+      ['#1F8FD8', 'שכבת ג\'ל מצננת', '#1F8FD8'],
+      ['#9D8CFF', 'קצף זיכרון אדפטיבי', '#6C5CFF'],
+      ['#E7E3D7', 'בסיס תמיכה גבוה', '#5A5668']
+    ];
+    for (i = 0; i < 4; i++) {
+      var ly = ly0 + i * (lh + gap), lyMid = ly + lh / 2;
+      c.save(); c.shadowColor = 'rgba(20,18,31,0.18)'; c.shadowBlur = 8; c.shadowOffsetY = 3;
+      c.fillStyle = layers[i][0]; rr(lx, ly, lw, lh, 10); c.fill();
+      c.restore();
+      var lg = c.createLinearGradient(0, ly, 0, ly + lh);
+      lg.addColorStop(0, 'rgba(255,255,255,0.35)'); lg.addColorStop(0.4, 'rgba(255,255,255,0)');
+      c.fillStyle = lg; rr(lx, ly, lw, lh, 10); c.fill();
+      c.strokeStyle = 'rgba(20,18,31,0.12)'; rr(lx + 0.5, ly + 0.5, lw - 1, lh - 1, 10); c.stroke();
+      c.strokeStyle = 'rgba(90,86,104,0.45)'; c.beginPath();
+      c.moveTo(lx + lw + 6, lyMid); c.lineTo(lx + lw + 44, lyMid); c.stroke();
+      c.fillStyle = '#5A5668'; c.beginPath(); c.arc(lx + lw + 6, lyMid, 2, 0, Math.PI * 2); c.fill();
+      c.direction = 'rtl'; c.textAlign = 'left';
+      c.fillStyle = layers[i][2]; c.font = '500 12px ' + FONT;
+      c.fillText(layers[i][1], lx + lw + 50, lyMid);
+    }
+
+    /* scroll hint + next-section peek */
+    c.strokeStyle = 'rgba(90,86,104,0.6)'; c.lineWidth = 2; c.lineCap = 'round';
+    c.beginPath(); c.moveTo(cx - 7, by + 356); c.lineTo(cx, by + 363); c.lineTo(cx + 7, by + 356); c.stroke();
+    c.lineWidth = 1; c.lineCap = 'butt';
+    c.fillStyle = '#191527'; c.fillRect(bx, by + bh - 56, bw, 56);
+    c.direction = 'rtl'; c.textAlign = 'center';
+    c.fillStyle = '#FAFAF9'; c.font = '600 15px ' + FONT;
+    c.fillText('הטכנולוגיה שמאחורי השינה', cx, by + bh - 34);
+    c.fillStyle = 'rgba(157,140,255,0.5)'; rr(cx - 22, by + bh - 18, 44, 3, 1.5); c.fill();
+    c.restore();
+    c.strokeStyle = 'rgba(185,166,255,0.16)'; c.lineWidth = 1; rr(bx + 0.5, by + 0.5, bw - 1, bh - 1, 16); c.stroke();
+
+    /* ---- phone mockup ---- */
+    var px = 730, py = 130, pw = 184, ph = 386, pcx = px + pw / 2;
+    c.save(); c.shadowColor = 'rgba(0,0,0,0.55)'; c.shadowBlur = 32; c.shadowOffsetY = 16;
+    c.fillStyle = '#0d0b18'; rr(px, py, pw, ph, 28); c.fill();
+    c.restore();
+    c.strokeStyle = 'rgba(185,166,255,0.22)'; rr(px + 0.5, py + 0.5, pw - 1, ph - 1, 28); c.stroke();
+    var sx = px + 9, sy = py + 9, sw = pw - 18, sh = ph - 18;
+    c.save(); c.fillStyle = '#FAFAF9'; rr(sx, sy, sw, sh, 20); c.fill(); rr(sx, sy, sw, sh, 20); c.clip();
+    c.fillStyle = '#0d0b18'; rr(pcx - 26, sy + 6, 52, 12, 6); c.fill();
+    c.direction = 'rtl'; c.textAlign = 'center';
+    c.fillStyle = '#14121F'; c.font = '700 19px ' + FONT;
+    c.fillText('ישנים טוב.', pcx, sy + 52);
+    c.fillText('חיים טוב.', pcx, sy + 76);
+    c.fillStyle = '#5A5668'; c.font = '400 10px ' + FONT;
+    c.fillText('מזרן מודולרי בארבע שכבות', pcx, sy + 98);
+    var mw = 108, mx = pcx - mw / 2, mh = 15, mg = 8, my0 = sy + 118;
+    for (i = 0; i < 4; i++) {
+      var myy = my0 + i * (mh + mg);
+      c.fillStyle = layers[i][0]; rr(mx, myy, mw, mh, 6); c.fill();
+      c.strokeStyle = 'rgba(20,18,31,0.12)'; rr(mx + 0.5, myy + 0.5, mw - 1, mh - 1, 6); c.stroke();
+    }
+    var cy0 = my0 + 4 * (mh + mg) + 12;
+    c.fillStyle = '#5B4CF5'; rr(pcx - 46, cy0, 92, 28, 14); c.fill();
+    c.fillStyle = '#FAFAF9'; c.font = '600 12px ' + FONT;
+    c.fillText('לחנות', pcx, cy0 + 15);
+    c.fillStyle = '#191527'; c.fillRect(sx, sy + sh - 40, sw, 40);
+    c.fillStyle = 'rgba(250,250,249,0.85)'; c.font = '600 10px ' + FONT;
+    c.fillText('הטכנולוגיה שמאחורי השינה', pcx, sy + sh - 20);
+    c.restore();
+
+    /* ---- dotted connectors ---- */
+    c.setLineDash([2, 6]); c.strokeStyle = 'rgba(31,143,216,0.5)'; c.lineWidth = 1;
+    c.beginPath(); c.moveTo(786, 72); c.lineTo(668, 108); c.stroke();
+    c.beginPath(); c.moveTo(150, 580); c.lineTo(150, 548); c.stroke();
+    c.beginPath(); c.moveTo(822, 562); c.lineTo(822, 518); c.stroke();
+    c.setLineDash([]);
+
+    /* ---- feature chips ---- */
+    function chip(x, y, label) {
+      c.direction = 'rtl'; c.font = '600 14px ' + FONT;
+      var w = c.measureText(label).width + 38;
+      c.save(); c.shadowColor = 'rgba(0,0,0,0.4)'; c.shadowBlur = 14; c.shadowOffsetY = 6;
+      c.fillStyle = 'rgba(34,28,56,0.94)'; rr(x - w / 2, y - 17, w, 34, 17); c.fill();
+      c.restore();
+      c.strokeStyle = 'rgba(31,143,216,0.6)'; c.lineWidth = 1; rr(x - w / 2 + 0.5, y - 16.5, w - 1, 33, 17); c.stroke();
+      c.fillStyle = '#1F8FD8'; c.beginPath(); c.arc(x + w / 2 - 15, y, 3, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#FAFAF9'; c.textAlign = 'center'; c.fillText(label, x - 5, y + 1);
+    }
+    chip(812, 58, 'וידאו מונע גלילה');
+    chip(150, 598, '16 עמודים');
+    chip(822, 580, 'חנות מובנית');
+  }
+
+  function drawCaseOrbo(c) {
+    function rr(x, y, w, h, r) { c.beginPath(); if (c.roundRect) { c.roundRect(x, y, w, h, r); } else { c.rect(x, y, w, h); } }
+    var seed = 42;
+    function rnd() { seed = (seed * 16807) % 2147483647; return seed / 2147483647; }
+    var i, y;
+
+    /* --- night backdrop, fully painted --- */
+    var bg = c.createLinearGradient(0, 0, 0, 640);
+    bg.addColorStop(0, '#191527'); bg.addColorStop(0.55, '#14121F'); bg.addColorStop(1, '#100d1c');
+    c.fillStyle = bg; c.fillRect(0, 0, 1024, 640);
+    var halo = c.createRadialGradient(512, 310, 40, 512, 310, 540);
+    halo.addColorStop(0, 'rgba(91,76,245,0.10)'); halo.addColorStop(1, 'rgba(91,76,245,0)');
+    c.fillStyle = halo; c.fillRect(0, 0, 1024, 640);
+    for (i = 0; i < 70; i++) {
+      c.fillStyle = 'rgba(185,166,255,' + (0.03 + rnd() * 0.07).toFixed(3) + ')';
+      c.fillRect(rnd() * 1024, rnd() * 640, 1.4, 1.4);
+    }
+
+    /* --- browser window shell with violet halo --- */
+    var wx = 112, wy = 70, ww = 800, wh = 500, bar = 44;
+    c.save();
+    c.shadowColor = 'rgba(108,92,255,0.5)'; c.shadowBlur = 44;
+    c.fillStyle = '#0d0b16'; rr(wx, wy, ww, wh, 16); c.fill();
+    c.restore();
+
+    /* --- viewport scene, clipped to the window --- */
+    c.save(); rr(wx, wy, ww, wh, 16); c.clip();
+    var vy = wy + bar, vh = wh - bar;
+    var sky = c.createLinearGradient(0, vy, 0, vy + vh);
+    sky.addColorStop(0, '#14121F'); sky.addColorStop(1, '#0f0c1a');
+    c.fillStyle = sky; c.fillRect(wx, vy, ww, vh);
+
+    var cx = 592, cy = 360;
+    var amb = c.createRadialGradient(cx, cy, 20, cx, cy, 300);
+    amb.addColorStop(0, 'rgba(91,76,245,0.16)'); amb.addColorStop(1, 'rgba(91,76,245,0)');
+    c.fillStyle = amb; c.fillRect(wx, vy, ww, vh);
+
+    for (i = 0; i < 90; i++) {
+      c.fillStyle = 'rgba(185,166,255,' + (0.04 + rnd() * 0.08).toFixed(3) + ')';
+      c.fillRect(wx + rnd() * ww, vy + rnd() * vh, 1.2, 1.2);
+    }
+
+    /* three logarithmic spiral arms of particles */
+    var arm, th, r0, px, py, jx, jy, a0, p, col, al, sz, th2, r2, qx, qy;
+    for (arm = 0; arm < 3; arm++) {
+      a0 = arm * 2.094 + 0.5;
+      for (i = 0; i < 110; i++) {
+        th = 0.6 + i * 0.115;
+        r0 = 6 * Math.exp(0.31 * th);
+        jx = (rnd() - 0.5) * (5 + r0 * 0.18);
+        jy = (rnd() - 0.5) * (4 + r0 * 0.11);
+        px = cx + Math.cos(th + a0) * r0 + jx;
+        py = cy + Math.sin(th + a0) * r0 * 0.56 + jy;
+        p = rnd();
+        col = p < 0.42 ? '#9D8CFF' : (p < 0.72 ? '#b9a6ff' : (p < 0.92 ? '#FAFAF9' : '#FFB080'));
+        al = Math.max(0.14, 0.85 - r0 * 0.0019) * (0.55 + rnd() * 0.45);
+        sz = r0 < 70 ? 1 + rnd() * 2 : 0.8 + rnd() * 1.7;
+        if (r0 > 70 && rnd() < 0.24) {
+          th2 = th - 0.32; r2 = 6 * Math.exp(0.31 * th2);
+          qx = cx + Math.cos(th2 + a0) * r2 + jx * 0.85;
+          qy = cy + Math.sin(th2 + a0) * r2 * 0.56 + jy * 0.85;
+          c.globalAlpha = al * 0.3; c.strokeStyle = col; c.lineWidth = 1;
+          c.beginPath(); c.moveTo(qx, qy); c.lineTo(px, py); c.stroke();
+        }
+        c.globalAlpha = al; c.fillStyle = col;
+        c.beginPath(); c.arc(px, py, sz, 0, 6.2832); c.fill();
+      }
+    }
+    c.globalAlpha = 1;
+
+    /* bright galactic core */
+    var core = c.createRadialGradient(cx, cy, 0, cx, cy, 92);
+    core.addColorStop(0, 'rgba(255,255,255,0.95)');
+    core.addColorStop(0.1, 'rgba(251,250,246,0.7)');
+    core.addColorStop(0.3, 'rgba(185,166,255,0.32)');
+    core.addColorStop(1, 'rgba(108,92,255,0)');
+    c.fillStyle = core; c.beginPath(); c.arc(cx, cy, 92, 0, 6.2832); c.fill();
+
+    /* headline over the galaxy */
+    c.direction = 'rtl'; c.textAlign = 'right';
+    c.shadowColor = 'rgba(13,11,22,0.85)'; c.shadowBlur = 16;
+    c.fillStyle = '#FAFAF9'; c.font = '800 46px ' + FONT;
+    c.fillText('רעיונות יש לכולם.', 866, 214);
+    c.fillStyle = '#b9a6ff'; c.font = '400 23px ' + FONT;
+    c.fillText('אנחנו הופכים אותם למציאות.', 866, 256);
+    c.shadowBlur = 0; c.shadowColor = 'rgba(0,0,0,0)';
+
+    /* scroll-progress rail, chapter 2 lit */
+    c.strokeStyle = 'rgba(250,250,249,0.10)'; c.lineWidth = 1;
+    c.beginPath(); c.moveTo(140.5, 150); c.lineTo(140.5, 530); c.stroke();
+    for (i = 0; i < 5; i++) {
+      y = 160 + i * 88;
+      if (i === 1) {
+        c.shadowColor = '#6C5CFF'; c.shadowBlur = 10;
+        c.fillStyle = '#6C5CFF';
+        c.beginPath(); c.arc(140.5, y, 4, 0, 6.2832); c.fill();
+        c.shadowBlur = 0; c.shadowColor = 'rgba(0,0,0,0)';
+        c.strokeStyle = 'rgba(108,92,255,0.45)';
+        c.beginPath(); c.arc(140.5, y, 7.5, 0, 6.2832); c.stroke();
+        c.textAlign = 'left'; c.fillStyle = '#b9a6ff'; c.font = '600 12px ' + FONT;
+        c.fillText('העולם נבנה', 156, y + 4);
+      } else {
+        c.fillStyle = 'rgba(250,250,249,0.22)';
+        c.beginPath(); c.arc(140.5, y, 2.5, 0, 6.2832); c.fill();
+      }
+    }
+
+    /* floating glass chips with dotted leaders into the swirl */
+    function chip(tx, ty, txt, lx, ly, dot) {
+      c.font = '600 16px ' + FONT;
+      var tw = c.measureText(txt).width, cw2 = tw + 34;
+      c.strokeStyle = 'rgba(157,140,255,0.5)'; c.lineWidth = 1; c.setLineDash([2, 5]);
+      c.beginPath(); c.moveTo(tx + cw2 / 2, ty + 19); c.lineTo(lx, ly); c.stroke();
+      c.setLineDash([]);
+      c.fillStyle = dot; c.beginPath(); c.arc(lx, ly, 2.6, 0, 6.2832); c.fill();
+      c.fillStyle = 'rgba(27,23,48,0.9)'; rr(tx, ty, cw2, 38, 10); c.fill();
+      c.strokeStyle = 'rgba(108,92,255,0.55)'; rr(tx + 0.5, ty + 0.5, cw2 - 1, 37, 10); c.stroke();
+      c.fillStyle = '#FAFAF9'; c.textAlign = 'center';
+      c.fillText(txt, tx + cw2 / 2, ty + 24.5);
+    }
+    chip(176, 158, 'עולם חלקיקים חי', 470, 316, '#FFB080');
+    chip(688, 486, 'אפס קובצי גרפיקה', 636, 424, '#b9a6ff');
+    c.restore();
+
+    /* chrome bar: sheen, hairline, traffic dots, url pill */
+    c.save(); rr(wx, wy, ww, wh, 16); c.clip();
+    var sheen = c.createLinearGradient(0, wy, 0, wy + bar);
+    sheen.addColorStop(0, 'rgba(250,250,249,0.05)'); sheen.addColorStop(1, 'rgba(250,250,249,0)');
+    c.fillStyle = sheen; c.fillRect(wx, wy, ww, bar);
+    c.strokeStyle = 'rgba(157,140,255,0.16)'; c.lineWidth = 1;
+    c.beginPath(); c.moveTo(wx, wy + bar - 0.5); c.lineTo(wx + ww, wy + bar - 0.5); c.stroke();
+    var dots = ['#e0655e', '#e0a94f', '#5fb86a'];
+    for (i = 0; i < 3; i++) {
+      c.fillStyle = dots[i];
+      c.beginPath(); c.arc(142 + i * 22, wy + 22, 5.5, 0, 6.2832); c.fill();
+    }
+    c.fillStyle = '#1b1730'; rr(392, wy + 9, 240, 26, 13); c.fill();
+    c.strokeStyle = 'rgba(108,92,255,0.4)'; rr(392.5, wy + 9.5, 239, 25, 13); c.stroke();
+    c.strokeStyle = '#9D8CFF'; c.lineWidth = 1.4;
+    c.beginPath(); c.arc(410, wy + 20.5, 3.2, Math.PI, 0); c.stroke();
+    c.fillStyle = '#9D8CFF'; rr(405.6, wy + 20.5, 8.8, 6.4, 1.5); c.fill();
+    c.direction = 'ltr'; c.textAlign = 'center';
+    c.font = '600 13px ' + FONT; c.fillStyle = '#9D8CFF';
+    c.fillText('orbosolutions.com', 519, wy + 26.5);
+    c.restore();
+
+    /* window hairline border over the glow */
+    c.strokeStyle = 'rgba(157,140,255,0.35)'; c.lineWidth = 1;
+    rr(wx + 0.5, wy + 0.5, ww - 1, wh - 1, 16); c.stroke();
+
+    /* gentle gallery vignette */
+    var vig = c.createRadialGradient(512, 320, 260, 512, 320, 620);
+    vig.addColorStop(0, 'rgba(9,7,16,0)'); vig.addColorStop(1, 'rgba(9,7,16,0.32)');
+    c.fillStyle = vig; c.fillRect(0, 0, 1024, 640);
+    c.direction = 'ltr'; c.globalAlpha = 1;
+  }
+
+  function drawCaseCrm(c) {
+    function rr(x, y, w, h, r) { c.beginPath(); if (c.roundRect) { c.roundRect(x, y, w, h, r); } else { c.rect(x, y, w, h); } }
+    function tx(t, x, y, f, col, al, dir) { c.font = f; c.fillStyle = col; c.textAlign = al; c.direction = dir; c.fillText(t, x, y); }
+    var TEAL = '#0FA88C', TEALL = '#35C9A8', VIO = '#6C5CFF', VIOL = '#9D8CFF', WARM = '#FFB080';
+    var INK = '#FAFAF9', MUT = '#8F88AD', DIM = '#6F6890', LINE = '#2a2344', CARD = '#1b1730';
+    var i, k, g, x, y, cy, a;
+    c.textBaseline = 'middle'; c.lineWidth = 1;
+    // ---- canvas backdrop + app frame ----
+    g = c.createLinearGradient(0, 0, 0, 640); g.addColorStop(0, '#171427'); g.addColorStop(1, '#100d1c');
+    c.fillStyle = g; c.fillRect(0, 0, 1024, 640);
+    c.save(); c.shadowColor = 'rgba(0,0,0,0.6)'; c.shadowBlur = 34; c.shadowOffsetY = 10;
+    c.fillStyle = '#131020'; rr(14, 14, 996, 612, 14); c.fill(); c.restore();
+    g = c.createLinearGradient(0, 14, 0, 150); g.addColorStop(0, 'rgba(157,140,255,0.05)'); g.addColorStop(1, 'rgba(157,140,255,0)');
+    c.fillStyle = g; rr(15, 15, 994, 130, 14); c.fill();
+    c.strokeStyle = LINE; rr(14.5, 14.5, 995, 611, 14); c.stroke();
+    c.beginPath(); c.moveTo(15, 66); c.lineTo(1009, 66); c.moveTo(920, 66); c.lineTo(920, 625); c.stroke();
+    // ---- top bar: logo + name (right), search (center), avatar (left) ----
+    c.save(); c.shadowColor = 'rgba(108,92,255,0.55)'; c.shadowBlur = 10;
+    g = c.createRadialGradient(980, 37, 1, 983, 40, 10); g.addColorStop(0, VIOL); g.addColorStop(1, '#5B4CF5');
+    c.fillStyle = g; c.beginPath(); c.arc(983, 40, 8, 0, 6.2832); c.fill(); c.restore();
+    tx('מרכז', 966, 41, '700 17px ' + FONT, INK, 'right', 'rtl');
+    c.fillStyle = CARD; rr(377, 25, 270, 30, 15); c.fill();
+    c.strokeStyle = LINE; rr(377.5, 25.5, 269, 29, 15); c.stroke();
+    c.strokeStyle = DIM; c.lineWidth = 1.5; c.beginPath(); c.arc(629, 38, 4.5, 0, 6.2832); c.moveTo(625.8, 41.6); c.lineTo(621.5, 46); c.stroke(); c.lineWidth = 1;
+    tx('חיפוש לקוח…', 612, 41, '400 12.5px ' + FONT, DIM, 'right', 'rtl');
+    c.fillStyle = '#221c38'; rr(386, 31, 42, 18, 5); c.fill();
+    tx('Ctrl+K', 407, 41, '600 10px ' + FONT, MUT, 'center', 'ltr');
+    g = c.createLinearGradient(33, 27, 59, 53); g.addColorStop(0, VIOL); g.addColorStop(1, '#5B4CF5');
+    c.fillStyle = g; c.beginPath(); c.arc(46, 40, 13, 0, 6.2832); c.fill();
+    tx('ד', 46, 41, '700 12px ' + FONT, INK, 'center', 'rtl');
+    c.fillStyle = TEALL; c.beginPath(); c.arc(56, 31, 4.5, 0, 6.2832); c.fill();
+    c.strokeStyle = '#131020'; c.lineWidth = 2; c.beginPath(); c.arc(56, 31, 4.5, 0, 6.2832); c.stroke(); c.lineWidth = 1;
+    // ---- right sidebar: 5 nav squares, first active ----
+    c.lineCap = 'round'; c.lineJoin = 'round';
+    for (i = 0; i < 5; i++) {
+      var sy = 90 + i * 58, cx = 965; cy = sy + 22;
+      if (i === 0) {
+        c.save(); c.shadowColor = 'rgba(15,168,140,0.4)'; c.shadowBlur = 14;
+        c.fillStyle = '#221c38'; rr(943, sy, 44, 44, 10); c.fill(); c.restore();
+        c.fillStyle = TEAL; rr(941.5, sy + 13, 3, 18, 1.5); c.fill();
+      }
+      c.strokeStyle = i === 0 ? '#EAE6F7' : DIM; c.lineWidth = 1.6; c.beginPath();
+      if (i === 0) { c.moveTo(cx - 8, cy + 1); c.lineTo(cx, cy - 7); c.lineTo(cx + 8, cy + 1); c.moveTo(cx - 5, cy - 1); c.lineTo(cx - 5, cy + 7); c.lineTo(cx + 5, cy + 7); c.lineTo(cx + 5, cy - 1); }
+      else if (i === 1) { c.moveTo(cx + 0.4, cy - 4); c.arc(cx - 3, cy - 4, 3.4, 0, 6.2832); c.moveTo(cx - 9, cy + 8); c.quadraticCurveTo(cx - 3, cy + 0.5, cx + 3, cy + 8); c.moveTo(cx + 7.6, cy - 6); c.arc(cx + 5, cy - 6, 2.6, 0, 6.2832); c.moveTo(cx + 4.5, cy + 8); c.quadraticCurveTo(cx + 7, cy + 2.5, cx + 9.5, cy + 8); }
+      else if (i === 2) { c.moveTo(cx - 9, cy - 7); c.lineTo(cx - 9, cy + 8); c.lineTo(cx + 9, cy + 8); c.moveTo(cx - 6, cy + 4); c.lineTo(cx - 1, cy - 2); c.lineTo(cx + 3, cy + 1); c.lineTo(cx + 8, cy - 6); }
+      else if (i === 3) { c.rect(cx - 6, cy - 8, 12, 16); c.moveTo(cx - 3, cy - 3); c.lineTo(cx + 3, cy - 3); c.moveTo(cx - 3, cy + 1); c.lineTo(cx + 3, cy + 1); c.moveTo(cx - 3, cy + 5); c.lineTo(cx + 1, cy + 5); }
+      else { c.moveTo(cx + 5.5, cy); c.arc(cx, cy, 5.5, 0, 6.2832); c.moveTo(cx + 2, cy); c.arc(cx, cy, 2, 0, 6.2832); for (k = 0; k < 8; k++) { a = k * 0.7854; c.moveTo(cx + Math.cos(a) * 7, cy + Math.sin(a) * 7); c.lineTo(cx + Math.cos(a) * 9.2, cy + Math.sin(a) * 9.2); } }
+      c.stroke();
+    }
+    c.lineWidth = 1;
+    // ---- KPI row (rtl order: first card on the right) ----
+    var kpi = [['פניות החודש', '248', '+12%', 1], ['מחזור חודשי', '₪ 96,400', '+8%', 1], ['לקוחות פעילים', '57', null, 0], ['זמן מענה ממוצע', '1:42', '-6%', -1]];
+    for (i = 0; i < 4; i++) {
+      x = 30 + (3 - i) * 222;
+      c.fillStyle = CARD; rr(x, 82, 208, 92, 12); c.fill();
+      c.strokeStyle = LINE; rr(x + 0.5, 82.5, 207, 91, 12); c.stroke();
+      tx(kpi[i][0], x + 192, 108, '500 12px ' + FONT, MUT, 'right', 'rtl');
+      tx(kpi[i][1], x + 192, 140, '800 27px ' + FONT, INK, 'right', 'ltr');
+      if (kpi[i][2]) {
+        c.fillStyle = kpi[i][3] > 0 ? TEALL : '#F0705F'; c.beginPath();
+        if (kpi[i][3] > 0) { c.moveTo(x + 14, 144); c.lineTo(x + 23, 144); c.lineTo(x + 18.5, 137); }
+        else { c.moveTo(x + 14, 138); c.lineTo(x + 23, 138); c.lineTo(x + 18.5, 145); }
+        c.closePath(); c.fill();
+        tx(kpi[i][2], x + 28, 141, '700 12px ' + FONT, kpi[i][3] > 0 ? TEALL : '#F0705F', 'left', 'ltr');
+      }
+    }
+    // ---- line chart card ----
+    c.fillStyle = CARD; rr(344, 188, 560, 200, 12); c.fill();
+    c.strokeStyle = LINE; rr(344.5, 188.5, 559, 199, 12); c.stroke();
+    tx('מגמת הכנסות', 888, 215, '700 14px ' + FONT, INK, 'right', 'rtl');
+    c.fillStyle = TEALL; c.beginPath(); c.arc(470, 214, 3.5, 0, 6.2832); c.fill();
+    tx('השנה', 462, 215, '500 11px ' + FONT, MUT, 'right', 'rtl');
+    c.fillStyle = VIOL; c.beginPath(); c.arc(404, 214, 3.5, 0, 6.2832); c.fill();
+    tx('אשתקד', 396, 215, '500 11px ' + FONT, MUT, 'right', 'rtl');
+    var gy = ['96K', '72K', '48K', '24K', '0'];
+    c.strokeStyle = 'rgba(42,35,68,0.7)';
+    for (k = 0; k < 5; k++) { y = 232 + k * 30; c.beginPath(); c.moveTo(396, y); c.lineTo(884, y); c.stroke(); tx(gy[k], 386, y, '400 9.5px ' + FONT, DIM, 'right', 'ltr'); }
+    var vx = [], vt = [40, 56, 48, 64, 72, 86], vv = [28, 36, 32, 44, 50, 58];
+    var mon = ['ינו׳', 'פבר׳', 'מרץ', 'אפר׳', 'מאי', 'יוני'];
+    for (i = 0; i < 6; i++) { vx.push(880 - i * 96.8); tx(mon[i], vx[i], 371, '400 10.5px ' + FONT, DIM, 'center', 'rtl'); }
+    c.beginPath();
+    for (i = 0; i < 6; i++) { y = 352 - vt[i] * 1.2; if (i) { c.lineTo(vx[i], y); } else { c.moveTo(vx[i], y); } }
+    c.lineTo(vx[5], 352); c.lineTo(vx[0], 352); c.closePath();
+    g = c.createLinearGradient(0, 240, 0, 352); g.addColorStop(0, 'rgba(15,168,140,0.24)'); g.addColorStop(1, 'rgba(15,168,140,0)');
+    c.fillStyle = g; c.fill();
+    c.beginPath();
+    for (i = 0; i < 6; i++) { y = 352 - vt[i] * 1.2; if (i) { c.lineTo(vx[i], y); } else { c.moveTo(vx[i], y); } }
+    c.strokeStyle = TEALL; c.lineWidth = 2.2; c.stroke();
+    c.setLineDash([5, 4]); c.beginPath();
+    for (i = 0; i < 6; i++) { y = 352 - vv[i] * 1.2; if (i) { c.lineTo(vx[i], y); } else { c.moveTo(vx[i], y); } }
+    c.strokeStyle = 'rgba(157,140,255,0.75)'; c.lineWidth = 1.5; c.stroke(); c.setLineDash([]); c.lineWidth = 1;
+    c.save(); c.shadowColor = TEALL; c.shadowBlur = 10; c.fillStyle = TEALL; c.beginPath(); c.arc(vx[5], 352 - 86 * 1.2, 4, 0, 6.2832); c.fill(); c.restore();
+    c.fillStyle = '#131020'; c.beginPath(); c.arc(vx[5], 352 - 86 * 1.2, 1.7, 0, 6.2832); c.fill();
+    // ---- donut card ----
+    c.fillStyle = CARD; rr(30, 188, 300, 200, 12); c.fill();
+    c.strokeStyle = LINE; rr(30.5, 188.5, 299, 199, 12); c.stroke();
+    tx('מקורות לידים', 314, 215, '700 14px ' + FONT, INK, 'right', 'rtl');
+    var segs = [[0.45, TEAL], [0.35, VIO], [0.2, WARM]], a0 = -1.5708;
+    c.lineWidth = 17;
+    for (i = 0; i < 3; i++) { var a1 = a0 + segs[i][0] * 6.2832; c.beginPath(); c.arc(108, 298, 48, a0 + 0.05, a1 - 0.05); c.strokeStyle = segs[i][1]; c.stroke(); a0 = a1; }
+    c.lineWidth = 1;
+    tx('312', 108, 292, '800 26px ' + FONT, INK, 'center', 'ltr');
+    tx('סה״כ לידים', 108, 313, '400 10px ' + FONT, MUT, 'center', 'rtl');
+    var leg = [['קמפיינים', '45%', TEAL], ['אתר', '35%', VIO], ['הפניות', '20%', WARM]];
+    for (i = 0; i < 3; i++) {
+      y = 252 + i * 32;
+      c.fillStyle = leg[i][2]; c.beginPath(); c.arc(306, y, 4, 0, 6.2832); c.fill();
+      tx(leg[i][0], 296, y + 1, '500 11.5px ' + FONT, '#CFCADF', 'right', 'rtl');
+      tx(leg[i][1], 196, y + 1, '700 11.5px ' + FONT, MUT, 'left', 'ltr');
+    }
+    // ---- table card ----
+    c.fillStyle = CARD; rr(30, 402, 874, 208, 12); c.fill();
+    c.strokeStyle = LINE; rr(30.5, 402.5, 873, 207, 12); c.stroke();
+    tx('לקוחות אחרונים', 886, 429, '700 14px ' + FONT, INK, 'right', 'rtl');
+    tx('הצג הכל', 48, 429, '500 12px ' + FONT, VIOL, 'left', 'rtl');
+    tx('לקוח', 886, 455, '500 11px ' + FONT, DIM, 'right', 'rtl');
+    tx('סטטוס', 660, 455, '500 11px ' + FONT, DIM, 'center', 'rtl');
+    tx('סכום', 560, 455, '500 11px ' + FONT, DIM, 'right', 'rtl');
+    tx('התקדמות', 46, 455, '500 11px ' + FONT, DIM, 'left', 'rtl');
+    c.strokeStyle = LINE; c.beginPath(); c.moveTo(46, 466); c.lineTo(888, 466); c.stroke();
+    var tealFg = '#3AD0AF', tealBg = 'rgba(15,168,140,0.15)', vioFg = '#B9A6FF', vioBg = 'rgba(108,92,255,0.16)', wFg = '#FFB080', wBg = 'rgba(255,176,128,0.14)';
+    var rows = [
+      ['נגריית העמק', 'פעיל', tealFg, tealBg, '₪ 24,800', 0.78, '78%'],
+      ['סטודיו אלה', 'בטיפול', vioFg, vioBg, '₪ 12,300', 0.45, '45%'],
+      ['מוסך הצפון', 'ממתין', wFg, wBg, '₪ 8,150', 0.22, '22%'],
+      ['קפה דיזל', 'פעיל', tealFg, tealBg, '₪ 31,900', 0.88, '88%']
+    ];
+    for (i = 0; i < 4; i++) {
+      cy = 486 + i * 35;
+      if (i) { c.strokeStyle = 'rgba(42,35,68,0.55)'; c.beginPath(); c.moveTo(46, cy - 17.5); c.lineTo(888, cy - 17.5); c.stroke(); }
+      c.fillStyle = rows[i][3]; rr(862, cy - 12, 24, 24, 7); c.fill();
+      tx(rows[i][0].charAt(0), 874, cy + 1, '700 12px ' + FONT, rows[i][2], 'center', 'rtl');
+      tx(rows[i][0], 852, cy + 1, '600 13px ' + FONT, '#E9E6F5', 'right', 'rtl');
+      c.fillStyle = rows[i][3]; rr(629, cy - 10, 62, 20, 10); c.fill();
+      tx(rows[i][1], 660, cy + 1, '600 11px ' + FONT, rows[i][2], 'center', 'rtl');
+      tx(rows[i][4], 560, cy + 1, '500 12.5px ' + FONT, '#CFCADF', 'right', 'ltr');
+      c.fillStyle = '#262040'; rr(100, cy - 2, 156, 4, 2); c.fill();
+      c.fillStyle = rows[i][2]; rr(256 - 156 * rows[i][5], cy - 2, 156 * rows[i][5], 4, 2); c.fill();
+      tx(rows[i][6], 46, cy + 1, '500 10.5px ' + FONT, DIM, 'left', 'ltr');
+    }
+    c.textBaseline = 'alphabetic'; c.direction = 'ltr'; c.textAlign = 'left';
+  }
+
+  function drawCaseAi(c) {
+    function rr(x, y, w, h, r) { c.beginPath(); if (c.roundRect) { c.roundRect(x, y, w, h, r); } else { c.rect(x, y, w, h); } }
+    var W = 1024, H = 640, i, j, x, y;
+    c.textBaseline = 'alphabetic';
+    // ---- deep night background ----
+    var bg = c.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, '#14121F'); bg.addColorStop(0.55, '#100d1c'); bg.addColorStop(1, '#0d0a17');
+    c.fillStyle = bg; c.fillRect(0, 0, W, H);
+    // faint dotted grid
+    c.fillStyle = '#9D8CFF';
+    for (x = 22; x < W; x += 26) { for (y = 22; y < H; y += 26) { c.globalAlpha = 0.025 + Math.random() * 0.035; c.fillRect(x, y, 1.5, 1.5); } }
+    c.globalAlpha = 1;
+    // ambient violet bloom behind the pipeline + soft vignette
+    var amb = c.createRadialGradient(512, 320, 40, 512, 320, 470);
+    amb.addColorStop(0, 'rgba(108,92,255,0.10)'); amb.addColorStop(1, 'rgba(108,92,255,0)');
+    c.fillStyle = amb; c.fillRect(0, 30, W, 580);
+    var vg = c.createRadialGradient(512, 320, 280, 512, 320, 720);
+    vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,0.30)');
+    c.fillStyle = vg; c.fillRect(0, 0, W, H);
+    // ---- moon badge, top-left ----
+    c.shadowColor = 'rgba(0,0,0,0.45)'; c.shadowBlur = 16; c.shadowOffsetY = 4;
+    c.fillStyle = '#1b1730'; rr(40, 34, 100, 40, 20); c.fill();
+    c.shadowColor = 'transparent'; c.shadowBlur = 0; c.shadowOffsetY = 0;
+    c.strokeStyle = 'rgba(157,140,255,0.22)'; c.lineWidth = 1; rr(40.5, 34.5, 99, 39, 19.5); c.stroke();
+    c.shadowColor = 'rgba(255,176,128,0.55)'; c.shadowBlur = 10;
+    c.fillStyle = '#FFB080'; c.beginPath(); c.arc(64, 54, 8.5, 0, Math.PI * 2); c.fill();
+    c.shadowColor = 'transparent'; c.shadowBlur = 0;
+    c.fillStyle = '#1b1730'; c.beginPath(); c.arc(67.5, 50.8, 7.6, 0, Math.PI * 2); c.fill();
+    c.direction = 'ltr'; c.textAlign = 'left'; c.font = '700 15px ' + FONT;
+    c.fillStyle = '#FAFAF9'; c.fillText('03:12', 82, 59);
+    // ---- header title, top-right + hairline ----
+    c.direction = 'rtl'; c.textAlign = 'right'; c.font = '700 20px ' + FONT;
+    c.fillStyle = '#FAFAF9'; c.fillText('טיפול אוטומטי בפניות', 984, 60);
+    c.strokeStyle = 'rgba(157,140,255,0.14)'; c.lineWidth = 1;
+    c.beginPath(); c.moveTo(40, 94.5); c.lineTo(984, 94.5); c.stroke();
+    // ---- four stage cards, flowing right-to-left ----
+    var xs = [779, 541, 303, 65], CW = 180, CY = 200, CH = 240;
+    var titles = ['פנייה נכנסת', 'מיון חכם', 'טיוטת מענה', 'אישור אנושי'];
+    var subs = ['מייל, טופס או וואטסאפ', '', 'נוסחה תוך 38 שניות', 'ההחלטה תמיד אצלכם'];
+    for (i = 0; i < 4; i++) {
+      x = xs[i]; var cx = x + CW / 2;
+      c.shadowColor = 'rgba(0,0,0,0.5)'; c.shadowBlur = 22; c.shadowOffsetY = 8;
+      var cg = c.createLinearGradient(0, CY, 0, CY + CH);
+      cg.addColorStop(0, '#221c38'); cg.addColorStop(1, '#1b1730');
+      c.fillStyle = cg; rr(x, CY, CW, CH, 14); c.fill();
+      c.shadowColor = 'transparent'; c.shadowBlur = 0; c.shadowOffsetY = 0;
+      c.strokeStyle = 'rgba(157,140,255,0.20)'; c.lineWidth = 1; rr(x + 0.5, CY + 0.5, CW - 1, CH - 1, 13.5); c.stroke();
+      c.strokeStyle = 'rgba(250,250,249,0.06)'; c.beginPath(); c.moveTo(x + 14, CY + 1.5); c.lineTo(x + CW - 14, CY + 1.5); c.stroke();
+      // icon disc
+      c.fillStyle = 'rgba(108,92,255,0.12)'; c.beginPath(); c.arc(cx, 262, 28, 0, Math.PI * 2); c.fill();
+      c.strokeStyle = 'rgba(157,140,255,0.30)'; c.lineWidth = 1; c.beginPath(); c.arc(cx, 262, 28, 0, Math.PI * 2); c.stroke();
+      // stroked icons
+      c.strokeStyle = '#b9a6ff'; c.lineWidth = 2; c.lineJoin = 'round'; c.lineCap = 'round';
+      if (i === 0) { // envelope
+        rr(cx - 17, 250, 34, 24, 4); c.stroke();
+        c.beginPath(); c.moveTo(cx - 15, 253); c.lineTo(cx, 265); c.lineTo(cx + 15, 253); c.stroke();
+      } else if (i === 1) { // sparkle
+        c.beginPath(); c.moveTo(cx, 247);
+        c.quadraticCurveTo(cx + 2.5, 258.5, cx + 14, 261); c.quadraticCurveTo(cx + 2.5, 263.5, cx, 275);
+        c.quadraticCurveTo(cx - 2.5, 263.5, cx - 14, 261); c.quadraticCurveTo(cx - 2.5, 258.5, cx, 247);
+        c.closePath(); c.fillStyle = 'rgba(108,92,255,0.30)'; c.fill(); c.stroke();
+        c.beginPath(); c.moveTo(cx + 14, 245); c.lineTo(cx + 14, 253); c.moveTo(cx + 10, 249); c.lineTo(cx + 18, 249); c.stroke();
+      } else if (i === 2) { // document with text hairlines
+        rr(cx - 13, 244, 26, 36, 4); c.stroke();
+        var rx = cx + 7;
+        c.strokeStyle = 'rgba(185,166,255,0.5)'; c.lineWidth = 1.5;
+        c.beginPath(); c.moveTo(rx, 252); c.lineTo(rx - 14, 252); c.moveTo(rx, 266); c.lineTo(rx - 14, 266); c.moveTo(rx, 273); c.lineTo(rx - 8, 273); c.stroke();
+        c.shadowColor = 'rgba(108,92,255,0.8)'; c.shadowBlur = 6;
+        c.strokeStyle = '#6C5CFF'; c.lineWidth = 2.5; c.beginPath(); c.moveTo(rx, 259); c.lineTo(rx - 14, 259); c.stroke();
+        c.shadowColor = 'transparent'; c.shadowBlur = 0;
+      } else { // person + approval check
+        c.beginPath(); c.arc(cx - 3, 254, 6.5, 0, Math.PI * 2); c.stroke();
+        c.beginPath(); c.arc(cx - 3, 275, 10, Math.PI, Math.PI * 2); c.stroke();
+        c.shadowColor = 'rgba(108,92,255,0.7)'; c.shadowBlur = 10;
+        c.fillStyle = '#6C5CFF'; c.beginPath(); c.arc(cx + 11, 271, 8, 0, Math.PI * 2); c.fill();
+        c.shadowColor = 'transparent'; c.shadowBlur = 0;
+        c.strokeStyle = '#FAFAF9'; c.lineWidth = 2;
+        c.beginPath(); c.moveTo(cx + 7.5, 271); c.lineTo(cx + 10.5, 274); c.lineTo(cx + 15, 267.5); c.stroke();
+      }
+      // title
+      c.direction = 'rtl'; c.textAlign = 'center'; c.font = '700 19px ' + FONT;
+      c.fillStyle = '#FAFAF9'; c.fillText(titles[i], cx, 330);
+      if (i === 1) { // category chips, middle one lit
+        var chips = ['הצעת מחיר', 'תמיכה', 'כללי'], cw = [], tot = 12;
+        c.font = '600 11px ' + FONT;
+        for (j = 0; j < 3; j++) { cw[j] = Math.ceil(c.measureText(chips[j]).width) + 14; tot += cw[j]; }
+        var rEdge = cx + tot / 2;
+        for (j = 0; j < 3; j++) {
+          var lit = (j === 1);
+          if (lit) { c.shadowColor = 'rgba(108,92,255,0.6)'; c.shadowBlur = 8; }
+          c.fillStyle = lit ? 'rgba(108,92,255,0.32)' : 'rgba(250,250,249,0.04)';
+          rr(rEdge - cw[j], 340, cw[j], 21, 10.5); c.fill();
+          c.shadowColor = 'transparent'; c.shadowBlur = 0;
+          c.strokeStyle = lit ? 'rgba(157,140,255,0.9)' : 'rgba(157,140,255,0.22)'; c.lineWidth = 1;
+          rr(rEdge - cw[j] + 0.5, 340.5, cw[j] - 1, 20, 10); c.stroke();
+          c.fillStyle = lit ? '#FAFAF9' : 'rgba(250,250,249,0.55)';
+          c.fillText(chips[j], rEdge - cw[j] / 2, 355);
+          rEdge -= cw[j] + 6;
+        }
+      } else {
+        c.font = '400 13px ' + FONT; c.fillStyle = 'rgba(250,250,249,0.55)';
+        c.fillText(subs[i], cx, 356);
+      }
+      // bottom hairline + stage number
+      c.strokeStyle = 'rgba(157,140,255,0.12)'; c.lineWidth = 1;
+      c.beginPath(); c.moveTo(x + 20, 400.5); c.lineTo(x + CW - 20, 400.5); c.stroke();
+      c.direction = 'ltr'; c.textAlign = 'center'; c.font = '600 11px ' + FONT;
+      c.fillStyle = 'rgba(157,140,255,0.55)'; c.fillText('0' + (i + 1), cx, 424);
+    }
+    // ---- glowing connectors, right-to-left ----
+    for (i = 0; i < 3; i++) {
+      var x1 = xs[i], x2 = xs[i + 1] + CW;
+      var lg = c.createLinearGradient(x1, 0, x2, 0);
+      lg.addColorStop(0, 'rgba(108,92,255,0)'); lg.addColorStop(0.45, 'rgba(108,92,255,0.55)'); lg.addColorStop(1, 'rgba(108,92,255,0.95)');
+      c.strokeStyle = lg; c.lineWidth = 2; c.lineCap = 'round';
+      c.beginPath(); c.moveTo(x1 - 1, 262); c.lineTo(x2 + 8, 262); c.stroke();
+      c.shadowColor = 'rgba(108,92,255,0.8)'; c.shadowBlur = 8;
+      c.fillStyle = '#6C5CFF'; c.beginPath(); c.moveTo(x2, 262); c.lineTo(x2 + 8, 257); c.lineTo(x2 + 8, 267); c.closePath(); c.fill();
+      var fr = [0.2, 0.48, 0.76];
+      for (j = 0; j < 3; j++) {
+        c.globalAlpha = 0.45 + 0.25 * j; c.fillStyle = '#b9a6ff';
+        c.beginPath(); c.arc(x1 + (x2 - x1) * fr[j], 262, 1.7 + 0.45 * j, 0, Math.PI * 2); c.fill();
+      }
+      c.globalAlpha = 1; c.shadowColor = 'transparent'; c.shadowBlur = 0;
+    }
+    // ---- footer ornament + stat line ----
+    c.strokeStyle = 'rgba(157,140,255,0.18)'; c.lineWidth = 1;
+    c.beginPath(); c.moveTo(432, 548.5); c.lineTo(498, 548.5); c.moveTo(526, 548.5); c.lineTo(592, 548.5); c.stroke();
+    c.fillStyle = 'rgba(157,140,255,0.5)'; c.beginPath(); c.arc(512, 548.5, 2, 0, Math.PI * 2); c.fill();
+    var heb = 'מהפניות מקבלות טיוטה לפני הבוקר';
+    c.font = '400 16px ' + FONT; var hw = c.measureText(heb).width;
+    c.font = '700 19px ' + FONT; var nw = c.measureText('92%').width;
+    var rx2 = 512 + (nw + 9 + hw) / 2;
+    c.direction = 'ltr'; c.textAlign = 'right';
+    c.shadowColor = 'rgba(108,92,255,0.65)'; c.shadowBlur = 14;
+    c.fillStyle = '#9D8CFF'; c.fillText('92%', rx2, 584);
+    c.shadowColor = 'transparent'; c.shadowBlur = 0;
+    c.direction = 'rtl'; c.textAlign = 'right'; c.font = '400 16px ' + FONT;
+    c.fillStyle = 'rgba(250,250,249,0.6)'; c.fillText(heb, rx2 - nw - 9, 584);
+  }
+
+  function drawCaseGame(c) {
+    function rr(x, y, w, h, r) { c.beginPath(); if (c.roundRect) { c.roundRect(x, y, w, h, r); } else { c.rect(x, y, w, h); } }
+    function noShadow() { c.shadowBlur = 0; c.shadowColor = 'rgba(0,0,0,0)'; c.shadowOffsetY = 0; }
+    var g, i, a, px, py;
+    // backdrop
+    g = c.createLinearGradient(0, 0, 0, 640); g.addColorStop(0, '#14121F'); g.addColorStop(1, '#100d1c');
+    c.fillStyle = g; c.fillRect(0, 0, 1024, 640);
+    // app frame
+    c.shadowColor = 'rgba(0,0,0,0.55)'; c.shadowBlur = 34; c.shadowOffsetY = 10;
+    c.fillStyle = '#131020'; rr(26, 22, 972, 596, 14); c.fill(); noShadow();
+    c.strokeStyle = 'rgba(157,140,255,0.14)'; c.lineWidth = 1; rr(26.5, 22.5, 971, 595, 14); c.stroke();
+    // HUD left: score chip with star
+    c.fillStyle = '#221c38'; rr(50, 40, 106, 32, 16); c.fill();
+    c.strokeStyle = 'rgba(255,255,255,0.07)'; rr(50.5, 40.5, 105, 31, 16); c.stroke();
+    c.fillStyle = '#FFB080'; c.beginPath();
+    for (i = 0; i < 10; i++) { a = -Math.PI / 2 + i * Math.PI / 5; var sr = (i % 2 === 0) ? 7 : 3; px = 68 + Math.cos(a) * sr; py = 56 + Math.sin(a) * sr; if (i === 0) { c.moveTo(px, py); } else { c.lineTo(px, py); } }
+    c.closePath(); c.fill();
+    c.direction = 'ltr'; c.textAlign = 'left'; c.fillStyle = '#FAFAF9'; c.font = '700 15px ' + FONT; c.fillText('1,240', 84, 61);
+    // HUD right: stage chip
+    c.fillStyle = '#221c38'; rr(852, 40, 120, 32, 16); c.fill();
+    c.strokeStyle = 'rgba(255,255,255,0.07)'; rr(852.5, 40.5, 119, 31, 16); c.stroke();
+    c.direction = 'rtl'; c.textAlign = 'center'; c.fillStyle = 'rgba(250,250,249,0.88)'; c.font = '600 14px ' + FONT; c.fillText('שלב 3 / 5', 912, 61);
+    // HUD center: progress 60% (RTL fill)
+    c.fillStyle = '#221c38'; rr(230, 52, 562, 8, 4); c.fill();
+    g = c.createLinearGradient(455, 0, 792, 0); g.addColorStop(0, '#FFB080'); g.addColorStop(1, '#E8722E');
+    c.fillStyle = g; rr(455, 52, 337, 8, 4); c.fill();
+    c.fillStyle = '#131020'; for (i = 1; i < 5; i++) { c.fillRect(230 + 562 * i / 5 - 1, 52, 2, 8); }
+    c.shadowColor = '#E8722E'; c.shadowBlur = 10; c.fillStyle = '#FFB080'; c.beginPath(); c.arc(455, 56, 4.5, 0, Math.PI * 2); c.fill(); noShadow();
+    c.fillStyle = 'rgba(255,255,255,0.05)'; c.fillRect(44, 87, 936, 1);
+    // ---- STAGE (clipped) ----
+    c.save(); rr(50, 108, 510, 448, 12); c.clip();
+    g = c.createLinearGradient(0, 108, 0, 556); g.addColorStop(0, '#0e0b1a'); g.addColorStop(1, '#131022');
+    c.fillStyle = g; c.fillRect(50, 108, 510, 448);
+    g = c.createRadialGradient(305, 300, 0, 305, 300, 270); g.addColorStop(0, 'rgba(108,92,255,0.17)'); g.addColorStop(1, 'rgba(108,92,255,0)');
+    c.fillStyle = g; c.fillRect(50, 108, 510, 448);
+    for (i = 0; i < 26; i++) { c.globalAlpha = 0.04 + Math.random() * 0.08; c.fillStyle = '#b9a6ff'; c.beginPath(); c.arc(60 + Math.random() * 490, 118 + Math.random() * 420, 0.6 + Math.random() * 0.9, 0, Math.PI * 2); c.fill(); }
+    c.globalAlpha = 1;
+    // ground glow
+    c.save(); c.translate(305, 452); c.scale(1, 0.26);
+    g = c.createRadialGradient(0, 0, 0, 0, 0, 165); g.addColorStop(0, 'rgba(108,92,255,0.34)'); g.addColorStop(0.55, 'rgba(108,92,255,0.12)'); g.addColorStop(1, 'rgba(108,92,255,0)');
+    c.fillStyle = g; c.beginPath(); c.arc(0, 0, 165, 0, Math.PI * 2); c.fill();
+    g = c.createRadialGradient(0, 0, 0, 0, 0, 70); g.addColorStop(0, 'rgba(232,114,46,0.25)'); g.addColorStop(1, 'rgba(232,114,46,0)');
+    c.fillStyle = g; c.beginPath(); c.arc(0, 0, 70, 0, Math.PI * 2); c.fill(); c.restore();
+    // dashed hover ring
+    c.save(); c.translate(305, 414); c.scale(1, 0.25); c.beginPath(); c.arc(0, 0, 158, 0, Math.PI * 2); c.restore();
+    c.setLineDash([6, 9]); c.strokeStyle = 'rgba(157,140,255,0.30)'; c.lineWidth = 1.5; c.stroke(); c.setLineDash([]);
+    // thruster light cones
+    g = c.createLinearGradient(0, 374, 0, 448); g.addColorStop(0, 'rgba(232,114,46,0.30)'); g.addColorStop(1, 'rgba(232,114,46,0)');
+    c.fillStyle = g;
+    c.beginPath(); c.moveTo(233, 374); c.lineTo(261, 374); c.lineTo(281, 448); c.lineTo(213, 448); c.closePath(); c.fill();
+    c.beginPath(); c.moveTo(349, 374); c.lineTo(377, 374); c.lineTo(397, 448); c.lineTo(329, 448); c.closePath(); c.fill();
+    // tail fin (behind hull)
+    c.fillStyle = '#9D8CFF'; c.beginPath(); c.moveTo(200, 292); c.lineTo(160, 248); c.lineTo(218, 272); c.closePath(); c.fill();
+    // nozzles
+    c.fillStyle = '#221c38'; rr(237, 344, 20, 18, 4); c.fill(); rr(353, 344, 20, 18, 4); c.fill();
+    // hull: dark side face then lit top face
+    g = c.createLinearGradient(0, 300, 0, 352); g.addColorStop(0, '#4c40cc'); g.addColorStop(1, '#342b98');
+    c.fillStyle = g; rr(189, 300, 250, 52, 24); c.fill();
+    g = c.createLinearGradient(0, 272, 0, 330); g.addColorStop(0, '#8F7FFF'); g.addColorStop(1, '#5B4CF5');
+    c.fillStyle = g; rr(175, 272, 260, 58, 27); c.fill();
+    c.fillStyle = 'rgba(255,255,255,0.16)'; rr(197, 279, 180, 9, 4.5); c.fill();
+    // canopy
+    c.beginPath(); c.arc(338, 273, 33, Math.PI, 0); c.closePath(); c.fillStyle = '#131020'; c.fill();
+    g = c.createLinearGradient(0, 242, 0, 272); g.addColorStop(0, '#FFC9A0'); g.addColorStop(1, '#E8722E');
+    c.beginPath(); c.arc(338, 272, 29, Math.PI, 0); c.closePath(); c.fillStyle = g; c.fill();
+    c.fillStyle = 'rgba(255,255,255,0.55)'; c.beginPath(); c.arc(327, 254, 3.5, 0, Math.PI * 2); c.fill();
+    // nose lamp
+    c.shadowColor = '#FFB080'; c.shadowBlur = 12; c.fillStyle = '#FFB080'; c.beginPath(); c.arc(431, 301, 4, 0, Math.PI * 2); c.fill(); noShadow();
+    // thrusters
+    var tx = [247, 363]; c.shadowColor = '#E8722E'; c.shadowBlur = 18;
+    for (i = 0; i < 2; i++) { g = c.createRadialGradient(tx[i], 368, 1, tx[i], 368, 12); g.addColorStop(0, '#FFE7CF'); g.addColorStop(0.5, '#FFB080'); g.addColorStop(1, '#E8722E'); c.fillStyle = g; c.beginPath(); c.arc(tx[i], 368, 12, 0, Math.PI * 2); c.fill(); }
+    noShadow();
+    // deliberate sparks
+    var sp = [[224, 236, 2, 0.8], [398, 228, 1.5, 0.7], [420, 344, 1.6, 0.55], [192, 330, 1.4, 0.55], [286, 212, 1.2, 0.5], [356, 194, 1.8, 0.75], [168, 284, 1.2, 0.5]];
+    for (i = 0; i < sp.length; i++) { c.globalAlpha = sp[i][3]; c.fillStyle = '#FAFAF9'; c.beginPath(); c.arc(sp[i][0], sp[i][1], sp[i][2], 0, Math.PI * 2); c.fill(); }
+    c.globalAlpha = 0.7; c.fillStyle = '#FFB080';
+    c.beginPath(); c.arc(237, 398, 1.5, 0, Math.PI * 2); c.fill(); c.beginPath(); c.arc(373, 404, 1.3, 0, Math.PI * 2); c.fill();
+    c.globalAlpha = 1; c.restore();
+    // stage border, viewport brackets, 360 chip
+    c.strokeStyle = 'rgba(157,140,255,0.10)'; c.lineWidth = 1; rr(50.5, 108.5, 509, 447, 12); c.stroke();
+    var bk = [[64, 122, 1, 1], [546, 122, -1, 1], [64, 542, 1, -1], [546, 542, -1, -1]];
+    c.strokeStyle = 'rgba(157,140,255,0.30)'; c.lineWidth = 2;
+    for (i = 0; i < 4; i++) { c.beginPath(); c.moveTo(bk[i][0] + 14 * bk[i][2], bk[i][1]); c.lineTo(bk[i][0], bk[i][1]); c.lineTo(bk[i][0], bk[i][1] + 14 * bk[i][3]); c.stroke(); }
+    c.fillStyle = 'rgba(34,28,56,0.85)'; rr(70, 510, 54, 24, 12); c.fill();
+    c.direction = 'ltr'; c.textAlign = 'center'; c.fillStyle = '#9D8CFF'; c.font = '600 12px ' + FONT; c.fillText('360°', 97, 526);
+    // ---- RIGHT PANEL (RTL config) ----
+    g = c.createLinearGradient(0, 108, 0, 474); g.addColorStop(0, '#1e1936'); g.addColorStop(1, '#1b1730');
+    c.fillStyle = g; rr(584, 108, 390, 366, 12); c.fill();
+    c.strokeStyle = 'rgba(157,140,255,0.12)'; c.lineWidth = 1; rr(584.5, 108.5, 389, 365, 12); c.stroke();
+    c.direction = 'rtl'; c.textAlign = 'right';
+    c.fillStyle = '#FAFAF9'; c.font = '700 22px ' + FONT; c.fillText('הרכיבו את שלכם', 944, 152);
+    c.font = '600 13px ' + FONT; c.fillStyle = 'rgba(185,166,255,0.85)'; c.fillText('צבע', 944, 190);
+    // swatches (selected = orange, first from right)
+    var sw = ['#E8722E', '#6C5CFF', '#9D8CFF', '#FFB080', '#FAFAF9'];
+    for (i = 0; i < 5; i++) { c.fillStyle = sw[i]; c.beginPath(); c.arc(926 - 38 * i, 216, 13, 0, Math.PI * 2); c.fill(); c.strokeStyle = 'rgba(16,13,28,0.5)'; c.lineWidth = 1; c.stroke(); }
+    c.strokeStyle = '#E8722E'; c.lineWidth = 2; c.beginPath(); c.arc(926, 216, 18.5, 0, Math.PI * 2); c.stroke();
+    c.fillStyle = 'rgba(255,255,255,0.06)'; c.fillRect(614, 243, 330, 1);
+    // engine pills
+    c.font = '600 13px ' + FONT; c.fillStyle = 'rgba(185,166,255,0.85)'; c.textAlign = 'right'; c.fillText('מנוע', 944, 272);
+    var pills = [{ t: 'שקט', x: 852, lit: false }, { t: 'ספורט', x: 748, lit: true }, { t: 'טורבו', x: 644, lit: false }];
+    for (i = 0; i < 3; i++) {
+      if (pills[i].lit) {
+        c.shadowColor = 'rgba(232,114,46,0.55)'; c.shadowBlur = 14;
+        g = c.createLinearGradient(0, 284, 0, 316); g.addColorStop(0, '#F5893B'); g.addColorStop(1, '#DE6524');
+        c.fillStyle = g; rr(pills[i].x, 284, 92, 32, 16); c.fill(); noShadow();
+        c.fillStyle = '#14121F'; c.font = '700 14px ' + FONT;
+      } else {
+        c.fillStyle = '#221c38'; rr(pills[i].x, 284, 92, 32, 16); c.fill();
+        c.strokeStyle = 'rgba(255,255,255,0.06)'; c.lineWidth = 1; rr(pills[i].x + 0.5, 284.5, 91, 31, 16); c.stroke();
+        c.fillStyle = 'rgba(250,250,249,0.72)'; c.font = '600 14px ' + FONT;
+      }
+      c.textAlign = 'center'; c.fillText(pills[i].t, pills[i].x + 46, 305);
+    }
+    c.fillStyle = 'rgba(255,255,255,0.06)'; c.fillRect(614, 332, 330, 1);
+    // hover-height slider at 70%
+    c.textAlign = 'right'; c.font = '600 13px ' + FONT; c.fillStyle = 'rgba(185,166,255,0.85)'; c.fillText('גובה ריחוף', 944, 360);
+    c.direction = 'ltr'; c.textAlign = 'left'; c.font = '700 13px ' + FONT; c.fillStyle = '#b9a6ff'; c.fillText('70%', 614, 360);
+    c.fillStyle = '#131020'; rr(614, 374, 330, 6, 3); c.fill();
+    g = c.createLinearGradient(713, 0, 944, 0); g.addColorStop(0, '#9D8CFF'); g.addColorStop(1, '#6C5CFF');
+    c.fillStyle = g; rr(713, 374, 231, 6, 3); c.fill();
+    c.shadowColor = 'rgba(0,0,0,0.45)'; c.shadowBlur = 8; c.shadowOffsetY = 2;
+    c.fillStyle = '#FAFAF9'; c.beginPath(); c.arc(713, 377, 10, 0, Math.PI * 2); c.fill(); noShadow();
+    c.fillStyle = '#6C5CFF'; c.beginPath(); c.arc(713, 377, 4, 0, Math.PI * 2); c.fill();
+    c.fillStyle = 'rgba(255,255,255,0.06)'; c.fillRect(614, 402, 330, 1);
+    // stat readout
+    var st = [{ t: 'מהירות', y: 419, w: 179, v: '82' }, { t: 'יציבות', y: 447, w: 140, v: '64' }];
+    for (i = 0; i < 2; i++) {
+      c.direction = 'rtl'; c.textAlign = 'right'; c.font = '600 13px ' + FONT; c.fillStyle = 'rgba(250,250,249,0.6)'; c.fillText(st[i].t, 944, st[i].y + 9);
+      c.fillStyle = '#131020'; rr(636, st[i].y, 218, 8, 4); c.fill();
+      g = c.createLinearGradient(636, 0, 854, 0); g.addColorStop(0, '#6C5CFF'); g.addColorStop(1, '#9D8CFF');
+      c.fillStyle = g; rr(854 - st[i].w, st[i].y, st[i].w, 8, 4); c.fill();
+      c.direction = 'ltr'; c.textAlign = 'left'; c.font = '600 12px ' + FONT; c.fillStyle = '#b9a6ff'; c.fillText(st[i].v, 614, st[i].y + 9);
+    }
+    // CTA
+    c.shadowColor = 'rgba(232,114,46,0.55)'; c.shadowBlur = 30; c.shadowOffsetY = 6;
+    g = c.createLinearGradient(0, 492, 0, 556); g.addColorStop(0, '#FFA366'); g.addColorStop(1, '#DE6320');
+    c.fillStyle = g; rr(584, 492, 390, 64, 18); c.fill(); noShadow();
+    c.fillStyle = 'rgba(255,255,255,0.35)'; rr(600, 497, 358, 2, 1); c.fill();
+    c.direction = 'rtl'; c.textAlign = 'center'; c.fillStyle = '#14121F'; c.font = '800 24px ' + FONT; c.fillText('נסו אותי', 779, 533);
+    // footer hints
+    c.font = '600 13px ' + FONT; c.fillStyle = 'rgba(250,250,249,0.38)'; c.fillText('גררו כדי לסובב את הדגם', 305, 584);
+    c.font = '600 12px ' + FONT; c.fillStyle = 'rgba(250,250,249,0.32)'; c.fillText('אפשר לשנות הכל אחר כך', 779, 584);
+    c.direction = 'ltr'; c.textAlign = 'left';
+  }
+
+  function drawCaseAnatomy(c) {
+    function rr(x, y, w, h, r) { c.beginPath(); if (c.roundRect) { c.roundRect(x, y, w, h, r); } else { c.rect(x, y, w, h); } }
+    var BLUE = '#1F8FD8', i;
+
+    /* night backdrop + a soft blue breath top-right */
+    c.fillStyle = '#14121F';
+    c.fillRect(0, 0, 1024, 640);
+    var breath = c.createRadialGradient(830, 120, 30, 830, 120, 460);
+    breath.addColorStop(0, 'rgba(31, 143, 216, 0.14)');
+    breath.addColorStop(1, 'rgba(31, 143, 216, 0)');
+    c.fillStyle = breath;
+    c.fillRect(0, 0, 1024, 640);
+    c.fillStyle = 'rgba(250, 250, 249, 0.04)';
+    for (i = 0; i < 40; i++) c.fillRect((i * 173.3) % 1024, (i * 97.7) % 640, 1.3, 1.3);
+
+    /* isometric mapping: plate space (u,v) -> screen; e = elevation */
+    var OX = 360, OY = 150, AU = 0.8, AV = 0.38;
+    function P(u, v, e) { return [OX + (u - v) * AU, OY + (u + v) * AV - e]; }
+    var PW = 300, PD = 190, TH = 14;   /* plate footprint + thickness */
+
+    function plate(e, top, sideL, sideR, inner) {
+      var a = P(0, 0, e), b = P(PW, 0, e), d2 = P(PW, PD, e), f = P(0, PD, e);
+      /* soft shadow cast on the plate below */
+      c.fillStyle = 'rgba(0, 0, 0, 0.30)';
+      c.beginPath();
+      c.ellipse(P(PW / 2, PD / 2, e)[0], P(PW / 2, PD / 2, e)[1] + 52, 210, 34, 0, 0, Math.PI * 2);
+      c.fill();
+      /* thickness sides */
+      c.fillStyle = sideL;
+      c.beginPath(); c.moveTo(f[0], f[1]); c.lineTo(d2[0], d2[1]); c.lineTo(d2[0], d2[1] + TH); c.lineTo(f[0], f[1] + TH); c.closePath(); c.fill();
+      c.fillStyle = sideR;
+      c.beginPath(); c.moveTo(d2[0], d2[1]); c.lineTo(b[0], b[1]); c.lineTo(b[0], b[1] + TH); c.lineTo(d2[0], d2[1] + TH); c.closePath(); c.fill();
+      /* top face */
+      c.fillStyle = top;
+      c.beginPath(); c.moveTo(a[0], a[1]); c.lineTo(b[0], b[1]); c.lineTo(d2[0], d2[1]); c.lineTo(f[0], f[1]); c.closePath(); c.fill();
+      c.strokeStyle = 'rgba(250, 250, 249, 0.10)';
+      c.lineWidth = 1;
+      c.stroke();
+      /* draw the plate's mini-content in plate space */
+      c.save();
+      c.transform(AU, AV, -AU, AV, OX, OY - e);
+      inner();
+      c.restore();
+    }
+
+    function bar(u, v, w, h, col, r) { c.fillStyle = col; rr(u, v, w, h, r || 3); c.fill(); }
+
+    /* bottom-up so upper plates overlap lower shadows */
+    /* 4. code */
+    plate(-318, '#100d1c', '#0a0812', '#070510', function () {
+      c.strokeStyle = 'rgba(31, 143, 216, 0.8)';
+      c.lineWidth = 7;
+      c.lineCap = 'round';
+      c.beginPath(); c.moveTo(64, 66); c.lineTo(40, 92); c.lineTo(64, 118); c.stroke();
+      c.beginPath(); c.moveTo(104, 66); c.lineTo(128, 92); c.lineTo(104, 118); c.stroke();
+      c.strokeStyle = 'rgba(157, 140, 255, 0.8)';
+      c.beginPath(); c.moveTo(90, 60); c.lineTo(78, 124); c.stroke();
+      c.lineCap = 'butt';
+      bar(160, 56, 96, 8, 'rgba(31, 143, 216, 0.55)');
+      bar(176, 76, 80, 8, 'rgba(157, 140, 255, 0.5)');
+      bar(176, 96, 64, 8, 'rgba(250, 250, 249, 0.22)');
+      bar(160, 116, 90, 8, 'rgba(255, 176, 128, 0.45)');
+    });
+    /* 3. motion */
+    plate(-212, '#1b1730', '#120e22', '#0d0a1c', function () {
+      c.lineWidth = 5;
+      c.lineCap = 'round';
+      c.strokeStyle = BLUE;
+      c.beginPath(); c.moveTo(40, 130); c.bezierCurveTo(110, 130, 130, 52, 210, 48); c.stroke();
+      c.strokeStyle = '#9D8CFF';
+      c.beginPath(); c.moveTo(40, 140); c.bezierCurveTo(160, 140, 120, 66, 250, 62); c.stroke();
+      c.lineCap = 'butt';
+      c.fillStyle = BLUE;
+      c.beginPath(); c.moveTo(210, 40); c.lineTo(222, 48); c.lineTo(210, 56); c.closePath(); c.fill();
+      c.fillStyle = '#9D8CFF';
+      c.beginPath(); c.moveTo(250, 54); c.lineTo(262, 62); c.lineTo(250, 70); c.closePath(); c.fill();
+      c.fillStyle = 'rgba(250, 250, 249, 0.16)';
+      c.beginPath(); c.arc(64, 62, 22, 0, Math.PI * 2); c.fill();
+      c.fillStyle = 'rgba(250, 250, 249, 0.85)';
+      c.beginPath(); c.moveTo(57, 50); c.lineTo(75, 62); c.lineTo(57, 74); c.closePath(); c.fill();
+    });
+    /* 2. design */
+    plate(-106, '#2a2153', '#1d1740', '#171233', function () {
+      var chips = ['#5B4CF5', '#9D8CFF', '#FFB080', '#FAFAF9'];
+      for (var k = 0; k < 4; k++) bar(40 + k * 46, 48, 34, 34, chips[k], 9);
+      c.fillStyle = 'rgba(250, 250, 249, 0.92)';
+      c.font = '850 74px ' + FONT;
+      c.textAlign = 'left';
+      c.direction = 'rtl';
+      c.fillText('אב', 196, 112);
+      c.strokeStyle = 'rgba(250, 250, 249, 0.30)';
+      c.lineWidth = 2;
+      c.beginPath(); c.moveTo(40, 132); c.lineTo(250, 132); c.stroke();
+      for (var t = 0; t <= 6; t++) { c.beginPath(); c.moveTo(40 + t * 35, 126); c.lineTo(40 + t * 35, 138); c.stroke(); }
+    });
+    /* 1. content */
+    plate(0, '#FAFAF9', '#d9d5c8', '#c8c3b4', function () {
+      bar(40, 44, 150, 20, '#14121F', 6);
+      bar(40, 80, 190, 9, 'rgba(90, 86, 104, 0.55)');
+      bar(40, 100, 170, 9, 'rgba(90, 86, 104, 0.42)');
+      bar(40, 120, 120, 9, 'rgba(90, 86, 104, 0.30)');
+      bar(206, 76, 56, 56, 'rgba(108, 92, 255, 0.35)', 8);
+      c.strokeStyle = 'rgba(20, 18, 31, 0.25)';
+      c.lineWidth = 1.5;
+      rr(206, 76, 56, 56, 8);
+      c.stroke();
+    });
+
+    /* the spine: a hairline through the right-front corners */
+    var s0 = P(PW, 0, 40), s1 = P(PW, 0, -358);
+    c.strokeStyle = 'rgba(31, 143, 216, 0.35)';
+    c.lineWidth = 1;
+    c.setLineDash([3, 6]);
+    c.beginPath(); c.moveTo(s0[0], s0[1]); c.lineTo(s1[0], s1[1]); c.stroke();
+    c.setLineDash([]);
+
+    /* labels with numbered dots + leader lines (rtl side) */
+    var labels = [['תוכן', 'מילים שנכתבות ללקוח', 0], ['עיצוב', 'שפה אחת, מכל זווית', -106], ['תנועה', 'החיים שבין המסכים', -212], ['קוד', 'מהיר, יציב, נקי', -318]];
+    c.textBaseline = 'middle';
+    for (i = 0; i < 4; i++) {
+      var e2 = labels[i][2];
+      var edge = P(PW, PD * 0.35, e2);
+      var lxx = 900, lyy = edge[1] - 8;
+      c.strokeStyle = 'rgba(250, 250, 249, 0.28)';
+      c.beginPath(); c.moveTo(edge[0] + 8, edge[1]); c.lineTo(lxx - 62, lyy); c.stroke();
+      c.fillStyle = 'rgba(31, 143, 216, 0.16)';
+      c.beginPath(); c.arc(lxx - 46, lyy, 13, 0, Math.PI * 2); c.fill();
+      c.strokeStyle = 'rgba(31, 143, 216, 0.7)';
+      c.beginPath(); c.arc(lxx - 46, lyy, 13, 0, Math.PI * 2); c.stroke();
+      c.fillStyle = '#FAFAF9';
+      c.font = '700 15px ' + FONT;
+      c.textAlign = 'center';
+      c.direction = 'ltr';
+      c.fillText(String(i + 1), lxx - 46, lyy + 1);
+      c.textAlign = 'right';
+      c.direction = 'rtl';
+      c.font = '700 24px ' + FONT;
+      c.fillText(labels[i][0], lxx + 88, lyy - 8);
+      c.fillStyle = 'rgba(143, 136, 173, 0.9)';
+      c.font = '400 15px ' + FONT;
+      c.fillText(labels[i][1], lxx + 88, lyy + 15);
+    }
+
+    /* heading (top right) + footer */
+    c.textAlign = 'right';
+    c.direction = 'rtl';
+    c.fillStyle = BLUE;
+    c.font = '600 20px ' + FONT;
+    c.fillText('ככה נבנה אתר', 976, 66);
+    c.fillStyle = '#FAFAF9';
+    c.font = '800 42px ' + FONT;
+    c.fillText('ארבע שכבות, מקשה אחת.', 976, 116);
+    c.textAlign = 'center';
+    c.fillStyle = 'rgba(143, 136, 173, 0.85)';
+    c.font = '400 20px ' + FONT;
+    c.fillText('כל שכבה נבנית אצלנו, באותו שולחן.', 512, 606);
+    c.textBaseline = 'alphabetic';
+    c.direction = 'ltr';
+    c.textAlign = 'left';
+  }
+
+  var DISPLAYS = {
+    bisomna: drawCaseBisomna,
+    orbo: drawCaseOrbo,
+    crm: drawCaseCrm,
+    ai: drawCaseAi,
+    game: drawCaseGame,
+    anatomy: drawCaseAnatomy
+  };
+
+  /* the collection, curated as a walk: stations 01-14 counterclockwise
+     from the door. each straight-wall zone belongs to the pedestal wing
+     it faces — websites NW, systems NE, AI SW, games SE — and carries
+     that wing's accent. the rich "case displays" (disp:) are drawn at
+     1024x640 by the display functions above. */
   var ART = [
-    /* left straight wall */
-    { id: 'bisomna', px: -(ROOM.hw - 0.06), pz: -4.6, ry: Math.PI / 2, title: 'BISOMNA', tag: 'אתר · באוויר', style: 'light', sub: 'אתר למיזם שינה ישראלי', domain: 'bisomna.com', link: 'https://bisomna.com', accent: '#5B4CF5',
-      body: 'אתר רחב למיזם בתחום השינה — מוצר, מדע, חנות ומשקיעים. וידאו שנע יחד עם הגלילה ותצוגת מוצר שנפתחת לשכבות, והכול נשאר מהיר גם בנייד.' },
-    { id: 'orbo', px: -(ROOM.hw - 0.06), pz: 0, ry: Math.PI / 2, title: 'orbosolutions.com', tag: 'הבית שלנו', style: 'dark', sub: 'דף הבית של הסטודיו', domain: 'orbosolutions.com', link: 'index.html', self: true, accent: '#6C5CFF',
-      body: 'דף הבית שלנו הוא מסע: גוללים, והמצלמה עפה דרך עולם של חלקיקים שמתגבשים לצורות. בנוי כולו בקוד, בלי אף קובץ תמונה.' },
-    { id: 'aurora', px: -(ROOM.hw - 0.06), pz: 4.6, ry: Math.PI / 2, live: 'aurora', title: 'AURORA', tag: 'ציור חי · המעבדה', accent: '#86B32B', link: 'lab/01-aurora-gsap/',
-      body: 'סרטי אור שנעים בזרם. הציור שעל הקיר נצבע מחדש עשרות פעמים בשנייה, ממש עכשיו — כמו כל ציורי המעבדה כאן.' },
-    /* right straight wall */
-    { id: 'genesis', px: ROOM.hw - 0.06, pz: -4.6, ry: -Math.PI / 2, gen: genesisArt, title: 'GENESIS', tag: 'אמנות גנרטיבית', accent: '#E8722E',
-      body: 'שלוש מאות קווים ששוחררו לשדה זרימה מתמטי. אף אחד לא צייר את היצירה הזאת — היא חושבה, קו אחרי קו, ברגע שנכנסתם למוזיאון.' },
-    { id: 'mosaic', px: ROOM.hw - 0.06, pz: 0, ry: -Math.PI / 2, gen: mosaicArt, title: 'MOSAIC', tag: 'אמנות גנרטיבית', accent: '#6C5CFF',
-      body: 'פסיפס שנבנה מחלוקת המרחב בין ארבעים ושש נקודות אקראיות. כל ריצה מייצרת פסיפס שלא היה קיים מעולם.' },
-    { id: 'flux', px: ROOM.hw - 0.06, pz: 4.6, ry: -Math.PI / 2, live: 'flux', title: 'FLUX', tag: 'ציור חי · המעבדה', accent: '#E0402F', link: 'lab/04-flux-shaders/',
-      body: 'שדות צבע שזורמים על המסך לפי כללים מתמטיים. בגרסה המלאה — שמונה יצירות, כולל נוזל שמציירים בו עם הסמן.' },
-    /* far curve: the finale flanked by two living paintings */
-    { id: 'nebula', px: farL.px, pz: farL.pz, ry: farL.ry, live: 'nebula', title: 'NEBULA', tag: 'ציור חי · המעבדה', accent: '#1F8FD8', link: 'lab/02-nebula-three/',
-      body: 'גלקסיה של חלקיקים שמסתחררת לאט. בגרסה המלאה גוללים אל תוך מרכז הגלקסיה.' },
+    /* near curve, left of the door — the walk begins */
+    { id: 'prism', num: '01', px: nearL.px, pz: nearL.pz, ry: nearL.ry, live: 'prism', title: 'PRISM', tag: 'ציור חי · המעבדה', demo: 'מדגים: תלת־ממד חי בדפדפן', accent: '#7A5CFF', link: 'lab/03-prism-r3f/',
+      body: 'אלומת אור נשברת דרך גאומטריה ומתפצלת לספקטרום — נצבע מחדש עשרות פעמים בשנייה, ממש עכשיו. ככה נראה תלת־ממד שרץ בדפדפן בלי להתקין כלום; בגרסה המלאה מחכה חדר חומרים שלם.' },
+    { id: 'aurora', num: '02', px: nearLL.px, pz: nearLL.pz, ry: nearLL.ry, live: 'aurora', title: 'AURORA', tag: 'ציור חי · המעבדה', demo: 'מדגים: אנימציה ותנועה באתר', accent: '#86B32B', link: 'lab/01-aurora-gsap/',
+      body: 'סרטי אור שנעים בזרם, נצבעים בזמן אמת על הקיר הזה. תנועה כזאת אפשר לשלב גם באתר שלכם — עדינה, מהירה, בלי קובצי וידאו כבדים.' },
+    /* left straight wall — AI wing (south), websites wing (north) */
+    { id: 'ai', num: '03', px: -(ROOM.hw - 0.06), pz: 4.6, ry: Math.PI / 2, disp: 'ai', wide: true, title: 'העוזר שלא ישן', tag: 'תצוגת יכולת · AI', demo: 'מדגים: AI ואוטומציה לעסק', accent: '#6C5CFF', contact: true,
+      body: 'ככה נראית אוטומציה חכמה בעסק אמיתי: פנייה נכנסת, ממוינת לפי תוכן, מקבלת טיוטת מענה — ואדם מאשר בסוף. המערכת ערה כל הלילה; ההחלטות נשארות אצלכם. רוצים תהליך כזה אצלכם? דברו איתנו.' },
+    { id: 'anatomy', num: '04', px: -(ROOM.hw - 0.06), pz: 0, ry: Math.PI / 2, disp: 'anatomy', wide: true, title: 'אנטומיה של אתר', tag: 'תצוגת יכולת · אתרים', demo: 'מדגים: איך נבנה אתר אצלנו', accent: '#1F8FD8', link: 'services.html', linkText: 'מה עוד אנחנו בונים',
+      body: 'ממה עשוי אתר שמרגיש כמו מקום? ארבע שכבות: תוכן שנכתב ללקוח, עיצוב עם שפה אחת, תנועה שמפיחה חיים, וקוד שמחזיק הכול יציב ומהיר. אצלנו כולן נבנות באותו שולחן — ולכן הן נפגשות מדויק.' },
+    { id: 'bisomna', num: '05', px: -(ROOM.hw - 0.06), pz: -4.6, ry: Math.PI / 2, disp: 'bisomna', wide: true, title: 'BISOMNA', tag: 'הקייס המרכזי · באוויר', demo: 'מדגים: אתר תדמית ומסחר', accent: '#1F8FD8', link: 'https://bisomna.com', linkText: 'לאתר החי',
+      body: 'הקייס המרכזי שלנו: מיזם שינה ישראלי שנכנס עם רעיון ויצא עם בית שלם — שישה־עשר עמודים, וידאו שנע עם הגלילה, תצוגת מוצר שנפתחת לשכבות וחנות. והכול טס גם בנייד. רוצים סטנדרט כזה? דברו איתנו.' },
+    /* far curve: our own home, two living paintings, the finale, a mosaic */
+    { id: 'orbo', num: '06', px: farLL.px, pz: farLL.pz, ry: farLL.ry, disp: 'orbo', title: 'orbosolutions.com', tag: 'הבית שלנו', demo: 'מדגים: אתר כחוויית מסע', accent: '#6C5CFF', link: 'index.html', self: true,
+      body: 'דף הבית שלנו הוא מסע: גוללים, והמצלמה עפה דרך עולם חלקיקים שמתגבש לצורות — בלי אף קובץ גרפיקה. כשהבית שלך בנוי ככה, הוא גם תיק העבודות.' },
+    { id: 'nebula', num: '07', px: farL.px, pz: farL.pz, ry: farL.ry, live: 'nebula', title: 'NEBULA', tag: 'ציור חי · המעבדה', demo: 'מדגים: גרפיקה בזמן אמת', accent: '#1F8FD8', link: 'lab/02-nebula-three/',
+      body: 'גלקסיה של חלקיקים שמסתחררת לאט, מחושבת חיה מול עיניכם. בגרסה המלאה גוללים אל תוך מרכז הגלקסיה.' },
     { id: 'star', px: 0, pz: -(ROOM.straight + CURVE_R), ry: 0, title: 'ORBO', tag: 'הסטודיו', style: 'dark', big: true, sub: 'רעיונות יש לכולם. אנחנו הופכים אותם למציאות.', accent: '#6C5CFF',
       body: 'תודה שביקרתם. אם משהו כאן הדליק לכם רעיון — נשמח לשמוע עליו.', contact: true },
-    { id: 'terra', px: farR.px, pz: farR.pz, ry: farR.ry, live: 'terra', title: 'TERRA', tag: 'ציור חי · המעבדה', accent: '#C9A05C', link: 'lab/05-terra-webgl/',
+    { id: 'terra', num: '08', px: farR.px, pz: farR.pz, ry: farR.ry, live: 'terra', title: 'TERRA', tag: 'ציור חי · המעבדה', demo: 'מדגים: עולמות מקוד טהור', accent: '#C9A05C', link: 'lab/05-terra-webgl/',
       body: 'רכסי הרים שמחושבים מרעש מתמטי טהור, תחת שמש נמוכה. בגרסה המלאה גולשים בין נופים שלמים.' },
-    /* near curve, flanking the door */
-    { id: 'prism', px: nearL.px, pz: nearL.pz, ry: nearL.ry, live: 'prism', title: 'PRISM', tag: 'ציור חי · המעבדה', accent: '#7A5CFF', link: 'lab/03-prism-r3f/',
-      body: 'אלומת אור שנשברת דרך גאומטריה ומתפצלת לספקטרום. בגרסה המלאה — חדר חומרים תלת־ממדי שלם.' },
-    { id: 'fractal', px: nearR.px, pz: nearR.pz, ry: nearR.ry, gen: fractalArt, title: 'JULIA', tag: 'אמנות גנרטיבית', accent: '#7A5CFF',
-      body: 'קבוצת ז׳וליה — נוסחה אחת קצרה שמכילה אינסוף. ככל שמתקרבים, מתגלים עוד ועוד עולמות. חושבה פיקסל־פיקסל בכניסתכם.' }
+    { id: 'mosaic', num: '09', px: farRR.px, pz: farRR.pz, ry: farRR.ry, gen: mosaicArt, title: 'MOSAIC', tag: 'אמנות גנרטיבית', demo: 'מדגים: אלגוריתם כמעצב', accent: '#6C5CFF',
+      body: 'פסיפס שנבנה מחלוקת המרחב בין ארבעים ושש נקודות אקראיות. כל כניסה למוזיאון מייצרת פסיפס שלא היה קיים מעולם.' },
+    /* right straight wall — systems wing (north), games wing (south) */
+    { id: 'crm', num: '10', px: ROOM.hw - 0.06, pz: -4.6, ry: -Math.PI / 2, disp: 'crm', wide: true, title: 'חדר הבקרה', tag: 'תצוגת יכולת · מערכות', demo: 'מדגים: מערכות ניהול ו־BI', accent: '#0FA88C', contact: true,
+      body: 'חדר הבקרה של עסק: לוח מחוונים שמראה בדיוק מה שחשוב הבוקר, לקוחות, גרפים וטבלאות שמתעדכנים לבד. בלי אקסלים אבודים ובלי ״רגע, אבדוק ואחזור אליך״. כל עסק מקבל חדר בקרה משלו — דברו איתנו.' },
+    { id: 'genesis', num: '11', px: ROOM.hw - 0.06, pz: 0, ry: -Math.PI / 2, gen: genesisArt, title: 'GENESIS', tag: 'אמנות גנרטיבית', demo: 'מדגים: אמנות מקוד', accent: '#0FA88C',
+      body: 'שלוש מאות קווים ששוחררו לשדה זרימה מתמטי. אף אחד לא צייר את היצירה הזאת — היא חושבה, קו אחרי קו, ברגע שנכנסתם.' },
+    { id: 'game', num: '12', px: ROOM.hw - 0.06, pz: 4.6, ry: -Math.PI / 2, disp: 'game', wide: true, title: 'המגרש', tag: 'תצוגת יכולת · משחקים', demo: 'מדגים: משחקים וקונפיגורטורים', accent: '#E8722E', contact: true,
+      body: 'הדרך הכי מהירה להבין מוצר היא לשחק בו: קונפיגורטור שמרכיב מוצר בלייב, סימולטור שמלמד תהליך, משחק שמשאיר מבקרים עוד דקה. אינטראקציה הופכת סקרנות להחלטה — בואו נבנה אחת לשלכם.' },
+    /* near curve, right of the door — the walk ends */
+    { id: 'flux', num: '13', px: nearRR.px, pz: nearRR.pz, ry: nearRR.ry, live: 'flux', title: 'FLUX', tag: 'ציור חי · המעבדה', demo: 'מדגים: שיידרים על ה־GPU', accent: '#E0402F', link: 'lab/04-flux-shaders/',
+      body: 'שדות צבע שזורמים לפי כללים מתמטיים, ישר מול המעבד הגרפי. בגרסה המלאה — שמונה יצירות, כולל נוזל שמציירים בו עם הסמן.' },
+    { id: 'fractal', num: '14', px: nearR.px, pz: nearR.pz, ry: nearR.ry, gen: fractalArt, title: 'JULIA', tag: 'אמנות גנרטיבית', demo: 'מדגים: מתמטיקה חיה', accent: '#7A5CFF',
+      body: 'קבוצת ז׳וליה — נוסחה אחת קצרה שמכילה אינסוף. חושבה פיקסל־פיקסל בכניסתכם. לפעמים הקסם הוא פשוט מתמטיקה עם טעם טוב.' }
   ];
 
   var glowTexNeutral = radialTexture('rgba(255, 255, 255, 0.7)', 'rgba(255, 255, 255, 0)');
 
   ART.forEach(function (art) {
     var group = new THREE.Group();
-    var W = art.big ? 3.6 : 2.2, H = art.big ? 2.25 : 1.375;
+    var W = art.big ? 3.6 : art.wide ? 2.6 : 2.2;
+    var H = art.big ? 2.25 : art.wide ? 1.625 : 1.375;
     var AY = art.big ? 2.6 : 2.1;
 
     group.position.set(art.px, 0, art.pz);
@@ -1170,6 +2143,12 @@
       texC.fillStyle = '#0F0D18';
       texC.fillRect(0, 0, aw, ah);
       tex = asTexture(texC.canvas);
+    } else if (art.disp && DISPLAYS[art.disp]) {
+      var dispC = ctx2d(1024, 640);
+      dispC.fillStyle = '#14121F';
+      dispC.fillRect(0, 0, 1024, 640);
+      tex = asTexture(dispC.canvas);
+      deferredArt.push({ run: DISPLAYS[art.disp].bind(null, dispC), tex: tex });
     } else if (art.gen) {
       var genC = ctx2d(640, 400);
       genC.fillStyle = '#0F0D18';
@@ -1195,10 +2174,10 @@
 
     if (!art.big) {
       var plq = new THREE.Mesh(
-        new THREE.PlaneGeometry(0.56, 0.28),
+        new THREE.PlaneGeometry(0.56, 0.42),
         new THREE.MeshBasicMaterial({ map: plaqueTexture(art) })
       );
-      plq.position.set(W / 2 + 0.95, 1.35, 0.02);
+      plq.position.set(W / 2 + 0.95, 1.42, 0.02);
       group.add(plq);
     }
 
@@ -1212,6 +2191,52 @@
 
     scene.add(group);
   });
+
+  /* ---------- the welcome stand: a lectern greeting the visitor ---------- */
+  var standCollide = null;
+  (function () {
+    var SX = 1.7, SZ = 8.6, TILT = -0.21;
+    var face = Math.atan2(0 - SX, 10.6 - SZ);   /* board normal toward the entry point */
+    /* bronze back plate (frame) + two legs join the static bake */
+    var bm = new THREE.Matrix4().makeRotationY(face);
+    bm.multiply(new THREE.Matrix4().makeRotationX(TILT));
+    bm.setPosition(SX, 1.28, SZ);
+    var back = bm.clone().multiply(new THREE.Matrix4().makeTranslation(0, 0, -0.014));
+    collectM('bronze', new THREE.BoxGeometry(1.56, 1.11, 0.02), back);
+    [[-0.5], [0.5]].forEach(function (lx) {
+      var leg = new THREE.Matrix4().makeRotationY(face);
+      leg.setPosition(SX, 0, SZ);
+      leg.multiply(new THREE.Matrix4().makeTranslation(lx[0], 0.44, 0.06));
+      collectM('dark', new THREE.CylinderGeometry(0.028, 0.034, 0.88, 8), leg);
+    });
+    /* the ivory board itself — gently backlit so it reads at night */
+    var introTex = introTexture();
+    var board = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.5, 1.05),
+      new THREE.MeshStandardMaterial({ map: introTex, emissive: 0xffffff, emissiveMap: introTex, emissiveIntensity: 0.38, roughness: 0.85, metalness: 0.0 })
+    );
+    board.rotation.order = 'YXZ';
+    board.rotation.set(TILT, face, 0);
+    board.position.set(SX, 1.28, SZ);
+    scene.add(board);
+    /* soft contact shadow */
+    var ssh = new THREE.Mesh(new THREE.PlaneGeometry(1.9, 1.2), new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, opacity: 0.6, depthWrite: false }));
+    ssh.rotation.x = -Math.PI / 2;
+    ssh.position.set(SX, 0.013, SZ);
+    scene.add(ssh);
+    /* clickable */
+    var hit = new THREE.Mesh(new THREE.BoxGeometry(1.7, 2.1, 0.6), new THREE.MeshBasicMaterial({ visible: false }));
+    hit.position.set(SX, 1.05, SZ);
+    hit.rotation.y = face;
+    hit.userData.art = {
+      title: 'ברוכים הבאים', tag: 'המוזיאון של אורבו', self: true,
+      body: 'במקום תיק עבודות — בנינו מקום. כל מה שסביבכם נוצר אצלנו בקוד: האולם, השמיים, הכוכב, והציורים שנצבעים ממש עכשיו בזמן שאתם מסתכלים. ארבע העמדות במרכז מציגות מה אנחנו בונים, ועל הקירות תחנות 01–14 עם קייסים ותצוגות יכולת. לחיצה על כל מוצג פותחת הסבר. סיור נעים.',
+      link: null
+    };
+    scene.add(hit);
+    pickables.push(hit);
+    standCollide = { x: SX, z: SZ, r: 0.7 };
+  })();
 
   /* a fixed pool of six spots serves whichever pieces are nearest.
      the light COUNT never changes, so the standard materials keep one
@@ -1448,6 +2473,7 @@
   /* ---------- movement & collisions ---------- */
   var fwd = new THREE.Vector3(), rgt = new THREE.Vector3(), wish = new THREE.Vector3();
   var pedCollide = pedestalDefs.map(function (d) { return { x: d.x, z: d.z, r: 0.92 }; });
+  if (standCollide) pedCollide.push(standCollide);
 
   /* the stadium: a rectangle capped by two discs */
   function walkable(x, z) {
