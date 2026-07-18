@@ -4,11 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>עבודות | Orbo Solutions</title>
-<meta name="description" content="עבודות נבחרות של הסטודיו: אתרים באוויר, מערכות שבנינו ללקוחות ולעצמנו, וגלריה תלת־ממדית שאפשר לטייל בה.">
+<meta name="description" content="המוזיאון של אורבו — היכל תלת־ממדי שנבנה כולו בקוד, עם יצירות חיות והולוגרמות. ולצדו: חמישה ניסויים של אור ותנועה שרצים ישר בדפדפן.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Orbo Solutions">
 <meta property="og:title" content="עבודות | Orbo Solutions">
-<meta property="og:description" content="אתרים באוויר, מערכות שבנינו, וגלריה תלת־ממדית שאפשר לטייל בה.">
+<meta property="og:description" content="מוזיאון תלת־ממדי שנבנה כולו בקוד, וחמישה ניסויים של אור ותנועה.">
 <meta property="og:url" content="https://orbosolutions.com/work.html">
 <meta property="og:image" content="https://orbosolutions.com/ad/ad-1080x1350.png">
 <meta property="og:locale" content="he_IL">
@@ -50,158 +50,112 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@300..900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/main.css?v=81">
 <style>
-  /* ---- work page only ---- */
+  /* ---- work page: the museum gate + the lab ---- */
 
-  .work-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5em;
-    font-size: 0.78rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    color: var(--accent);
-    background: var(--accent-soft);
-    border: 1px solid rgba(91, 76, 245, 0.16);
-    border-radius: var(--radius-pill);
-    padding: 0.36em 0.95em;
-    width: fit-content;
-  }
-  .work-tag::before {
-    content: '';
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--grad-accent);
-  }
-  .work-tag.tag-live::before { background: #2FBF71; box-shadow: 0 0 0 3px rgba(47, 191, 113, 0.18); }
-
-  /* — the gallery gate: a dark doorway into the 3D museum — */
-  .gallery-gate { padding-block: clamp(20px, 3vw, 40px) clamp(40px, 6vw, 70px); }
+  /* ═══ the museum gate: a monumental dark hall on the page ═══ */
+  .museum-gate { padding-block: clamp(24px, 4vw, 56px) clamp(56px, 8vw, 100px); }
   .gate-band {
     position: relative;
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 1.25fr 1fr;
     align-items: center;
-    gap: clamp(24px, 4vw, 56px);
-    background: #16131F;
+    gap: clamp(24px, 4vw, 64px);
+    background: #0D0B14;
     color: #fff;
     border-radius: var(--radius-lg);
-    padding: clamp(36px, 5vw, 64px) clamp(28px, 5vw, 72px);
+    padding: clamp(44px, 6vw, 88px) clamp(28px, 5vw, 80px);
     overflow: hidden;
     box-shadow: var(--shadow-lg);
   }
+  /* perspective floor lines — the hall runs into the band */
   .gate-band::before {
     content: '';
     position: absolute;
     inset: 0;
     background:
-      radial-gradient(60% 90% at 15% 110%, rgba(108, 92, 255, 0.35), transparent 70%),
-      radial-gradient(40% 55% at 90% -10%, rgba(157, 107, 255, 0.22), transparent 70%);
+      linear-gradient(rgba(157, 140, 255, 0.10) 1px, transparent 1px) 0 0 / 100% 34px,
+      radial-gradient(70% 100% at 50% 115%, rgba(108, 92, 255, 0.42), transparent 68%),
+      radial-gradient(42% 55% at 88% -8%, rgba(157, 107, 255, 0.22), transparent 70%);
+    mask-image: linear-gradient(180deg, transparent 30%, #000 78%);
+    -webkit-mask-image: linear-gradient(180deg, transparent 30%, #000 78%);
     pointer-events: none;
+  }
+  .gate-band::after {
+    content: '';
+    position: absolute;
+    inset-inline: 8%;
+    top: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(157, 140, 255, 0.6), transparent);
   }
   .gate-band > * { position: relative; }
   .gate-copy .eyebrow {
     color: #C9AFFF;
     background: rgba(157, 140, 255, 0.12);
     border-color: rgba(157, 140, 255, 0.28);
-    margin-bottom: 16px;
+    margin-bottom: 18px;
   }
-  .gate-copy h2 { color: #fff; margin-bottom: 10px; }
-  .gate-copy p { color: rgba(255, 255, 255, 0.68); font-weight: 300; max-width: 30em; }
-  .gate-door {
-    display: grid;
-    justify-items: center;
-    gap: 14px;
+  .gate-copy h2 { color: #fff; font-size: clamp(2.1rem, 4.6vw, 3.4rem); margin-bottom: 14px; }
+  .gate-copy p { color: rgba(255, 255, 255, 0.7); font-weight: 300; max-width: 30em; font-size: 1.08rem; line-height: 1.75; }
+  .gate-feats { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 22px; }
+  .gate-feats span {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(157, 140, 255, 0.3);
+    border-radius: var(--radius-pill);
+    padding: 0.45em 1.05em;
+    background: rgba(157, 140, 255, 0.08);
   }
-  /* a tall doorway silhouette, lit from inside */
+  .gate-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-top: 30px; }
+
+  /* the doorway: tall arch, hall receding inside */
+  .gate-door { display: grid; justify-items: center; }
   .gate-frame {
-    width: 108px;
-    height: 150px;
-    border: 1px solid rgba(157, 140, 255, 0.45);
+    width: clamp(150px, 16vw, 210px);
+    aspect-ratio: 108 / 165;
+    border: 1px solid rgba(157, 140, 255, 0.5);
     border-bottom: none;
-    border-radius: 54px 54px 0 0;
+    border-radius: 50% 50% 0 0 / 34% 34% 0 0;
     position: relative;
     overflow: hidden;
     background:
-      radial-gradient(80% 60% at 50% 100%, rgba(108, 92, 255, 0.5), transparent 75%),
-      linear-gradient(180deg, rgba(157, 140, 255, 0.06), rgba(157, 140, 255, 0.14));
+      linear-gradient(rgba(157, 140, 255, 0.14) 1px, transparent 1px) 0 100% / 100% 12%,
+      radial-gradient(90% 55% at 50% 100%, rgba(108, 92, 255, 0.55), transparent 80%),
+      linear-gradient(180deg, rgba(157, 140, 255, 0.05), rgba(157, 140, 255, 0.14));
   }
+  .gate-frame::before {
+    content: '';
+    position: absolute;
+    inset-inline: 30%;
+    bottom: 12%;
+    aspect-ratio: 1;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 3 L18.6 13.4 L29 16 L18.6 18.6 L16 29 L13.4 18.6 L3 16 L13.4 13.4 Z' fill='%23b9a6ff'/%3E%3C/svg%3E") center/contain no-repeat;
+    filter: drop-shadow(0 0 18px rgba(157, 140, 255, 0.9));
+    animation: doorStar 5s var(--ease-out) infinite;
+  }
+  @keyframes doorStar { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
   .gate-frame::after {
     content: '';
     position: absolute;
-    inset-inline: 22%;
+    inset-inline: 18%;
     bottom: 0;
-    height: 62%;
+    height: 58%;
     background: linear-gradient(180deg, transparent, rgba(201, 175, 255, 0.5));
-    filter: blur(10px);
+    filter: blur(12px);
   }
   @media (max-width: 860px) {
     .gate-band { grid-template-columns: 1fr; text-align: center; }
     .gate-copy p { margin-inline: auto; }
-    .gate-frame { display: none; }
+    .gate-feats, .gate-actions { justify-content: center; }
+    .gate-door { order: -1; }
+    .gate-frame { width: 130px; }
   }
+  @media (prefers-reduced-motion: reduce) { .gate-frame::before { animation: none; } }
 
-  /* — featured rows — */
-  .work-feature { position: relative; overflow: hidden; padding-block: clamp(64px, 8vw, 104px); }
-  .work-feature:nth-child(even) { background: var(--surface); }
-  .work-feature .svc-scene {
-    position: absolute;
-    inset-inline-end: -120px;
-    top: 50%;
-    margin-top: -340px;
-    width: 680px;
-    height: 680px;
-    color: var(--accent);
-    opacity: 0.17;
-    pointer-events: none;
-    z-index: 0;
-  }
-  @media (max-width: 860px) { .work-feature .svc-scene { display: none; } }
-
-  .feature-inner {
-    position: relative;
-    z-index: 1;
-    display: grid;
-    grid-template-columns: 340px 1fr;
-    gap: clamp(32px, 5vw, 72px);
-    align-items: start;
-  }
-  .feature-side { position: sticky; top: calc(var(--header-h) + 32px); display: grid; gap: 14px; justify-items: start; }
-  .feature-num {
-    font-family: var(--font-display);
-    font-size: 1rem;
-    font-weight: 700;
-    letter-spacing: 0.18em;
-    margin-inline-end: -0.18em;
-    color: var(--accent);
-    direction: ltr;
-  }
-  .feature-side h2 { font-size: clamp(1.5rem, 2.6vw, 2rem); }
-  .feature-domain {
-    font-weight: 600;
-    font-size: 0.95rem;
-    color: var(--ink-soft);
-    direction: ltr;
-  }
-  .feature-body p {
-    font-size: 1.12rem;
-    font-weight: 300;
-    color: var(--ink-soft);
-    max-width: 38em;
-    margin-bottom: 26px;
-  }
-  .feature-actions { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
-
-  @media (max-width: 1020px) {
-    .feature-inner { grid-template-columns: 1fr; }
-    .feature-side { position: static; }
-  }
-
-  /* — systems grid — */
-  .product-card { cursor: default; }
-
-  /* — the lab: a dark shelf inside the light page — */
+  /* ═══ the lab: five rooms of light & motion ═══ */
   .lab-section {
-    background: #16131F;
+    background: #100D1A;
     color: #fff;
     padding-block: clamp(84px, 11vw, 140px);
     position: relative;
@@ -212,13 +166,14 @@
     position: absolute;
     inset: 0;
     background:
-      radial-gradient(55% 70% at 50% 115%, rgba(108, 92, 255, 0.30), transparent 70%),
-      radial-gradient(35% 45% at 85% -10%, rgba(157, 107, 255, 0.18), transparent 70%);
+      radial-gradient(55% 70% at 50% 118%, rgba(108, 92, 255, 0.28), transparent 70%),
+      radial-gradient(35% 45% at 85% -10%, rgba(157, 107, 255, 0.16), transparent 70%),
+      linear-gradient(rgba(157, 140, 255, 0.045) 1px, transparent 1px) 0 0 / 100% 4px;
     pointer-events: none;
   }
   .lab-section > .container { position: relative; }
   .lab-section h2 { color: #fff; }
-  .lab-section .section-head .lead { color: rgba(255, 255, 255, 0.68); }
+  .lab-section .section-head .lead { color: rgba(255, 255, 255, 0.66); }
   .lab-section .eyebrow {
     color: #C9AFFF;
     background: rgba(157, 140, 255, 0.12);
@@ -233,67 +188,120 @@
   .lab-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
+    gap: 22px;
   }
   .lab-card {
+    --lx: #9d8cff;
     position: relative;
     display: flex;
     flex-direction: column;
-    background: #0F0D18;
-    border: 1px solid rgba(255, 255, 255, 0.09);
+    background: #0C0A14;
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: var(--radius);
     overflow: hidden;
-    transition: transform 0.45s var(--ease-out), border-color 0.3s, box-shadow 0.45s var(--ease-out);
+    transition: transform 0.5s var(--ease-out), border-color 0.35s, box-shadow 0.5s var(--ease-out);
+  }
+  /* accent light seeps from the top edge of each room */
+  .lab-card::before {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--lx), transparent);
+    opacity: 0.55;
+    transition: opacity 0.35s;
+    z-index: 1;
   }
   .lab-card:hover {
-    transform: translateY(-8px);
-    border-color: rgba(157, 140, 255, 0.45);
-    box-shadow: 0 26px 70px -18px rgba(108, 92, 255, 0.45);
+    transform: translateY(-10px);
+    border-color: color-mix(in srgb, var(--lx) 55%, transparent);
+    box-shadow: 0 30px 80px -20px color-mix(in srgb, var(--lx) 45%, transparent);
   }
+  .lab-card:hover::before { opacity: 1; }
   .lab-view {
     position: relative;
     aspect-ratio: 16 / 9;
     background:
-      radial-gradient(70% 90% at 50% 110%, rgba(108, 92, 255, 0.24), transparent 70%),
-      #0F0D18;
+      radial-gradient(70% 95% at 50% 112%, color-mix(in srgb, var(--lx) 22%, transparent), transparent 70%),
+      #0C0A14;
   }
   .lab-view canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  /* the big room index watermark */
+  .lab-view::after {
+    content: attr(data-num);
+    position: absolute;
+    top: 6px;
+    inset-inline-start: 16px;
+    font-family: var(--font-display);
+    font-size: 3.2rem;
+    font-weight: 850;
+    letter-spacing: -0.02em;
+    color: color-mix(in srgb, var(--lx) 34%, transparent);
+    direction: ltr;
+    pointer-events: none;
+    line-height: 1;
+  }
   .lab-info { display: flex; flex-direction: column; gap: 8px; padding: 20px 22px 22px; flex-grow: 1; }
   .lab-name {
     display: flex;
     align-items: baseline;
+    justify-content: space-between;
     gap: 10px;
-    font-family: var(--font-display);
-    font-weight: 700;
-    letter-spacing: 0.12em;
     direction: ltr;
-    justify-content: flex-end; /* RTL page: latin name reads from the right edge */
   }
-  .lab-name b { font-size: 1.05rem; color: #fff; }
-  .lab-name span { font-size: 0.78rem; color: rgba(255, 255, 255, 0.42); font-weight: 600; }
-  .lab-card p { font-size: 0.92rem; color: rgba(255, 255, 255, 0.62); flex-grow: 1; }
+  .lab-name b {
+    font-family: var(--font-display);
+    font-size: 1.12rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    color: #fff;
+  }
+  .lab-name i {
+    font-style: normal;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--lx);
+    border: 1px solid color-mix(in srgb, var(--lx) 45%, transparent);
+    border-radius: var(--radius-pill);
+    padding: 0.25em 0.8em;
+  }
+  .lab-card p { font-size: 0.94rem; color: rgba(255, 255, 255, 0.6); flex-grow: 1; }
   .lab-open {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    margin-top: 10px;
+    margin-top: 12px;
     font-size: 0.9rem;
     font-weight: 600;
-    color: #C9AFFF;
+    color: var(--lx);
   }
   .lab-open svg { width: 16px; height: 16px; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
   .lab-card:hover .lab-open svg { transform: translateX(-6px); }
 
+  .lab-more {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap: 14px;
+    padding: 34px 26px;
+    background:
+      radial-gradient(80% 80% at 50% 110%, rgba(108, 92, 255, 0.2), transparent 70%),
+      #0C0A14;
+  }
+  .lab-more p { font-size: 1.02rem; color: rgba(255, 255, 255, 0.72); max-width: 22em; }
+  .lab-more .btn-ghost { background: rgba(255, 255, 255, 0.04); color: #fff; border-color: rgba(255, 255, 255, 0.2); }
+  .lab-more .btn-ghost:hover { border-color: #C9AFFF; color: #C9AFFF; }
+
   @media (max-width: 1020px) { .lab-grid { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 640px) { .lab-grid { grid-template-columns: 1fr; } }
 
-  /* mobile rhythm */
   @media (max-width: 767px) {
-    .work-feature { padding-block: 44px 38px; }
-    .feature-inner { gap: 18px; }
-    .feature-body p { font-size: 1rem; margin-bottom: 18px; }
     .lab-section { padding-block: 56px; }
-    .gate-band { padding: 30px 24px; }
+    .gate-band { padding: 34px 24px 40px; }
   }
 </style>
 </head>
@@ -344,198 +352,37 @@
   <section class="page-hero">
     <div class="page-hero-bg" aria-hidden="true"><canvas class="pageHeroCanvas"></canvas></div>
     <div class="container">
-      <span class="eyebrow reveal">תיק עבודות</span>
-      <h1 class="display-xl reveal" style="--d:.08s">העבודות שלנו.</h1>
-      <p class="lead reveal" style="--d:.16s">חלק מהעבודות באוויר, חלק נבנו ללקוחות וחלק לעצמנו. ריכזנו כאן את מה שנוח להראות — ועל השאר נשמח לספר בשיחה.</p>
+      <span class="eyebrow reveal">עבודות</span>
+      <h1 class="display-xl reveal" style="--d:.08s">לא נספר לכם.<br><span class="accent-text">ניתן לכם להיכנס.</span></h1>
+      <p class="lead reveal" style="--d:.16s">במקום עוד רשימת פרויקטים, בנינו מקום. מוזיאון תלת־ממדי שכולו קוד — והוא עצמו העבודה הכי טובה שלנו.</p>
     </div>
   </section>
 
-  <!-- The gallery gate -->
-  <section class="gallery-gate">
+  <!-- The museum gate -->
+  <section class="museum-gate">
     <div class="container">
       <div class="gate-band reveal">
         <div class="gate-copy">
-          <span class="eyebrow">חדש</span>
-          <h2 class="display-md">הגלריה.</h2>
-          <p>בנינו מוזיאון תלת־ממדי לעבודות שלנו. נכנסים, מסתובבים בין הקירות, מתקרבים ליצירות — כמו ביקור אמיתי בגלריה, ישר מהדפדפן.</p>
-          <div style="margin-top:24px">
+          <span class="eyebrow">ORBO·GALLERY</span>
+          <h2>המוזיאון.</h2>
+          <p>היכל שנבנה כולו בקוד — שיש, עמודים ושמי כוכבים. בפנים: יצירות שנצבעות מחדש בכל רגע, הולוגרמות שנדלקות בלחיצה, ואמנות שמחושבת ברגע שאתם נכנסים. הסתובבו חופשי, כמו במשחק.</p>
+          <div class="gate-feats">
+            <span>סיור חופשי</span>
+            <span>הולוגרמות אינטראקטיביות</span>
+            <span>ציורים חיים</span>
+            <span>אמנות גנרטיבית</span>
+          </div>
+          <div class="gate-actions">
             <a href="gallery.html" class="btn btn-primary btn-lg" data-magnetic>
-              כניסה לגלריה
+              כניסה למוזיאון
               <svg class="btn-arrow" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg>
             </a>
+            <span style="font-size:0.85rem; color:rgba(255,255,255,0.5)">עובד במחשב ובנייד, בלי להתקין כלום</span>
           </div>
         </div>
         <div class="gate-door" aria-hidden="true">
           <div class="gate-frame"></div>
         </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 01 · Erez Egzozim -->
-  <section class="work-feature" id="erez">
-    <svg class="svc-scene" viewBox="0 0 240 240" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
-      <g data-rate="0.9" opacity=".5">
-        <circle cx="196" cy="60" r="22" stroke-dasharray="3 5" vector-effect="non-scaling-stroke"/>
-      </g>
-      <g data-rate="1">
-        <path d="M40 96 l80 -46 l80 46 l-80 46 Z" vector-effect="non-scaling-stroke"/>
-        <path d="M40 96 V162 L120 208 V142 Z" vector-effect="non-scaling-stroke"/>
-        <path d="M200 96 V162 L120 208 V142 Z" vector-effect="non-scaling-stroke"/>
-        <path d="M84 120 a38 22 0 1 0 72 -20" vector-effect="non-scaling-stroke"/>
-        <circle cx="92" cy="170" r="9" vector-effect="non-scaling-stroke"/>
-        <circle cx="148" cy="170" r="9" vector-effect="non-scaling-stroke"/>
-        <path d="M60 76 l14 -8 M80 65 l14 -8" stroke-dasharray="2 5" vector-effect="non-scaling-stroke"/>
-      </g>
-    </svg>
-    <div class="container feature-inner">
-      <div class="feature-side reveal">
-        <span class="feature-num"><span class="num-roll">01</span></span>
-        <span class="work-tag tag-live">באוויר</span>
-        <h2>ארז אגזוזים</h2>
-        <a class="feature-domain" href="https://erezegzozim.com" target="_blank" rel="noopener">erezegzozim.com</a>
-      </div>
-      <div class="feature-body">
-        <p class="reveal" style="--d:.1s">מוסך למערכות פליטה בראשון לציון. רצינו שמי שנכנס לאתר ירגיש את המקום, אז צילמנו את המוסך עצמו והפכנו את הצילומים לפתיח וידאו. הוספנו כלי קטן שעוזר ללקוח להבין מה הבעיה לפי מה שהוא שומע מהרכב, ובסוף הכול מוביל לכפתור וואטסאפ אחד. בלי טפסים ארוכים.</p>
-        <div class="feature-actions reveal" style="--d:.2s">
-          <a href="https://erezegzozim.com" target="_blank" rel="noopener" class="btn btn-primary" data-magnetic>
-            לאתר
-            <svg class="btn-arrow" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg>
-          </a>
-          <ul class="chips" role="list">
-            <li class="chip">אתר תדמית</li>
-            <li class="chip">וידאו</li>
-            <li class="chip">מובייל תחילה</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 02 · BISOMNA -->
-  <section class="work-feature" id="bisomna">
-    <svg class="svc-scene" viewBox="0 0 240 240" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
-      <g data-rate="0.9" opacity=".5">
-        <path d="M30 200 q60 -30 120 0" stroke-dasharray="3 6" vector-effect="non-scaling-stroke"/>
-      </g>
-      <g data-rate="1">
-        <path d="M48 88 l72 -42 l72 42 l-72 42 Z" vector-effect="non-scaling-stroke"/>
-        <path d="M48 114 l72 42 l72 -42" vector-effect="non-scaling-stroke"/>
-        <path d="M48 140 l72 42 l72 -42" vector-effect="non-scaling-stroke"/>
-        <path d="M48 88 V140 M192 88 V140 M120 130 V182" vector-effect="non-scaling-stroke"/>
-        <path d="M96 60 q10 -14 24 -8 q4 -12 18 -8" stroke-dasharray="2 5" vector-effect="non-scaling-stroke"/>
-        <circle cx="196" cy="52" r="4" vector-effect="non-scaling-stroke"/>
-        <circle cx="208" cy="66" r="2.5" vector-effect="non-scaling-stroke"/>
-      </g>
-    </svg>
-    <div class="container feature-inner">
-      <div class="feature-side reveal">
-        <span class="feature-num"><span class="num-roll">02</span></span>
-        <span class="work-tag tag-live">באוויר</span>
-        <h2>BISOMNA</h2>
-        <a class="feature-domain" href="https://bisomna.com" target="_blank" rel="noopener">bisomna.com</a>
-      </div>
-      <div class="feature-body">
-        <p class="reveal" style="--d:.1s">מיזם ישראלי בתחום השינה שהיה צריך אתר שמדבר גם ללקוחות וגם למשקיעים. בנינו אתר רחב — מוצר, טכנולוגיה, מדע, חנות ומפת דרכים — עם וידאו שזז יחד עם הגלילה ותצוגת מוצר שנפתחת לשכבות. למרות כל מה שקורה על המסך, הוא נשאר מהיר גם בנייד.</p>
-        <div class="feature-actions reveal" style="--d:.2s">
-          <a href="https://bisomna.com" target="_blank" rel="noopener" class="btn btn-primary" data-magnetic>
-            לאתר
-            <svg class="btn-arrow" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg>
-          </a>
-          <ul class="chips" role="list">
-            <li class="chip">אתר מיזם</li>
-            <li class="chip">וידאו בגלילה</li>
-            <li class="chip">חנות</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 03 · This site -->
-  <section class="work-feature" id="orbo">
-    <svg class="svc-scene" viewBox="0 0 240 240" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
-      <g data-rate="0.9" opacity=".5">
-        <ellipse cx="120" cy="120" rx="95" ry="42" stroke-dasharray="3 6" transform="rotate(-18 120 120)" vector-effect="non-scaling-stroke"/>
-      </g>
-      <g data-rate="1">
-        <path d="M120 42 L134 106 L198 120 L134 134 L120 198 L106 134 L42 120 L106 106 Z" vector-effect="non-scaling-stroke"/>
-        <circle cx="120" cy="120" r="14" vector-effect="non-scaling-stroke"/>
-        <circle cx="66" cy="70" r="3" vector-effect="non-scaling-stroke"/>
-        <circle cx="180" cy="64" r="4" vector-effect="non-scaling-stroke"/>
-        <circle cx="188" cy="176" r="3" vector-effect="non-scaling-stroke"/>
-        <circle cx="58" cy="180" r="4" vector-effect="non-scaling-stroke"/>
-      </g>
-    </svg>
-    <div class="container feature-inner">
-      <div class="feature-side reveal">
-        <span class="feature-num"><span class="num-roll">03</span></span>
-        <span class="work-tag">הבית שלנו</span>
-        <h2>orbosolutions.com</h2>
-        <a class="feature-domain" href="index.html">דף הבית</a>
-      </div>
-      <div class="feature-body">
-        <p class="reveal" style="--d:.1s">כשבנינו את האתר של עצמנו, החלטנו שדף הבית לא יהיה עוד דף — אלא מסע. גוללים, והמצלמה עפה דרך עולם של חלקיקים שמתגבשים לצורות. אם עוד לא עברתם אותו עד הסוף, שווה לחזור רגע הביתה.</p>
-        <div class="feature-actions reveal" style="--d:.2s">
-          <a href="index.html" class="btn btn-primary" data-magnetic>
-            לדף הבית
-            <svg class="btn-arrow" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg>
-          </a>
-          <ul class="chips" role="list">
-            <li class="chip">תלת־ממד בדפדפן</li>
-            <li class="chip">עברית מלאה</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Systems -->
-  <section class="section section-tint" id="products">
-    <div class="container">
-      <div class="section-head section-head-center">
-        <span class="eyebrow reveal">מערכות ומוצרים</span>
-        <h2 class="display-md reveal" style="--d:.08s">עוד דברים שיצאו מכאן.</h2>
-        <p class="lead reveal" style="--d:.16s">חלק נבנו ללקוחות, חלק התחילו כרעיון שלנו. אלה העיקריים.</p>
-      </div>
-      <div class="worlds-grid">
-
-        <article class="world-card product-card reveal">
-          <span class="work-tag">עבודת לקוח</span>
-          <div class="world-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.6"/><circle cx="17.5" cy="20" r="1.6"/><path d="M3 3.5h2.4l2.2 12h11.2l1.9-8.2H6.1"/></svg>
-          </div>
-          <h3>Royal Tattoo Supply</h3>
-          <p>חנות אינטרנטית ליבואן ציוד קעקועים — קטלוג מוצרים, מבצעים, סליקה ותשלום מהיר מהנייד.</p>
-        </article>
-
-        <article class="world-card product-card reveal" style="--d:.08s">
-          <span class="work-tag">פיתוח פנימי</span>
-          <div class="world-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M15.2 4v16"/><path d="M3 12.2h12.2"/><path d="M6.6 17.2v-2M9.2 17.2v-3.4M11.8 17.2v-1.2"/></svg>
-          </div>
-          <h3>LeadForge</h3>
-          <p>מערכת שעוזרת לעסק קטן לרכז את הלידים, המכירות והצעות המחיר במקום אחד במקום בוואטסאפ ובאקסל.</p>
-        </article>
-
-        <article class="world-card product-card reveal" style="--d:.16s">
-          <span class="work-tag">פיתוח פנימי</span>
-          <div class="world-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v11a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 17.5z"/><path d="M8 9h8M8 12.5h8M8 16h4.6"/></svg>
-          </div>
-          <h3>FlowDesk</h3>
-          <p>בק־אופיס לעסקי שירות — מלווה את הלקוח מהפנייה הראשונה ועד הצעת המחיר והחשבונית.</p>
-        </article>
-
-        <article class="world-card product-card reveal" style="--d:.24s">
-          <span class="work-tag">פיתוח פנימי</span>
-          <div class="world-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15.5a3.2 3.2 0 0 0 3.2-3.2V6.7a3.2 3.2 0 1 0-6.4 0v5.6a3.2 3.2 0 0 0 3.2 3.2z"/><path d="M18 11.5a6 6 0 0 1-12 0"/><path d="M12 17.5v3"/></svg>
-          </div>
-          <h3>CastMark</h3>
-          <p>כלי שמקבל פרק פודקאסט ומחזיר תקציר, נקודות עיקריות וחלוקה לפרקים — חוסך שעות עריכה.</p>
-        </article>
-
       </div>
     </div>
   </section>
@@ -546,58 +393,58 @@
       <div class="section-head section-head-center">
         <span class="eyebrow reveal">ORBO·LAB</span>
         <h2 class="display-md reveal" style="--d:.08s">ניסויים באור <span class="accent-text">ובתנועה.</span></h2>
-        <p class="lead reveal" style="--d:.16s">כשיוצא לנו רגע, אנחנו בונים דברים בשביל הכיף. חמישה ניסויים גרפיים שרצים ישר בדפדפן — התצוגות כאן חיות, והמלא נפתח בלחיצה.</p>
+        <p class="lead reveal" style="--d:.16s">חמישה חדרים, חמש טכניקות, אפס קובצי גרפיקה — כל מה שתראו נוצר בקוד. התצוגות כאן חיות ממש עכשיו, והחדר המלא נפתח בלחיצה.</p>
       </div>
       <div class="lab-grid">
 
-        <a class="lab-card reveal" href="lab/01-aurora-gsap/" target="_blank" rel="noopener">
-          <span class="lab-view"><canvas class="lab-canvas" data-lab="aurora" aria-hidden="true"></canvas></span>
+        <a class="lab-card reveal" href="lab/01-aurora-gsap/" target="_blank" rel="noopener" style="--lx:#c6f24e">
+          <span class="lab-view" data-num="01"><canvas class="lab-canvas" data-lab="aurora" aria-hidden="true"></canvas></span>
           <span class="lab-info">
-            <span class="lab-name"><b>AURORA</b><span>01</span></span>
-            <p>סרטי אור שנעים עם הגלילה.</p>
-            <span class="lab-open">לניסוי המלא<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg></span>
+            <span class="lab-name"><b>AURORA</b><i>גלילה</i></span>
+            <p>סרטי אור שנעים עם הגלילה, בכוריאוגרפיה חלקה.</p>
+            <span class="lab-open">לחדר המלא<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg></span>
           </span>
         </a>
 
-        <a class="lab-card reveal" href="lab/02-nebula-three/" target="_blank" rel="noopener" style="--d:.06s">
-          <span class="lab-view"><canvas class="lab-canvas" data-lab="nebula" aria-hidden="true"></canvas></span>
+        <a class="lab-card reveal" href="lab/02-nebula-three/" target="_blank" rel="noopener" style="--lx:#4dd8ff; --d:.06s">
+          <span class="lab-view" data-num="02"><canvas class="lab-canvas" data-lab="nebula" aria-hidden="true"></canvas></span>
           <span class="lab-info">
-            <span class="lab-name"><b>NEBULA</b><span>02</span></span>
-            <p>מסע בתוך גלקסיה של חלקיקים.</p>
-            <span class="lab-open">לניסוי המלא<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg></span>
+            <span class="lab-name"><b>NEBULA</b><i>חלקיקים</i></span>
+            <p>מסע אל תוך גלקסיה שנבנתה מרבבות חלקיקים זוהרים.</p>
+            <span class="lab-open">לחדר המלא<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg></span>
           </span>
         </a>
 
-        <a class="lab-card reveal" href="lab/03-prism-r3f/" target="_blank" rel="noopener" style="--d:.12s">
-          <span class="lab-view"><canvas class="lab-canvas" data-lab="prism" aria-hidden="true"></canvas></span>
+        <a class="lab-card reveal" href="lab/03-prism-r3f/" target="_blank" rel="noopener" style="--lx:#9d6bff; --d:.12s">
+          <span class="lab-view" data-num="03"><canvas class="lab-canvas" data-lab="prism" aria-hidden="true"></canvas></span>
           <span class="lab-info">
-            <span class="lab-name"><b>PRISM</b><span>03</span></span>
-            <p>אור שנשבר דרך גאומטריה.</p>
-            <span class="lab-open">לניסוי המלא<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg></span>
+            <span class="lab-name"><b>PRISM</b><i>חומרים</i></span>
+            <p>אור שנשבר דרך גאומטריה — חדר חומרים תלת־ממדי.</p>
+            <span class="lab-open">לחדר המלא<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg></span>
           </span>
         </a>
 
-        <a class="lab-card reveal" href="lab/04-flux-shaders/" target="_blank" rel="noopener" style="--d:.18s">
-          <span class="lab-view"><canvas class="lab-canvas" data-lab="flux" aria-hidden="true"></canvas></span>
+        <a class="lab-card reveal" href="lab/04-flux-shaders/" target="_blank" rel="noopener" style="--lx:#ff4b3e; --d:.18s">
+          <span class="lab-view" data-num="04"><canvas class="lab-canvas" data-lab="flux" aria-hidden="true"></canvas></span>
           <span class="lab-info">
-            <span class="lab-name"><b>FLUX</b><span>04</span></span>
-            <p>שדות צבע שזורמים על המסך.</p>
-            <span class="lab-open">לניסוי המלא<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg></span>
+            <span class="lab-name"><b>FLUX</b><i>שיידרים</i></span>
+            <p>שדות צבע שזורמים ישר מול המעבד הגרפי, בלי מתווכים.</p>
+            <span class="lab-open">לחדר המלא<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg></span>
           </span>
         </a>
 
-        <a class="lab-card reveal" href="lab/05-terra-webgl/" target="_blank" rel="noopener" style="--d:.24s">
-          <span class="lab-view"><canvas class="lab-canvas" data-lab="terra" aria-hidden="true"></canvas></span>
+        <a class="lab-card reveal" href="lab/05-terra-webgl/" target="_blank" rel="noopener" style="--lx:#e0c08c; --d:.24s">
+          <span class="lab-view" data-num="05"><canvas class="lab-canvas" data-lab="terra" aria-hidden="true"></canvas></span>
           <span class="lab-info">
-            <span class="lab-name"><b>TERRA</b><span>05</span></span>
-            <p>נופים שנוצרים ממתמטיקה.</p>
-            <span class="lab-open">לניסוי המלא<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg></span>
+            <span class="lab-name"><b>TERRA</b><i>נופים</i></span>
+            <p>רכסים ועמקים שמחושבים ממתמטיקה טהורה, תחת שמש נמוכה.</p>
+            <span class="lab-open">לחדר המלא<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg></span>
           </span>
         </a>
 
-        <div class="lab-card reveal" style="--d:.30s; justify-content:center; align-items:center; text-align:center; padding:34px 26px; gap:14px; display:flex">
-          <p style="font-size:1.02rem; color:rgba(255,255,255,0.72); max-width:22em">חמשת הניסויים מחכים בספרייה אחת.</p>
-          <a href="lab/" target="_blank" rel="noopener" class="btn btn-ghost" style="background:rgba(255,255,255,0.04); color:#fff; border-color:rgba(255,255,255,0.2)">
+        <div class="lab-card lab-more reveal" style="--d:.30s">
+          <p>חמשת החדרים מחכים בספרייה אחת — וכולם תלויים גם על קירות המוזיאון.</p>
+          <a href="lab/" target="_blank" rel="noopener" class="btn btn-ghost">
             לספרייה
             <svg class="btn-arrow" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg>
           </a>
@@ -615,8 +462,8 @@
         <svg class="cta-star" style="inset-inline-start:6%;top:10%;width:280px;height:280px;opacity:.12" viewBox="0 0 32 32" fill="none" aria-hidden="true">
           <path d="M16 3 L18.6 13.4 L29 16 L18.6 18.6 L16 29 L13.4 18.6 L3 16 L13.4 13.4 Z" stroke="rgba(157,140,255,.35)" stroke-width="0.4" stroke-linejoin="round"/>
         </svg>
-        <h2 class="display-lg">יש לכם פרויקט בראש?</h2>
-        <p class="cta-line">ספרו לנו עליו. נשמח לחשוב עליו יחד אתכם.</p>
+        <h2 class="display-lg">רוצים שנבנה לכם<br><span class="accent-text">משהו שאין לאף אחד?</span></h2>
+        <p class="cta-line">ספרו לנו על הרעיון. נשמח לחשוב עליו יחד אתכם.</p>
         <a href="contact.html" class="btn btn-primary btn-lg" data-magnetic>
           לתיאום שיחת היכרות חינם
           <svg class="btn-arrow" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg>
@@ -650,7 +497,7 @@
       <a href="index.html">בית</a>
       <a href="services.html">שירותים</a>
       <a href="work.html">עבודות</a>
-      <a href="gallery.html">הגלריה</a>
+      <a href="gallery.html">המוזיאון</a>
       <a href="studio.html">הסטודיו</a>
       <a href="lab/">ORBO LAB</a>
       <a href="contact.html">צור קשר</a>

@@ -43,8 +43,8 @@
       "mainEntity": [
         {
           "@type": "Question",
-          "name": "אתם סטודיו צעיר. למה שנסמוך עליכם?",
-          "acceptedAnswer": { "@type": "Answer", "text": "כי אנחנו לא מבקשים אמון על סמך הבטחות — אלא על סמך דברים שאפשר לבדוק. בעמוד העבודות שלנו יש אתרים חיים בפרודקשן שאפשר לגלוש בהם עכשיו, מוצרים עובדים וספריית ניסויים פתוחה. והתהליך בנוי כך שהסיכון שלכם קטן: מחיר סגור מראש, עדכון שבועי עם גרסה עובדת, והקוד שייך לכם מהיום הראשון." }
+          "name": "אתם חברה צעירה. למה שנעבוד דווקא איתכם?",
+          "acceptedAnswer": { "@type": "Answer", "text": "כי אצל חברה בתחילת הדרך, הפרויקט שלכם הוא לא עוד שורה בטבלה — הוא ההוכחה שלנו. תקבלו את הצוות המלא, תנאי השקה, מחיר סגור מראש ועדכון שבועי עם גרסה עובדת. ואת הרמה אפשר לבדוק עוד לפני השיחה הראשונה — במוזיאון התלת־ממדי שבנינו." }
         },
         {
           "@type": "Question",
@@ -54,7 +54,7 @@
         {
           "@type": "Question",
           "name": "כמה עולה פרויקט?",
-          "acceptedAnswer": { "@type": "Answer", "text": "תלוי בהיקף — אבל תמיד תדעו מראש. אחרי שיחת ההיכרות ואפיון קצר תקבלו הצעה מסודרת עם מחיר סגור ולוח זמנים. בלי שעתון מפתיע ובלי חריגות שמתגלות בסוף." }
+          "acceptedAnswer": { "@type": "Answer", "text": "תלוי בהיקף — אבל תמיד תדעו מראש. אחרי שיחת ההיכרות ואפיון קצר תקבלו הצעה מסודרת עם מחיר סגור ולוח זמנים, בלי שעתון מפתיע ובלי חריגות שמתגלות בסוף. וכרגע, בתקופת ההשקה, הלקוחות הראשונים נהנים מתנאים שלא יחזרו." }
         },
         {
           "@type": "Question",
@@ -182,6 +182,23 @@
   }
   .step-gets svg { width: 16px; height: 16px; color: var(--accent); flex-shrink: 0; margin-top: 3px; }
 
+  /* the launch window band */
+  .launch-band {
+    background: linear-gradient(135deg, #F5F3FF 0%, var(--surface) 60%);
+    border: 1px solid rgba(91, 76, 245, 0.18);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: clamp(36px, 5vw, 64px) clamp(28px, 5vw, 72px);
+    max-width: 900px;
+    margin-inline: auto;
+  }
+  .launch-band .eyebrow { margin-bottom: 18px; }
+  .launch-band h2 { margin-bottom: 16px; }
+  .launch-band > p { color: var(--ink-soft); font-weight: 350; font-size: 1.1rem; line-height: 1.8; max-width: 44em; margin-bottom: 26px; }
+  .launch-points { display: grid; gap: 13px; margin-bottom: 30px; }
+  .launch-points li { display: flex; gap: 12px; align-items: flex-start; font-size: 1rem; font-weight: 500; color: var(--ink); }
+  .launch-points svg { width: 19px; height: 19px; color: var(--accent); flex-shrink: 0; margin-top: 3px; }
+
   /* stack: plain chips, grouped */
   .stack-groups { display: grid; gap: 26px; max-width: 860px; }
   .stack-group { display: grid; gap: 12px; }
@@ -243,25 +260,25 @@
     <div class="page-hero-bg" aria-hidden="true"><canvas class="pageHeroCanvas"></canvas></div>
     <div class="container">
       <span class="eyebrow reveal">הסטודיו</span>
-      <h1 class="display-xl reveal" style="--d:.08s">שני אחים.<br><span class="accent-text">סטודיו אחד.</span></h1>
-      <p class="lead reveal" style="--d:.16s">אורבו הוא סטודיו של שני אחים שבונים אתרים, מערכות ואוטומציה לעסקים. בעמוד הזה תכירו אותנו, ותראו איך נראית עבודה משותפת איתנו — שלב אחרי שלב.</p>
+      <h1 class="display-xl reveal" style="--d:.08s">בתחילת הדרך.<br><span class="accent-text">בדיוק בגלל זה.</span></h1>
+      <p class="lead reveal" style="--d:.16s">אורבו היא חברה צעירה עם סטנדרטים בלתי מתפשרים. ובשלב הזה של הדרך, ללקוחות הראשונים יש יתרון שלא יחזור: תנאי השקה, ורמת תשומת לב שאי אפשר לקנות בחברה עמוסה.</p>
 
       <div class="proof-strip reveal" style="--d:.24s">
         <div class="proof-item">
-          <span class="proof-num">2</span>
-          <p>אחים מאחורי הסטודיו</p>
-        </div>
-        <div class="proof-item">
           <span class="proof-num">3</span>
-          <p>אתרים באוויר — <a href="work.html">תראו אותם</a></p>
+          <p>פרויקטים במקביל. לא יותר.</p>
         </div>
         <div class="proof-item">
-          <span class="proof-num">5</span>
-          <p>ניסויים גרפיים <a href="lab/" target="_blank" rel="noopener">בספרייה שלנו</a></p>
+          <span class="proof-num">0</span>
+          <p>תבניות מוכנות. הכול נבנה מאפס.</p>
         </div>
         <div class="proof-item">
           <span class="proof-num">1</span>
-          <p>גלריה תלת־ממדית — <a href="gallery.html">היכנסו לביקור</a></p>
+          <p>מוזיאון תלת־ממדי — <a href="gallery.html">כרטיס הביקור שלנו</a></p>
+        </div>
+        <div class="proof-item">
+          <span class="proof-num">5</span>
+          <p>ניסויים חיים <a href="lab/" target="_blank" rel="noopener">בספרייה הפתוחה</a></p>
         </div>
       </div>
     </div>
@@ -282,7 +299,7 @@
           </div>
           <h3>בר כהן</h3>
           <p class="founder-role">מייסד · מוצר ופיתוח</p>
-          <p>מוביל את הפרויקטים מהרעיון ועד ההשקה — אפיון, עיצוב וקוד.</p>
+          <p>מוביל כל פרויקט מקצה לקצה — אפיון, עיצוב ופיתוח. לא עוזב עד שזה מדויק.</p>
           <!-- TODO(owner): תמונה אמיתית + קישור לינקדאין:
           <div class="founder-links">
             <a class="btn btn-ghost btn-sm" href="https://www.linkedin.com/in/YOUR-PROFILE" target="_blank" rel="noopener">LinkedIn</a>
@@ -299,8 +316,8 @@
             </svg>
           </div>
           <h3>אור כהן</h3>
-          <p class="founder-role">שותף · IT, רשתות ותשתיות</p>
-          <p>מנהל IT במקצועו. אצלנו הוא אחראי שהכול יעבוד — תשתיות, רשתות, אבטחה ו־AI.</p>
+          <p class="founder-role">שותף · תשתיות, רשתות ו־AI</p>
+          <p>מנהל IT במקצועו. אחראי שכל מה שנבנה ירוץ מהר, מאובטח ויציב — היום ובעוד שנתיים.</p>
           <!-- TODO(owner): תמונה אמיתית + קישור לינקדאין:
           <div class="founder-links">
             <a class="btn btn-ghost btn-sm" href="https://www.linkedin.com/in/YOUR-PROFILE" target="_blank" rel="noopener">LinkedIn</a>
@@ -309,11 +326,40 @@
         </aside>
       </div>
       <div class="founder-body">
-        <span class="eyebrow reveal">מי אנחנו</span>
-        <h2 class="display-md reveal" style="--d:.06s; margin-block: 18px 22px">אח אחד בונה. אח אחד דואג שזה יחזיק.</h2>
-        <p class="reveal" style="--d:.12s"><strong>בר</strong> הוא הצד של המוצר: יושב עם הלקוח, מבין מה העסק צריך, מעצב ובונה — מהשרטוט הראשון ועד שהאתר או המערכת באוויר. <strong>אור</strong>, מנהל IT במקצועו, הוא הצד שמתחת למכסה המנוע: רשתות, שרתים, אבטחה וכל מה שצריך כדי שמה שבנינו ימשיך לרוץ חלק גם בעוד שנה.</p>
-        <p class="reveal" style="--d:.18s">לעבוד עם אחים יש יתרון פשוט: אנחנו לא צריכים ישיבות כדי להבין אחד את השני. החלטות נופלות מהר, ואין ״זה לא בתחום שלי״ — כל פרויקט הוא של שנינו, מההתחלה ועד הסוף.</p>
-        <p class="reveal" style="--d:.24s">ובגלל שאנחנו קטנים, אתם תמיד מדברים עם מי שעושה את העבודה בפועל. לא מנהל לקוחות, לא מוקד — אנחנו.</p>
+        <span class="eyebrow reveal">מי מוביל את אורבו</span>
+        <h2 class="display-md reveal" style="--d:.06s; margin-block: 18px 22px">אנשים שחיים את הפרטים הקטנים.</h2>
+        <p class="reveal" style="--d:.12s">אורבו נבנתה על שילוב נדיר: <strong>בר</strong> מגיע מצד המוצר — אפיון, עיצוב וקוד, מהשרטוט הראשון ועד ההשקה. <strong>אור</strong> מגיע מצד התשתיות — מנהל IT שמריץ סביבות שלמות ביום־יום, מומחה רשתות, אבטחה ו־AI. אחד בונה את מה שרואים; השני מבטיח את מה שלא רואים.</p>
+        <p class="reveal" style="--d:.18s">ואם תהיתם — כן, אנחנו גם אחים. בפועל זה אומר דבר אחד: החלטות שנסגרות בשיחה אחת, בלי שרשרת מיילים ובלי ״זה לא בתחום שלי״. כל פרויקט שייך לשנינו, מההתחלה ועד הסוף.</p>
+        <p class="reveal" style="--d:.24s">יש לנו גם חוק פנימי פשוט: אם משהו לא מרגיש לנו שלם — הוא לא עולה לאוויר. לפעמים זה אומר עוד לילה של עבודה אצלנו. זה אף פעם לא אומר פשרה אצלכם.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- The launch window -->
+  <section class="section" id="launch" style="padding-block: clamp(56px, 8vw, 100px)">
+    <div class="container">
+      <div class="launch-band reveal">
+        <span class="eyebrow">למה דווקא עכשיו</span>
+        <h2 class="display-md">יתרון הלקוחות הראשונים.</h2>
+        <p>אנחנו בתקופת ההשקה שלנו — והפרויקטים הראשונים הם אלה שיספרו את הסיפור שלנו הלאה. לכן אנחנו מתמחרים אותם בתנאים שלא יחזרו, ומשקיעים בהם מעבר לכל היגיון עסקי קר: כל פרויקט כזה חייב להיות כזה שנתגאה בו. אתם מקבלים רמת עבודה של סטודיו יקר במחיר של התחלה; אנחנו מקבלים לקוח שממליץ עלינו. עסקה הוגנת.</p>
+        <ul class="launch-points" role="list">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            <span>תנאי השקה — נסגרים מראש, שחור על גבי לבן</span>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            <span>הצוות המלא על הפרויקט שלכם — לא מתלמדים</span>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            <span>רמת גימור שהמוזיאון שלנו מדגים — <a href="gallery.html" style="color:var(--accent); font-weight:600">שפטו בעצמכם</a></span>
+          </li>
+        </ul>
+        <a href="contact.html" class="btn btn-primary btn-lg" data-magnetic style="margin-top: 8px">
+          בואו נדבר על הפרויקט שלכם
+          <svg class="btn-arrow" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg>
+        </a>
       </div>
     </div>
   </section>
@@ -471,10 +517,10 @@
       <div class="faq-list">
         <details class="faq-item reveal">
           <summary>
-            אתם סטודיו צעיר. למה שנסמוך עליכם?
+            אתם חברה צעירה. למה שנעבוד דווקא איתכם?
             <span class="faq-plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>
           </summary>
-          <p class="faq-answer">כי אנחנו לא מבקשים אמון על סמך הבטחות — אלא על סמך דברים שאפשר לבדוק. <a href="work.html" style="color:var(--accent); font-weight:600">בעמוד העבודות</a> יש אתרים חיים בפרודקשן שאפשר לגלוש בהם עכשיו, מוצרים עובדים וספריית ניסויים פתוחה. והתהליך בנוי כך שהסיכון שלכם קטן: מחיר סגור מראש, עדכון שבועי עם גרסה עובדת, והקוד שייך לכם מהיום הראשון.</p>
+          <p class="faq-answer">כי אצל חברה בתחילת הדרך, הפרויקט שלכם הוא לא עוד שורה בטבלה — הוא ההוכחה שלנו. תקבלו את הצוות המלא, תנאי השקה, מחיר סגור מראש ועדכון שבועי עם גרסה עובדת. ואת הרמה אפשר לבדוק עוד לפני השיחה הראשונה: <a href="gallery.html" style="color:var(--accent); font-weight:600">היכנסו למוזיאון</a> ותשפטו בעצמכם.</p>
         </details>
         <details class="faq-item reveal" style="--d:.05s">
           <summary>
@@ -488,7 +534,7 @@
             כמה עולה פרויקט?
             <span class="faq-plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>
           </summary>
-          <p class="faq-answer">תלוי בהיקף — אבל תמיד תדעו מראש. אחרי שיחת ההיכרות ואפיון קצר תקבלו הצעה מסודרת עם מחיר סגור ולוח זמנים. בלי שעתון מפתיע ובלי חריגות שמתגלות בסוף.</p>
+          <p class="faq-answer">תלוי בהיקף — אבל תמיד תדעו מראש. אחרי שיחת ההיכרות ואפיון קצר תקבלו הצעה מסודרת עם מחיר סגור ולוח זמנים, בלי שעתון מפתיע ובלי חריגות שמתגלות בסוף. וכרגע, בתקופת ההשקה, הלקוחות הראשונים נהנים מתנאים שלא יחזרו.</p>
         </details>
         <details class="faq-item reveal" style="--d:.15s">
           <summary>
@@ -558,7 +604,7 @@
       <a href="index.html">בית</a>
       <a href="services.html">שירותים</a>
       <a href="work.html">עבודות</a>
-      <a href="gallery.html">הגלריה</a>
+      <a href="gallery.html">המוזיאון</a>
       <a href="studio.html">הסטודיו</a>
       <a href="lab/">ORBO LAB</a>
       <a href="contact.html">צור קשר</a>
