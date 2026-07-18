@@ -56,11 +56,11 @@
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isTouch ? 1.5 : 1.75));
   renderer.setSize(innerWidth, innerHeight);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.14;
+  renderer.toneMappingExposure = 1.3;
 
   var scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x090711);
-  scene.fog = new THREE.Fog(0x090711, 26, 78);
+  scene.background = new THREE.Color(0x0b0916);
+  scene.fog = new THREE.Fog(0x0b0916, 30, 84);
 
   var camera = new THREE.PerspectiveCamera(68, innerWidth / innerHeight, 0.08, 120);
   camera.rotation.order = 'YXZ';
@@ -344,7 +344,7 @@
       c.clearRect(0, 0, 1024, 256);
       c.textAlign = 'center';
       c.direction = ltr ? 'ltr' : 'rtl';
-      c.fillStyle = 'rgba(157, 140, 255, 0.32)';
+      c.fillStyle = 'rgba(178, 160, 255, 0.55)';
       c.font = '850 150px ' + FONT;
       c.fillText(text, 512, 178);
     };
@@ -545,13 +545,21 @@
   brandWall.rotation.y = Math.PI;
   scene.add(brandWall);
 
-  /* base lights */
-  scene.add(new THREE.AmbientLight(0x9a8ecf, 0.3));
-  scene.add(new THREE.HemisphereLight(0x6a5fae, 0x0d0b14, 0.35));
+  /* base lights — a bright night, not a dark one */
+  scene.add(new THREE.AmbientLight(0xa89ede, 0.5));
+  scene.add(new THREE.HemisphereLight(0x7a6ec2, 0x141020, 0.55));
   [24, 12, 0, -12, -24].forEach(function (z, i) {
-    var p = new THREE.PointLight(i % 2 ? 0xb7a6ff : 0xffd9bd, 22, 22, 1.7);
+    var p = new THREE.PointLight(i % 2 ? 0xb7a6ff : 0xffd9bd, 34, 24, 1.6);
     p.position.set(0, HALL.h - 0.7, z);
     scene.add(p);
+  });
+  /* warm washes along the walls so the bays read clearly */
+  [18, 0, -18].forEach(function (z) {
+    [-1, 1].forEach(function (side) {
+      var w = new THREE.PointLight(0xf5e6ff, 10, 12, 1.8);
+      w.position.set(side * 5.4, HALL.h - 1.4, z);
+      scene.add(w);
+    });
   });
 
   /* light benches */
@@ -590,6 +598,47 @@
     scene.add(dust);
   })();
 
+  /* a soft ring of light follows the visitor across the marble */
+  var playerHalo = new THREE.Mesh(
+    new THREE.PlaneGeometry(3.4, 3.4),
+    new THREE.MeshBasicMaterial({ map: radialTexture('rgba(157, 140, 255, 0.20)', 'rgba(157, 140, 255, 0)'), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false })
+  );
+  playerHalo.rotation.x = -Math.PI / 2;
+  playerHalo.position.y = 0.015;
+  scene.add(playerHalo);
+
+  /* an aurora river flows beneath the skylight, painted live by the lab engine */
+  var auroraRiver = null;
+  if (window.ORBO_LAB) {
+    var arW = 1024, arH = 192;
+    var arCtx = ctx2d(arW, arH);
+    var arTex = asTexture(arCtx.canvas);
+    auroraRiver = {
+      ctx: arCtx, tex: arTex, w: arW, h: arH, t: Math.random() * 40,
+      mesh: new THREE.Mesh(
+        new THREE.PlaneGeometry(HALL.l - 6, 4.4),
+        new THREE.MeshBasicMaterial({ map: arTex, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })
+      )
+    };
+    auroraRiver.mesh.rotation.set(Math.PI / 2, 0, Math.PI / 2);
+    auroraRiver.mesh.position.set(0, HALL.h - 0.18, 0);
+    scene.add(auroraRiver.mesh);
+  }
+
+  /* comets circling the atrium star */
+  var comets = [];
+  (function () {
+    var cometTex = radialTexture('rgba(201, 175, 255, 0.9)', 'rgba(201, 175, 255, 0)');
+    for (var i = 0; i < 3; i++) {
+      var m = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.55, 0.55),
+        new THREE.MeshBasicMaterial({ map: cometTex, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })
+      );
+      scene.add(m);
+      comets.push({ mesh: m, r: 2.6 + i * 0.5, sp: 0.5 + i * 0.17, ph: i * 2.1, tilt: 0.35 + i * 0.22 });
+    }
+  })();
+
   /* wing titles */
   function wingTitle(text, x, z, ry) {
     var m = new THREE.Mesh(
@@ -600,10 +649,12 @@
     m.rotation.y = ry;
     scene.add(m);
   }
-  wingTitle('העבודות', LX, 25, Math.PI / 2);
-  wingTitle('אמנות בקוד', RX, 25, -Math.PI / 2);
-  wingTitle('המעבדה', LX, -17, Math.PI / 2);
-  wingTitle('המעבדה', RX, -17, -Math.PI / 2);
+  /* titles float off the wall, centered on bays between the pilasters
+     (columns stand at z = ±8, ±16, ±24 — bay centers at 20 / -12 clear them) */
+  wingTitle('העבודות', LX + 0.55, 20, Math.PI / 2);
+  wingTitle('אמנות בקוד', RX - 0.55, 20, -Math.PI / 2);
+  wingTitle('המעבדה', LX + 0.55, -12, Math.PI / 2);
+  wingTitle('המעבדה', RX - 0.55, -12, -Math.PI / 2);
 
   /* ---------- holograms ---------- */
   var holoLineMat = function (color) {
@@ -819,8 +870,10 @@
 
   ART.forEach(function (art) {
     var group = new THREE.Group();
-    var W = art.big ? 2.9 : 2.7, H = art.big ? 2.9 : 1.69;
-    var AY = 2.15;   /* artwork center height in the tall hall */
+    /* the finale screen is a wide cinema wall — same 8:5 aspect as its
+       texture, so the type never squashes */
+    var W = art.big ? 4.8 : 2.7, H = art.big ? 3.0 : 1.69;
+    var AY = art.big ? 2.55 : 2.15;   /* artwork center height */
 
     if (art.wall === 'L') { group.position.set(LX, 0, art.z); group.rotation.y = Math.PI / 2; }
     else if (art.wall === 'R') { group.position.set(RX, 0, art.z); group.rotation.y = -Math.PI / 2; }
@@ -1024,10 +1077,8 @@
 
   function setHover(art) {
     if (art === hoverArt) return;
-    if (hoverArt && hoverArt._glow) hoverArt._glow.material.opacity = 0.32;
-    hoverArt = art;
+    hoverArt = art;   /* glow itself is driven by the proximity system */
     if (art) {
-      if (art._glow) art._glow.material.opacity = 0.62;
       crosshair.classList.add('hot');
       showHint(isTouch ? 'הקישו לפרטים' : '״' + art.title + '״ — לחצו לפרטים');
     } else {
@@ -1174,7 +1225,9 @@
       var L = liveArts[i];
       var wp = L.plane.getWorldPosition(new THREE.Vector3());
       if (wp.distanceTo(pos) > 17) continue;
-      L.t += dt * 2;
+      /* paintings paint faster as you approach — the room notices you */
+      var near = Math.max(0, 1 - wp.distanceTo(pos) / 10);
+      L.t += dt * (2 + near * 2.5);
       ORBO_LAB.draw[L.kind]({ ctx: L.art, w: L.w, h: L.h, t: L.t, seed: L.seed });
       var g = L.tex;
       g.fillStyle = '#0F0D18';
@@ -1195,7 +1248,9 @@
       var h = holograms[i];
       var u = h.userData;
       u.excite = Math.max(0, u.excite - dt * 0.8);
-      var ex = u.excite;
+      /* holograms wake up as you walk toward them */
+      var prox = Math.max(0, 1 - h.position.distanceTo(pos) / 6);
+      var ex = Math.min(1, u.excite + prox * 0.55);
       u.core.rotation.y += dt * (u.spin + ex * 3.2);
       u.core.position.y = Math.sin(t * 0.9 + i * 1.7) * 0.05;
       var flick = 1 + ex * 0.28 + (reduced ? 0 : Math.sin(t * 13 + i * 3) * 0.02);
@@ -1223,6 +1278,40 @@
     }
   }
 
+  /* every piece breathes toward whoever stands in front of it */
+  var tmpV = new THREE.Vector3();
+  function tickReactive(t, dt) {
+    for (var i = 0; i < ART.length; i++) {
+      var a = ART[i];
+      if (!a._plane) continue;
+      a._plane.getWorldPosition(tmpV);
+      var d = tmpV.distanceTo(pos);
+      if (d > 22) continue;
+      var prox = Math.max(0, Math.min(1, 1 - (d - 2) / 5));
+      a._glow.material.opacity = 0.3 + prox * 0.3 + (a === hoverArt ? 0.18 : 0);
+      var sc = 1 + prox * 0.035;
+      a._plane.scale.set(sc, sc, 1);
+    }
+    playerHalo.position.x = pos.x;
+    playerHalo.position.z = pos.z;
+    playerHalo.material.opacity = 0.75 + (reduced ? 0 : Math.sin(t * 1.6) * 0.2);
+    if (auroraRiver && !reduced && liveTick % 2 === 0) {
+      auroraRiver.t = (auroraRiver.t || 0) + dt * 2.4;
+      ORBO_LAB.draw.aurora({ ctx: auroraRiver.ctx, w: auroraRiver.w, h: auroraRiver.h, t: auroraRiver.t, seed: [] });
+      auroraRiver.tex.needsUpdate = true;
+    }
+    for (var k = 0; k < comets.length; k++) {
+      var cm = comets[k];
+      var a2 = t * cm.sp + cm.ph;
+      cm.mesh.position.set(
+        Math.cos(a2) * cm.r,
+        4.9 + Math.sin(a2 * 1.3) * Math.sin(cm.tilt) * 1.1,
+        Math.sin(a2) * cm.r * 0.8
+      );
+      cm.mesh.lookAt(pos.x, pos.y, pos.z);
+    }
+  }
+
   /* ---------- loop ---------- */
   var clock = new THREE.Clock();
   var pickTick = 0;
@@ -1235,6 +1324,7 @@
     step(dt);
     paintLive(dt);
     tickHolograms(t, dt);
+    tickReactive(t, dt);
 
     /* labels face the visitor */
     for (var i = 0; i < billboards.length; i++) {
