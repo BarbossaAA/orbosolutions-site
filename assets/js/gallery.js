@@ -118,40 +118,62 @@
 
   /* ---------- material suites: stone, limewash, linen, bronze ---------- */
 
-  /* honed stone tiles: warm large-format slabs, veined, with grout lines */
+  /* honed stone tiles: warm large-format slabs, veined, with grout lines.
+     the megapixel of fbm used to block load for ~0.5s — now an instant
+     stand-in (base tone + grout) ships first and the veined surface is
+     computed in row bands between frames, done long before the visitor
+     clicks through the entry overlay. */
   function stoneFloorSuite() {
     var S = 1024, TILES = 4;
     var col = ctx2d(S, S), rgh = ctx2d(S, S);
-    var img = col.createImageData(S, S);
-    var rimg = rgh.createImageData(S, S);
     var tileSz = S / TILES;
-    for (var y = 0; y < S; y++) {
-      for (var x = 0; x < S; x++) {
-        var tx = Math.floor(x / tileSz), ty = Math.floor(y / tileSz);
-        var seed = tx * 7.13 + ty * 3.71;
-        var u = x / S * 5, v = y / S * 5;
-        var tone = fbm(u + seed, v + seed * 2, 3);                 /* per-tile drift */
-        var w = fbm(u * 2.0 + seed * 9, v * 2.0 + 4.2, 5);
-        var vein = Math.pow(1 - Math.abs(Math.sin(w * 7.2 + tone * 2.4)), 16);
-        /* deep night stone, silver-violet veins */
-        var r = 30 + tone * 12 + vein * 74;
-        var g = 27 + tone * 11 + vein * 66;
-        var b = 44 + tone * 16 + vein * 96;
-        /* grout: darker seams between slabs */
-        var gx = x % tileSz, gy = y % tileSz;
-        var gd = Math.min(gx, tileSz - gx, gy, tileSz - gy);
-        if (gd < 3) { var k = 0.45 + gd * 0.12; r *= k; g *= k; b *= k; }
-        var o = (y * S + x) * 4;
-        img.data[o] = r; img.data[o + 1] = g; img.data[o + 2] = b; img.data[o + 3] = 255;
-        var ro = 95 + tone * 55 - vein * 35 + (gd < 3 ? 70 : 0);   /* veins polished, grout matte */
-        rimg.data[o] = ro; rimg.data[o + 1] = ro; rimg.data[o + 2] = ro; rimg.data[o + 3] = 255;
-      }
+    col.fillStyle = '#232031';
+    col.fillRect(0, 0, S, S);
+    col.fillStyle = 'rgba(0, 0, 0, 0.45)';
+    for (var g0 = 0; g0 <= TILES; g0++) {
+      col.fillRect(g0 * tileSz - 2, 0, 4, S);
+      col.fillRect(0, g0 * tileSz - 2, S, 4);
     }
-    col.putImageData(img, 0, 0);
-    rgh.putImageData(rimg, 0, 0);
+    rgh.fillStyle = 'rgb(122, 122, 122)';
+    rgh.fillRect(0, 0, S, S);
     var map = asTexture(col.canvas);
     var rough = asTexture(rgh.canvas, true);
     [map, rough].forEach(function (t) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(0.125, 0.125); });
+    var img = col.createImageData(S, S);
+    var rimg = rgh.createImageData(S, S);
+    var band = 0, BANDS = 8, rowsPerBand = S / BANDS;
+    function renderBand() {
+      var y1 = band * rowsPerBand + rowsPerBand;
+      for (var y = y1 - rowsPerBand; y < y1; y++) {
+        for (var x = 0; x < S; x++) {
+          var tx = Math.floor(x / tileSz), ty = Math.floor(y / tileSz);
+          var seed = tx * 7.13 + ty * 3.71;
+          var u = x / S * 5, v = y / S * 5;
+          var tone = fbm(u + seed, v + seed * 2, 3);                 /* per-tile drift */
+          var w = fbm(u * 2.0 + seed * 9, v * 2.0 + 4.2, 5);
+          var vein = Math.pow(1 - Math.abs(Math.sin(w * 7.2 + tone * 2.4)), 16);
+          /* deep night stone, silver-violet veins */
+          var r = 30 + tone * 12 + vein * 74;
+          var g = 27 + tone * 11 + vein * 66;
+          var b = 44 + tone * 16 + vein * 96;
+          /* grout: darker seams between slabs */
+          var gx = x % tileSz, gy = y % tileSz;
+          var gd = Math.min(gx, tileSz - gx, gy, tileSz - gy);
+          if (gd < 3) { var k = 0.45 + gd * 0.12; r *= k; g *= k; b *= k; }
+          var o = (y * S + x) * 4;
+          img.data[o] = r; img.data[o + 1] = g; img.data[o + 2] = b; img.data[o + 3] = 255;
+          var ro = 95 + tone * 55 - vein * 35 + (gd < 3 ? 70 : 0);   /* veins polished, grout matte */
+          rimg.data[o] = ro; rimg.data[o + 1] = ro; rimg.data[o + 2] = ro; rimg.data[o + 3] = 255;
+        }
+      }
+      band++;
+      if (band < BANDS) { setTimeout(renderBand, 25); return; }
+      col.putImageData(img, 0, 0);
+      rgh.putImageData(rimg, 0, 0);
+      map.needsUpdate = true;
+      rough.needsUpdate = true;
+    }
+    setTimeout(renderBand, 25);
     return { map: map, rough: rough };
   }
 
@@ -438,10 +460,12 @@
     return t;
   }
 
-  /* ---------- generative artworks ---------- */
-  function genesisTexture() {
+  /* ---------- generative artworks ----------
+     each draws into a ctx it is handed; the ART loop ships a dark
+     placeholder texture instantly and schedules these off the critical
+     path, so load never blocks on a megapixel of math. */
+  function genesisArt(c) {
     var W = 640, H = 400;
-    var c = ctx2d(W, H);
     c.fillStyle = '#0e0a18';
     c.fillRect(0, 0, W, H);
     var cols = ['rgba(157, 140, 255,', 'rgba(255, 176, 128,', 'rgba(120, 170, 255,', 'rgba(201, 175, 255,'];
@@ -460,12 +484,10 @@
       c.lineWidth = 0.8;
       c.stroke();
     }
-    return asTexture(c.canvas);
   }
 
-  function mosaicTexture() {
+  function mosaicArt(c) {
     var W = 640, H = 400;
-    var c = ctx2d(W, H);
     var N = 46, pts = [];
     var palette = [[26, 20, 44], [40, 30, 70], [58, 44, 108], [91, 76, 245], [157, 140, 255], [255, 176, 128], [22, 17, 36]];
     for (var i = 0; i < N; i++) pts.push([Math.random() * W, Math.random() * H, palette[i % palette.length]]);
@@ -488,12 +510,10 @@
       }
     }
     c.putImageData(img, 0, 0);
-    return asTexture(c.canvas);
   }
 
-  function fractalTexture() {
+  function fractalArt(c) {
     var W = 640, H = 400;
-    var c = ctx2d(W, H);
     var img = c.createImageData(W, H);
     var cr = -0.79, ci = 0.15;
     for (var y = 0; y < H; y++) {
@@ -518,7 +538,14 @@
       }
     }
     c.putImageData(img, 0, 0);
-    return asTexture(c.canvas);
+  }
+
+  /* one-time art renders that stream in behind the entry overlay */
+  var deferredArt = [];
+  function runDeferredArt() {
+    deferredArt.forEach(function (d, i) {
+      setTimeout(function () { d.run(); d.tex.needsUpdate = true; }, 80 + i * 90);
+    });
   }
 
   /* ---------- the room ---------- */
@@ -532,6 +559,50 @@
   var linenMat = new THREE.MeshStandardMaterial({ map: linenTexture(), roughness: 0.92, metalness: 0.02 });
   var ceilMat = new THREE.MeshStandardMaterial({ color: 0x14111d, roughness: 0.9, metalness: 0.0, side: THREE.DoubleSide });
   var warmLineMat = new THREE.MeshBasicMaterial({ color: 0x8474e8 });
+  var pedestalStoneMat = new THREE.MeshStandardMaterial({ color: 0xE3DCCB, roughness: 0.55, metalness: 0.05, envMapIntensity: 0.9 });
+
+  /* ---------- static-geometry collectors ----------
+     every fixed bronze bar, frame, belt, collar and housing lands in a
+     bucket and is baked into ONE mesh per material — the hall's ~120
+     pieces of hardware cost five draw calls instead of five score. */
+  var staticParts = { bronze: [], dark: [], warm: [], linen: [], stone: [] };
+  var _collectEuler = new THREE.Euler();
+  function collect(bucket, geo, x, y, z, rx, ry, rz) {
+    var m = new THREE.Matrix4().makeRotationFromEuler(_collectEuler.set(rx || 0, ry || 0, rz || 0));
+    m.setPosition(x, y, z);
+    staticParts[bucket].push({ geo: geo, matrix: m });
+  }
+  function collectM(bucket, geo, matrix) {
+    staticParts[bucket].push({ geo: geo, matrix: matrix });
+  }
+  function bakeStatic() {
+    var mats = { bronze: bronzeMat, dark: darkBronze, warm: warmLineMat, linen: linenMat, stone: pedestalStoneMat };
+    Object.keys(staticParts).forEach(function (key) {
+      var list = staticParts[key];
+      if (!list.length) return;
+      var posA = [], norA = [], uvA = [];
+      var v = new THREE.Vector3();
+      var nm = new THREE.Matrix3();
+      list.forEach(function (it) {
+        var g = it.geo.index ? it.geo.toNonIndexed() : it.geo;
+        var p = g.attributes.position, n = g.attributes.normal, u = g.attributes.uv;
+        nm.getNormalMatrix(it.matrix);
+        for (var i = 0; i < p.count; i++) {
+          v.fromBufferAttribute(p, i).applyMatrix4(it.matrix);
+          posA.push(v.x, v.y, v.z);
+          v.fromBufferAttribute(n, i).applyMatrix3(nm).normalize();
+          norA.push(v.x, v.y, v.z);
+          uvA.push(u ? u.getX(i) : 0, u ? u.getY(i) : 0);
+        }
+      });
+      var geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(posA, 3));
+      geo.setAttribute('normal', new THREE.Float32BufferAttribute(norA, 3));
+      geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvA, 2));
+      scene.add(new THREE.Mesh(geo, mats[key]));
+      staticParts[key] = [];
+    });
+  }
 
   /* one seamless stadium floor — a single shape, nothing to fight over */
   (function () {
@@ -562,27 +633,20 @@
   });
 
   /* bronze wainscot rail + warm cove line, all the way around */
-  function beltRing(y, mat, tube) {
+  function beltRing(y, bucket, tube) {
     /* straight segments */
     [-1, 1].forEach(function (side) {
-      var seg = new THREE.Mesh(new THREE.CylinderGeometry(tube, tube, ROOM.straight * 2, 6), mat);
-      seg.rotation.x = Math.PI / 2;
-      seg.position.set(side * (ROOM.hw - 0.04), y, 0);
-      scene.add(seg);
+      collect(bucket, new THREE.CylinderGeometry(tube, tube, ROOM.straight * 2, 6), side * (ROOM.hw - 0.04), y, 0, Math.PI / 2, 0, 0);
     });
     /* curved segments */
     [1, -1].forEach(function (side) {
-      var arc = new THREE.Mesh(new THREE.TorusGeometry(ROOM.hw - 0.04, tube, 6, 30, Math.PI), mat);
-      arc.rotation.x = -Math.PI / 2;
-      arc.rotation.z = side > 0 ? Math.PI : 0;
-      arc.position.set(0, y, side * ROOM.straight);
-      scene.add(arc);
+      collect(bucket, new THREE.TorusGeometry(ROOM.hw - 0.04, tube, 6, 30, Math.PI), 0, y, side * ROOM.straight, -Math.PI / 2, 0, side > 0 ? Math.PI : 0);
     });
   }
-  beltRing(0.95, bronzeMat, 0.03);            /* wainscot rail */
-  beltRing(ROOM.h - 0.55, warmLineMat, 0.022); /* warm cove light line */
+  beltRing(0.95, 'bronze', 0.03);            /* wainscot rail */
+  beltRing(ROOM.h - 0.55, 'warm', 0.022);    /* warm cove light line */
   /* stone base skirting */
-  beltRing(0.12, darkBronze, 0.05);
+  beltRing(0.12, 'dark', 0.05);
 
   /* ceiling: a warm plane with a great oval opening to the stars */
   (function () {
@@ -607,21 +671,13 @@
     scene.add(ceil);
     /* bronze rim on the strip's edges + the two violet rails of the original */
     [[-2.24, 20.2, 0.055], [2.24, 20.2, 0.055]].forEach(function (r) {
-      var edge = new THREE.Mesh(new THREE.CylinderGeometry(r[2], r[2], r[1], 8), bronzeMat);
-      edge.rotation.x = Math.PI / 2;
-      edge.position.set(r[0], ROOM.h - 0.02, 0);
-      scene.add(edge);
+      collect('bronze', new THREE.CylinderGeometry(r[2], r[2], r[1], 8), r[0], ROOM.h - 0.02, 0, Math.PI / 2, 0, 0);
     });
     [[-10.05], [10.05]].forEach(function (r) {
-      var cap = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 4.5, 8), bronzeMat);
-      cap.rotation.z = Math.PI / 2;
-      cap.position.set(0, ROOM.h - 0.02, r[0]);
-      scene.add(cap);
+      collect('bronze', new THREE.CylinderGeometry(0.055, 0.055, 4.5, 8), 0, ROOM.h - 0.02, r[0], 0, 0, Math.PI / 2);
     });
     [-2.05, 2.05].forEach(function (x) {
-      var railGlow = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.05, 19.6), warmLineMat);
-      railGlow.position.set(x, ROOM.h - 0.05, 0);
-      scene.add(railGlow);
+      collect('warm', new THREE.BoxGeometry(0.1, 0.05, 19.6), x, ROOM.h - 0.05, 0);
     });
   })();
 
@@ -632,10 +688,7 @@
     door.position.set(0, 1.8, ROOM.straight + doorR);
     door.rotation.y = Math.PI;
     scene.add(door);
-    var arch = new THREE.Mesh(new THREE.TorusGeometry(1.32, 0.07, 8, 24, Math.PI), bronzeMat);
-    arch.position.set(0, 3.6, ROOM.straight + doorR - 0.02);
-    arch.rotation.y = Math.PI;
-    scene.add(arch);
+    collect('bronze', new THREE.TorusGeometry(1.32, 0.07, 8, 24, Math.PI), 0, 3.6, ROOM.straight + doorR - 0.02, 0, Math.PI, 0);
     var sign = new THREE.Mesh(
       new THREE.PlaneGeometry(4.6, 1.15),
       new THREE.MeshBasicMaterial({ map: brandTexture(), transparent: true, depthWrite: false })
@@ -661,14 +714,13 @@
   /* benches: dark bronze legs, warm stone tops, soft contact shadows */
   var blobTex = radialTexture('rgba(30, 24, 18, 0.5)', 'rgba(30, 24, 18, 0)');
   var benches = [];
+  var benchTopMat = new THREE.MeshStandardMaterial({ color: 0x2e2620, roughness: 0.55, metalness: 0.1 });
   [[-3.1, 0], [3.1, 0]].forEach(function (bz) {
-    var top = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.09, 2.0), new THREE.MeshStandardMaterial({ color: 0x2e2620, roughness: 0.55, metalness: 0.1 }));
+    var top = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.09, 2.0), benchTopMat);
     top.position.set(bz[0], 0.44, bz[1]);
     scene.add(top);
     [[-0.8], [0.8]].forEach(function (lz) {
-      var leg = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.42, 8), darkBronze);
-      leg.position.set(bz[0], 0.21, bz[1] + lz[0]);
-      scene.add(leg);
+      collect('dark', new THREE.CylinderGeometry(0.035, 0.035, 0.42, 8), bz[0], 0.21, bz[1] + lz[0]);
     });
     var sh = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 2.8), new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, opacity: 0.7, depthWrite: false }));
     sh.rotation.x = -Math.PI / 2;
@@ -827,13 +879,8 @@
   var billboards = [];
 
   pedestalDefs.forEach(function (def) {
-    var base = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.6, 0.95, 24), new THREE.MeshStandardMaterial({ color: 0xE3DCCB, roughness: 0.55, metalness: 0.05, envMapIntensity: 0.9 }));
-    base.position.set(def.x, 0.475, def.z);
-    scene.add(base);
-    var collar = new THREE.Mesh(new THREE.TorusGeometry(0.47, 0.02, 8, 40), bronzeMat);
-    collar.rotation.x = Math.PI / 2;
-    collar.position.set(def.x, 0.96, def.z);
-    scene.add(collar);
+    collect('stone', new THREE.CylinderGeometry(0.5, 0.6, 0.95, 24), def.x, 0.475, def.z);
+    collect('bronze', new THREE.TorusGeometry(0.47, 0.02, 8, 40), def.x, 0.96, def.z, Math.PI / 2, 0, 0);
     var bshadow = new THREE.Mesh(new THREE.PlaneGeometry(1.9, 1.9), new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, opacity: 0.7, depthWrite: false }));
     bshadow.rotation.x = -Math.PI / 2;
     bshadow.position.set(def.x, 0.011, def.z);
@@ -921,9 +968,9 @@
     { id: 'aurora', px: -(ROOM.hw - 0.06), pz: 4.6, ry: Math.PI / 2, live: 'aurora', title: 'AURORA', tag: 'ציור חי · המעבדה', accent: '#86B32B', link: 'lab/01-aurora-gsap/',
       body: 'סרטי אור שנעים בזרם. הציור שעל הקיר נצבע מחדש עשרות פעמים בשנייה, ממש עכשיו — כמו כל ציורי המעבדה כאן.' },
     /* right straight wall */
-    { id: 'genesis', px: ROOM.hw - 0.06, pz: -4.6, ry: -Math.PI / 2, gen: genesisTexture, title: 'GENESIS', tag: 'אמנות גנרטיבית', accent: '#E8722E',
+    { id: 'genesis', px: ROOM.hw - 0.06, pz: -4.6, ry: -Math.PI / 2, gen: genesisArt, title: 'GENESIS', tag: 'אמנות גנרטיבית', accent: '#E8722E',
       body: 'שלוש מאות קווים ששוחררו לשדה זרימה מתמטי. אף אחד לא צייר את היצירה הזאת — היא חושבה, קו אחרי קו, ברגע שנכנסתם למוזיאון.' },
-    { id: 'mosaic', px: ROOM.hw - 0.06, pz: 0, ry: -Math.PI / 2, gen: mosaicTexture, title: 'MOSAIC', tag: 'אמנות גנרטיבית', accent: '#6C5CFF',
+    { id: 'mosaic', px: ROOM.hw - 0.06, pz: 0, ry: -Math.PI / 2, gen: mosaicArt, title: 'MOSAIC', tag: 'אמנות גנרטיבית', accent: '#6C5CFF',
       body: 'פסיפס שנבנה מחלוקת המרחב בין ארבעים ושש נקודות אקראיות. כל ריצה מייצרת פסיפס שלא היה קיים מעולם.' },
     { id: 'flux', px: ROOM.hw - 0.06, pz: 4.6, ry: -Math.PI / 2, live: 'flux', title: 'FLUX', tag: 'ציור חי · המעבדה', accent: '#E0402F', link: 'lab/04-flux-shaders/',
       body: 'שדות צבע שזורמים על המסך לפי כללים מתמטיים. בגרסה המלאה — שמונה יצירות, כולל נוזל שמציירים בו עם הסמן.' },
@@ -937,7 +984,7 @@
     /* near curve, flanking the door */
     { id: 'prism', px: nearL.px, pz: nearL.pz, ry: nearL.ry, live: 'prism', title: 'PRISM', tag: 'ציור חי · המעבדה', accent: '#7A5CFF', link: 'lab/03-prism-r3f/',
       body: 'אלומת אור שנשברת דרך גאומטריה ומתפצלת לספקטרום. בגרסה המלאה — חדר חומרים תלת־ממדי שלם.' },
-    { id: 'fractal', px: nearR.px, pz: nearR.pz, ry: nearR.ry, gen: fractalTexture, title: 'JULIA', tag: 'אמנות גנרטיבית', accent: '#7A5CFF',
+    { id: 'fractal', px: nearR.px, pz: nearR.pz, ry: nearR.ry, gen: fractalArt, title: 'JULIA', tag: 'אמנות גנרטיבית', accent: '#7A5CFF',
       body: 'קבוצת ז׳וליה — נוסחה אחת קצרה שמכילה אינסוף. ככל שמתקרבים, מתגלים עוד ועוד עולמות. חושבה פיקסל־פיקסל בכניסתכם.' }
   ];
 
@@ -951,21 +998,22 @@
     group.position.set(art.px, 0, art.pz);
     group.rotation.y = art.ry;
 
+    /* world matrix helper: the group's transform times a local offset */
+    var gm = new THREE.Matrix4().makeRotationY(art.ry);
+    gm.setPosition(art.px, 0, art.pz);
+    var partAt = function (lx, ly, lz) {
+      return gm.clone().multiply(new THREE.Matrix4().makeTranslation(lx, ly, lz));
+    };
+
     /* the dark linen panel the piece hangs on */
-    var panelM = new THREE.Mesh(new THREE.BoxGeometry(W + 1.0, H + 1.0, 0.05), linenMat);
-    panelM.position.set(0, AY, 0.028);
-    group.add(panelM);
+    collectM('linen', new THREE.BoxGeometry(W + 1.0, H + 1.0, 0.05), partAt(0, AY, 0.028));
     /* bronze border around the panel — four clean bars */
     var PW = W + 1.0, PH = H + 1.0, bt = 0.035;
     [[0, AY + PH / 2, PW + bt * 2, bt], [0, AY - PH / 2, PW + bt * 2, bt]].forEach(function (bb) {
-      var bar = new THREE.Mesh(new THREE.BoxGeometry(bb[2], bb[3], 0.03), bronzeMat);
-      bar.position.set(bb[0], bb[1], 0.05);
-      group.add(bar);
+      collectM('bronze', new THREE.BoxGeometry(bb[2], bb[3], 0.03), partAt(bb[0], bb[1], 0.05));
     });
     [[-PW / 2, AY], [PW / 2, AY]].forEach(function (bb) {
-      var bar = new THREE.Mesh(new THREE.BoxGeometry(bt, PH, 0.03), bronzeMat);
-      bar.position.set(bb[0], bb[1], 0.05);
-      group.add(bar);
+      collectM('bronze', new THREE.BoxGeometry(bt, PH, 0.03), partAt(bb[0], bb[1], 0.05));
     });
 
     /* soft accent glow on the linen */
@@ -979,19 +1027,15 @@
     /* bronze frame */
     var d = 0.06, th = 0.07, off = 0.1;
     [[0, AY + H / 2 + th / 2, W + th * 2, th], [0, AY - H / 2 - th / 2, W + th * 2, th]].forEach(function (s) {
-      var m = new THREE.Mesh(new THREE.BoxGeometry(s[2], s[3], d), darkBronze);
-      m.position.set(s[0], s[1], off - d / 2);
-      group.add(m);
+      collectM('dark', new THREE.BoxGeometry(s[2], s[3], d), partAt(s[0], s[1], off - d / 2));
     });
     [[-W / 2 - th / 2, AY], [W / 2 + th / 2, AY]].forEach(function (s) {
-      var m = new THREE.Mesh(new THREE.BoxGeometry(th, H, d), darkBronze);
-      m.position.set(s[0], s[1], off - d / 2);
-      group.add(m);
+      collectM('dark', new THREE.BoxGeometry(th, H, d), partAt(s[0], s[1], off - d / 2));
     });
 
     var tex, liveState = null;
     if (art.live && window.ORBO_LAB) {
-      var aw = 640, ah = 400;
+      var aw = 512, ah = 320;   /* uploaded to the GPU while walking — keep it light */
       var artC = ctx2d(aw, ah);
       var texC = ctx2d(aw, ah);
       liveState = { kind: art.live, art: artC, tex: texC, w: aw, h: ah, t: Math.random() * 60, seed: ORBO_LAB.makeSeed(art.live, aw, ah) };
@@ -999,7 +1043,11 @@
       texC.fillRect(0, 0, aw, ah);
       tex = asTexture(texC.canvas);
     } else if (art.gen) {
-      tex = art.gen();
+      var genC = ctx2d(640, 400);
+      genC.fillStyle = '#0F0D18';
+      genC.fillRect(0, 0, 640, 400);
+      tex = asTexture(genC.canvas);
+      deferredArt.push({ run: art.gen.bind(null, genC), tex: tex });
     } else {
       tex = posterTexture(art);
     }
@@ -1026,23 +1074,54 @@
       group.add(plq);
     }
 
-    /* desktop: one warm spot per piece */
-    if (!isTouch) {
-      var sp = new THREE.SpotLight(0xfff0dc, 16, 9, 0.5, 0.6, 1.5);
-      var sWorld = new THREE.Vector3(0, ROOM.h - 0.35, 1.7).applyEuler(group.rotation).add(group.position);
-      sp.position.copy(sWorld);
-      var tWorld = new THREE.Vector3(0, AY, 0).applyEuler(group.rotation).add(group.position);
-      sp.target.position.copy(tWorld);
-      scene.add(sp);
-      scene.add(sp.target);
-      var hs = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.09, 0.16, 10), darkBronze);
-      hs.position.copy(sWorld);
-      hs.position.y = ROOM.h - 0.1;
-      scene.add(hs);
-    }
+    /* where this piece's warm spot would sit — the shared pool below
+       parks the real lights on the nearest pieces only */
+    var sWorld = new THREE.Vector3(0, ROOM.h - 0.35, 1.7).applyEuler(group.rotation).add(group.position);
+    var tWorld = new THREE.Vector3(0, AY, 0).applyEuler(group.rotation).add(group.position);
+    art._spotFrom = sWorld;
+    art._spotTo = tWorld;
+    collect('dark', new THREE.CylinderGeometry(0.06, 0.09, 0.16, 10), sWorld.x, ROOM.h - 0.1, sWorld.z);
 
     scene.add(group);
   });
+
+  /* a fixed pool of six spots serves whichever pieces are nearest.
+     the light COUNT never changes, so the standard materials keep one
+     compiled program — and six spots cost roughly half of eleven on
+     every lit pixel. beyond ~9m a spot's falloff is spent anyway. */
+  var spotPool = [];
+  if (!isTouch) {
+    for (var spi = 0; spi < 6; spi++) {
+      var pooled = new THREE.SpotLight(0xfff0dc, 16, 9, 0.5, 0.6, 1.5);
+      scene.add(pooled);
+      scene.add(pooled.target);
+      spotPool.push(pooled);
+    }
+  }
+  function assignSpots() {
+    if (!spotPool.length) return;
+    var order = [];
+    for (var i = 0; i < ART.length; i++) {
+      var a = ART[i];
+      if (a._spotFrom) order.push([a._spotTo.distanceToSquared(pos), a]);
+    }
+    order.sort(function (x, y) { return x[0] - y[0]; });
+    for (var k = 0; k < spotPool.length; k++) {
+      var s = spotPool[k];
+      if (order[k]) {
+        s.intensity = 16;
+        s.position.copy(order[k][1]._spotFrom);
+        s.target.position.copy(order[k][1]._spotTo);
+      } else {
+        s.intensity = 0;
+      }
+    }
+  }
+
+  /* everything static is now collected — bake it down to one mesh per
+     material, and let the heavy one-time art renders stream in */
+  bakeStatic();
+  runDeferredArt();
 
   /* ---------- player ---------- */
   var yaw = 0;    /* enter facing down the hall, toward the finale */
@@ -1315,30 +1394,54 @@
     applyCamera();
   }
 
-  /* ---------- living paintings ---------- */
+  /* ---------- living paintings ----------
+     a painted frame is a full canvas redraw plus a GPU texture upload,
+     so ration them hard: every 3rd frame, only pieces actually inside
+     the view frustum and within 10m, and of those the two nearest. */
   var liveTick = 0;
+  var liveFrustum = new THREE.Frustum();
+  var liveProj = new THREE.Matrix4();
+  var liveSphere = new THREE.Sphere(new THREE.Vector3(), 1.8);
+  var liveWp = new THREE.Vector3();
+  function paintOne(L, adv) {
+    L.t += adv;
+    ORBO_LAB.draw[L.kind]({ ctx: L.art, w: L.w, h: L.h, t: L.t, seed: L.seed });
+    var g = L.tex;
+    g.fillStyle = '#0F0D18';
+    g.fillRect(0, 0, L.w, L.h);
+    var rg = g.createRadialGradient(L.w / 2, L.h * 1.05, 0, L.w / 2, L.h * 1.05, L.w * 0.6);
+    rg.addColorStop(0, 'rgba(108, 92, 255, 0.18)');
+    rg.addColorStop(1, 'rgba(108, 92, 255, 0)');
+    g.fillStyle = rg;
+    g.fillRect(0, 0, L.w, L.h);
+    g.drawImage(L.art.canvas, 0, 0);
+    L.texture.needsUpdate = true;
+  }
   function paintLive(dt) {
     liveTick++;
-    if (liveTick % 2) return;
+    if (liveTick % 3) return;
+    liveProj.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
+    liveFrustum.setFromProjectionMatrix(liveProj);
+    var near1 = null, near2 = null, d1 = 1e9, d2 = 1e9;
     for (var i = 0; i < liveArts.length; i++) {
       var L = liveArts[i];
-      var wp = L.plane.getWorldPosition(new THREE.Vector3());
-      if (wp.distanceTo(pos) > 15) continue;
-      var near = Math.max(0, 1 - wp.distanceTo(pos) / 9);
-      L.t += dt * (2 + near * 2.5);
-      ORBO_LAB.draw[L.kind]({ ctx: L.art, w: L.w, h: L.h, t: L.t, seed: L.seed });
-      var g = L.tex;
-      g.fillStyle = '#0F0D18';
-      g.fillRect(0, 0, L.w, L.h);
-      var rg = g.createRadialGradient(L.w / 2, L.h * 1.05, 0, L.w / 2, L.h * 1.05, L.w * 0.6);
-      rg.addColorStop(0, 'rgba(108, 92, 255, 0.18)');
-      rg.addColorStop(1, 'rgba(108, 92, 255, 0)');
-      g.fillStyle = rg;
-      g.fillRect(0, 0, L.w, L.h);
-      g.drawImage(L.art.canvas, 0, 0);
-      L.texture.needsUpdate = true;
+      L.plane.getWorldPosition(liveWp);
+      var d = liveWp.distanceTo(pos);
+      if (d > 10) continue;
+      liveSphere.center.copy(liveWp);
+      if (!liveFrustum.intersectsSphere(liveSphere)) continue;
+      if (d < d1) { d2 = d1; near2 = near1; d1 = d; near1 = L; }
+      else if (d < d2) { d2 = d; near2 = L; }
     }
+    /* dt*3 keeps on-canvas speed steady at the sparser paint rate */
+    if (near1) paintOne(near1, dt * 3 * (1 + Math.max(0, 1 - d1 / 9) * 1.25));
+    if (near2) paintOne(near2, dt * 3 * (1 + Math.max(0, 1 - d2 / 9) * 1.25));
   }
+  /* first strokes for every living canvas, spread behind the overlay —
+     no piece is ever seen black */
+  liveArts.forEach(function (L, i) {
+    setTimeout(function () { paintOne(L, 0.001); }, 550 + i * 120);
+  });
 
   /* ---------- holograms tick ---------- */
   function tickHolograms(t, dt) {
@@ -1413,6 +1516,7 @@
   /* ---------- loop ---------- */
   var clock = new THREE.Clock();
   var pickTick = 0;
+  var spotClock = 1;   /* >0.5 so the pool is parked on the first frame */
   function frame() {
     requestAnimationFrame(frame);
     if (document.hidden) return;
@@ -1420,6 +1524,8 @@
     var t = clock.elapsedTime;
 
     step(dt);
+    spotClock += dt;
+    if (spotClock > 0.5) { spotClock = 0; assignSpots(); }
     paintLive(dt);
     tickHolograms(t, dt);
     tickReactive(t, dt);
@@ -1453,11 +1559,28 @@
     }
   }, 600);
 
-  /* QA handle — read-only peek at the world */
+  /* QA handle — read-only peek at the world, plus a manual tick so
+     probes can drive frames even while the tab reports hidden */
   window.__GALLERY = {
     renderer: renderer, scene: scene, camera: camera,
     pickables: pickables, liveArts: liveArts, holograms: holograms,
     pos: pos,
+    tick: function (dt) {
+      dt = dt || 1 / 60;
+      var t = clock.elapsedTime + dt;
+      clock.elapsedTime = t;
+      step(dt);
+      assignSpots();
+      paintLive(dt);
+      tickHolograms(t, dt);
+      tickReactive(t, dt);
+      renderer.render(scene, camera);
+    },
+    setPlayer: function (x, z, newYaw) {
+      pos.x = x; pos.z = z;
+      if (typeof newYaw === 'number') yaw = newYaw;
+      applyCamera();
+    },
     state: function () {
       return {
         started: started, locked: locked, panelOpen: panelOpen,
