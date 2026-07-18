@@ -1,14 +1,13 @@
-/* ORBO — the museum.
-   A grand, walkable night-museum for the studio, built on three.js.
-   One monumental hall: veined marble floor, pilaster columns, a coffered
-   glowing ceiling with a starfield skylight, emissive trim lines, and
-   light everywhere it matters. The collection: two live sites and the
-   brand piece as backlit posters, five LIVING lab paintings repainted
-   every frame by the shared ORBO_LAB engine, three generative artworks
-   computed at the door, four capability pedestals carrying interactive
-   HOLOGRAMS, and a great hologram star floating in the atrium.
-   Desktop: pointer-lock + WASD. Touch: joystick + drag-look + tap.
-   No assets — every texture, artwork and hologram is drawn in code. */
+/* ORBO — the museum, third light.
+   A bright futuristic palace in the site's own palette: ivory marble,
+   soft daylight pouring through a sky-window, arched ribs spanning the
+   hall, a glowing stream running its length with plants along the banks.
+   The collection: backlit posters, five LIVING lab paintings, three
+   generative artworks computed at the door, four capability pedestals
+   carrying interactive holograms, and a great hologram star over the
+   atrium. Everything reacts to the visitor. Desktop: pointer-lock +
+   WASD. Touch: joystick + drag-look + tap. No assets — every texture,
+   artwork, plant and hologram is drawn in code. */
 (function () {
   'use strict';
 
@@ -56,13 +55,13 @@
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isTouch ? 1.5 : 1.75));
   renderer.setSize(innerWidth, innerHeight);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.3;
+  renderer.toneMappingExposure = 1.08;
 
   var scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x0b0916);
-  scene.fog = new THREE.Fog(0x0b0916, 30, 84);
+  scene.background = new THREE.Color(0xEDEBF5);
+  scene.fog = new THREE.Fog(0xEDEBF5, 30, 92);
 
-  var camera = new THREE.PerspectiveCamera(68, innerWidth / innerHeight, 0.08, 120);
+  var camera = new THREE.PerspectiveCamera(68, innerWidth / innerHeight, 0.08, 130);
   camera.rotation.order = 'YXZ';
 
   /* ---------- hall dimensions ---------- */
@@ -71,7 +70,7 @@
   var BOUND = { x: 7.6, zMin: -29.4, zMax: 29.4 };
   var LX = -HALL.w / 2 + 0.05, RX = HALL.w / 2 - 0.05;
 
-  /* ---------- environment reflections ---------- */
+  /* ---------- environment reflections (bright ivory room) ---------- */
   (function buildEnv() {
     var env = new THREE.Scene();
     var mk = function (color, w, h, x, y, z, ry) {
@@ -80,12 +79,12 @@
       m.rotation.y = ry || 0;
       env.add(m);
     };
-    env.background = new THREE.Color(0x04030a);
-    mk(0x7a68e8, 18, 2.4, 0, 7, -8);
-    mk(0x322a52, 26, 4, 0, 8, 10, Math.PI);
-    mk(0xffb080, 4, 1.6, -9, 4, 0, Math.PI / 2);
-    mk(0x58c8f0, 4, 1.6, 9, 4, 0, -Math.PI / 2);
-    mk(0x18122a, 40, 40, 0, -5, 0);
+    env.background = new THREE.Color(0xE8E5F2);
+    mk(0xffffff, 22, 6, 0, 9, -10);                 /* bright sky ahead */
+    mk(0xcfd4ff, 26, 5, 0, 9, 12, Math.PI);
+    mk(0x8474e8, 5, 1.6, -10, 4, 0, Math.PI / 2);   /* violet accents */
+    mk(0xffd9bd, 5, 1.6, 10, 4, 0, -Math.PI / 2);   /* warm accents */
+    mk(0xf3f0ea, 44, 44, 0, -5, 0);                 /* ivory floor bounce */
     var pmrem = new THREE.PMREMGenerator(renderer);
     scene.environment = pmrem.fromScene(env, 0.035).texture;
     pmrem.dispose();
@@ -108,55 +107,52 @@
     return n - Math.floor(n);
   };
 
-  /* dark marble: veins wandered across a deep slab */
+  /* bright ivory marble with soft violet-gray veins */
   function marbleTexture() {
     var S = 512;
     var c = ctx2d(S, S);
     var g = c.createLinearGradient(0, 0, S, S);
-    g.addColorStop(0, '#17131f');
-    g.addColorStop(0.5, '#1b1626');
-    g.addColorStop(1, '#151020');
+    g.addColorStop(0, '#F6F4F9');
+    g.addColorStop(0.5, '#EFEDF6');
+    g.addColorStop(1, '#F4F1F7');
     c.fillStyle = g;
     c.fillRect(0, 0, S, S);
-    for (var v = 0; v < 26; v++) {
+    for (var v = 0; v < 24; v++) {
       var x = Math.random() * S, y = Math.random() * S;
       var a = Math.random() * Math.PI * 2;
       c.beginPath();
       c.moveTo(x, y);
-      var light = Math.random() < 0.3;
+      var strong = Math.random() < 0.3;
       for (var s = 0; s < 60; s++) {
         a += (noise(x * 0.02, y * 0.02) - 0.5) * 1.1;
         x += Math.cos(a) * 7;
         y += Math.sin(a) * 7;
         c.lineTo(x, y);
       }
-      c.strokeStyle = light ? 'rgba(170, 150, 220, 0.10)' : 'rgba(8, 6, 14, 0.5)';
-      c.lineWidth = light ? 1.6 : 2.6;
+      c.strokeStyle = strong ? 'rgba(122, 110, 168, 0.14)' : 'rgba(160, 152, 190, 0.09)';
+      c.lineWidth = strong ? 2.2 : 1.4;
       c.stroke();
     }
-    /* faint speckle */
-    c.fillStyle = 'rgba(190, 175, 235, 0.05)';
-    for (var i = 0; i < 500; i++) {
-      c.fillRect(Math.random() * S, Math.random() * S, 1.4, 1.4);
-    }
+    c.fillStyle = 'rgba(122, 110, 168, 0.05)';
+    for (var i = 0; i < 400; i++) c.fillRect(Math.random() * S, Math.random() * S, 1.3, 1.3);
     var t = asTexture(c.canvas);
     t.wrapS = t.wrapT = THREE.RepeatWrapping;
     t.repeat.set(3, 10);
     return t;
   }
 
-  /* coffered ceiling: recessed squares with glowing seams */
+  /* light coffered ceiling with violet seams */
   function cofferTexture() {
     var S = 256;
     var c = ctx2d(S, S);
-    c.fillStyle = '#151020';
+    c.fillStyle = '#F2F0F8';
     c.fillRect(0, 0, S, S);
-    c.fillStyle = '#0e0a18';
+    c.fillStyle = '#EAE7F3';
     c.fillRect(22, 22, S - 44, S - 44);
-    c.strokeStyle = 'rgba(122, 104, 232, 0.55)';
-    c.lineWidth = 5;
+    c.strokeStyle = 'rgba(122, 104, 232, 0.5)';
+    c.lineWidth = 4;
     c.strokeRect(11, 11, S - 22, S - 22);
-    c.strokeStyle = 'rgba(122, 104, 232, 0.18)';
+    c.strokeStyle = 'rgba(122, 104, 232, 0.16)';
     c.lineWidth = 2;
     c.strokeRect(30, 30, S - 60, S - 60);
     var t = asTexture(c.canvas);
@@ -165,43 +161,44 @@
     return t;
   }
 
-  /* night sky for the skylight */
-  function starfieldTexture() {
+  /* soft day sky for the long sky-window */
+  function dayskyTexture() {
     var W = 512, H = 2048;
     var c = ctx2d(W, H);
-    var g = c.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, '#07050f');
-    g.addColorStop(0.5, '#0b0718');
-    g.addColorStop(1, '#07050f');
+    var g = c.createLinearGradient(0, 0, W, 0);
+    g.addColorStop(0, '#C9D2FF');
+    g.addColorStop(0.5, '#E3E9FF');
+    g.addColorStop(1, '#D5DCFF');
     c.fillStyle = g;
     c.fillRect(0, 0, W, H);
-    /* nebula wisps */
-    for (var n = 0; n < 22; n++) {
-      var x = Math.random() * W, y = Math.random() * H, r = 60 + Math.random() * 140;
-      var rg = c.createRadialGradient(x, y, 0, x, y, r);
-      rg.addColorStop(0, n % 3 ? 'rgba(110, 90, 220, 0.10)' : 'rgba(255, 170, 120, 0.05)');
-      rg.addColorStop(1, 'rgba(0, 0, 0, 0)');
-      c.fillStyle = rg;
+    /* sun */
+    var sun = c.createRadialGradient(W * 0.68, H * 0.24, 0, W * 0.68, H * 0.24, 260);
+    sun.addColorStop(0, 'rgba(255, 240, 214, 0.95)');
+    sun.addColorStop(0.35, 'rgba(255, 226, 188, 0.45)');
+    sun.addColorStop(1, 'rgba(255, 226, 188, 0)');
+    c.fillStyle = sun;
+    c.fillRect(0, 0, W, H);
+    /* soft clouds */
+    for (var n = 0; n < 26; n++) {
+      var x = Math.random() * W, y = Math.random() * H, r = 50 + Math.random() * 120;
+      var cl = c.createRadialGradient(x, y, 0, x, y, r);
+      cl.addColorStop(0, 'rgba(255, 255, 255, 0.5)');
+      cl.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      c.fillStyle = cl;
       c.fillRect(x - r, y - r, r * 2, r * 2);
-    }
-    /* stars */
-    for (var i = 0; i < 700; i++) {
-      var sx = Math.random() * W, sy = Math.random() * H;
-      var s = Math.random();
-      c.fillStyle = 'rgba(235, 230, 255, ' + (0.25 + s * 0.7) + ')';
-      c.fillRect(sx, sy, s < 0.92 ? 1 : 2, s < 0.92 ? 1 : 2);
     }
     return asTexture(c.canvas);
   }
 
+  /* warm light plaster */
   function plasterTexture() {
     var c = ctx2d(256, 256);
-    c.fillStyle = '#221d31';
+    c.fillStyle = '#F3F0EA';
     c.fillRect(0, 0, 256, 256);
     var img = c.getImageData(0, 0, 256, 256);
     for (var i = 0; i < img.data.length; i += 4) {
-      var n = (Math.random() - 0.5) * 11;
-      img.data[i] += n; img.data[i + 1] += n; img.data[i + 2] += n + 2;
+      var n = (Math.random() - 0.5) * 8;
+      img.data[i] += n; img.data[i + 1] += n; img.data[i + 2] += n;
     }
     c.putImageData(img, 0, 0);
     var t = asTexture(c.canvas);
@@ -220,12 +217,31 @@
     return asTexture(c.canvas);
   }
 
-  /* vertical fade for light cones */
+  /* rippling water: streaks that tile and scroll */
+  function rippleTexture() {
+    var S = 256;
+    var c = ctx2d(S, S);
+    for (var i = 0; i < 46; i++) {
+      var y = Math.random() * S;
+      c.beginPath();
+      for (var x = 0; x <= S; x += 8) {
+        var yy = y + Math.sin((x / S) * Math.PI * 2 * (1 + i % 3)) * 6;
+        if (x === 0) c.moveTo(x, yy); else c.lineTo(x, yy);
+      }
+      c.strokeStyle = i % 5 === 0 ? 'rgba(201, 175, 255, 0.32)' : 'rgba(255, 255, 255, ' + (0.10 + Math.random() * 0.16) + ')';
+      c.lineWidth = 1 + Math.random() * 1.6;
+      c.stroke();
+    }
+    var t = asTexture(c.canvas);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    return t;
+  }
+
   function coneTexture() {
     var c = ctx2d(64, 256);
     var g = c.createLinearGradient(0, 0, 0, 256);
-    g.addColorStop(0, 'rgba(150, 130, 255, 0.55)');
-    g.addColorStop(1, 'rgba(150, 130, 255, 0)');
+    g.addColorStop(0, 'rgba(108, 92, 255, 0.5)');
+    g.addColorStop(1, 'rgba(108, 92, 255, 0)');
     c.fillStyle = g;
     c.fillRect(0, 0, 64, 256);
     return asTexture(c.canvas);
@@ -272,7 +288,7 @@
         c.fillStyle = rg;
         c.fillRect(0, 0, W, H);
       } else {
-        c.fillStyle = '#FAF9F5';
+        c.fillStyle = '#FCFBF8';
         c.fillRect(0, 0, W, H);
         c.fillStyle = 'rgba(20, 18, 31, 0.05)';
         for (var i = 0; i < 60; i++) {
@@ -308,29 +324,27 @@
     return t;
   }
 
+  /* light card plaques, like the site's own cards */
   function plaqueTexture(art) {
     var W = 512, H = 256;
     var c = ctx2d(W, H);
-    var accent = art.accent || '#c9afff';
+    var accent = art.accent || '#5B4CF5';
     var redraw = function () {
-      c.clearRect(0, 0, W, H);
-      c.fillStyle = '#141022';
+      c.fillStyle = '#FFFFFF';
       c.fillRect(0, 0, W, H);
-      c.strokeStyle = accent;
-      c.globalAlpha = 0.5;
-      c.lineWidth = 3;
-      c.strokeRect(8, 8, W - 16, H - 16);
-      c.globalAlpha = 1;
+      c.strokeStyle = 'rgba(20, 18, 31, 0.12)';
+      c.lineWidth = 2;
+      c.strokeRect(4, 4, W - 8, H - 8);
+      c.fillStyle = accent;
+      c.fillRect(W - 12, 16, 4, H - 32);
       c.textAlign = 'right';
       c.direction = 'rtl';
-      c.fillStyle = '#F4F2FA';
+      c.fillStyle = '#14121F';
       c.font = '700 44px ' + FONT;
-      c.fillText(art.title, W - 42, 96, W - 84);
+      c.fillText(art.title, W - 40, 100, W - 80);
       c.fillStyle = accent;
-      c.globalAlpha = 0.9;
       c.font = '500 30px ' + FONT;
-      c.fillText(art.tag, W - 42, 158, W - 84);
-      c.globalAlpha = 1;
+      c.fillText(art.tag, W - 40, 162, W - 80);
     };
     redraw();
     var t = asTexture(c.canvas);
@@ -344,7 +358,7 @@
       c.clearRect(0, 0, 1024, 256);
       c.textAlign = 'center';
       c.direction = ltr ? 'ltr' : 'rtl';
-      c.fillStyle = 'rgba(178, 160, 255, 0.55)';
+      c.fillStyle = 'rgba(91, 76, 245, 0.55)';
       c.font = '850 150px ' + FONT;
       c.fillText(text, 512, 178);
     };
@@ -354,18 +368,22 @@
     return t;
   }
 
-  /* floating hologram label */
-  function holoLabelTexture(text) {
-    var c = ctx2d(512, 128);
+  /* the big glowing brand sign over the door */
+  function brandTexture() {
+    var W = 1600, H = 400;
+    var c = ctx2d(W, H);
     var redraw = function () {
-      c.clearRect(0, 0, 512, 128);
+      c.clearRect(0, 0, W, H);
       c.textAlign = 'center';
-      c.direction = 'rtl';
-      c.fillStyle = 'rgba(178, 225, 255, 0.95)';
-      c.font = '700 56px ' + FONT;
-      c.shadowColor = 'rgba(120, 200, 255, 0.9)';
-      c.shadowBlur = 22;
-      c.fillText(text, 256, 82, 470);
+      c.direction = 'ltr';
+      c.shadowColor = 'rgba(108, 92, 255, 0.65)';
+      c.shadowBlur = 44;
+      var g = c.createLinearGradient(0, 60, 0, 320);
+      g.addColorStop(0, '#8F74FF');
+      g.addColorStop(1, '#5B4CF5');
+      c.fillStyle = g;
+      c.font = '850 210px ' + FONT;
+      c.fillText('ORBO·GALLERY', W / 2, 272, W - 100);
       c.shadowBlur = 0;
     };
     redraw();
@@ -374,7 +392,31 @@
     return t;
   }
 
-  /* ---------- generative artworks (computed at the door) ---------- */
+  /* floating hologram labels: ink on a soft white pill */
+  function holoLabelTexture(text) {
+    var c = ctx2d(512, 128);
+    var redraw = function () {
+      c.clearRect(0, 0, 512, 128);
+      c.fillStyle = 'rgba(255, 255, 255, 0.85)';
+      c.beginPath();
+      if (c.roundRect) c.roundRect(36, 22, 440, 84, 42); else c.rect(36, 22, 440, 84);
+      c.fill();
+      c.strokeStyle = 'rgba(91, 76, 245, 0.4)';
+      c.lineWidth = 3;
+      c.stroke();
+      c.textAlign = 'center';
+      c.direction = 'rtl';
+      c.fillStyle = '#14121F';
+      c.font = '700 50px ' + FONT;
+      c.fillText(text, 256, 86, 400);
+    };
+    redraw();
+    var t = asTexture(c.canvas);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { redraw(); t.needsUpdate = true; });
+    return t;
+  }
+
+  /* ---------- generative artworks ---------- */
   function genesisTexture() {
     var W = 640, H = 400;
     var c = ctx2d(W, H);
@@ -458,29 +500,29 @@
   }
 
   /* ---------- the hall ---------- */
-  var wallMat = new THREE.MeshStandardMaterial({ map: plasterTexture(), roughness: 0.93, metalness: 0.0 });
-  var floorMat = new THREE.MeshStandardMaterial({ map: marbleTexture(), roughness: 0.17, metalness: 0.55, envMapIntensity: 1.35 });
-  var trimMat = new THREE.MeshStandardMaterial({ color: 0x0b0913, roughness: 0.55, metalness: 0.35 });
-  var glowLineMat = new THREE.MeshBasicMaterial({ color: 0x8474e8 });
-  var columnMat = new THREE.MeshStandardMaterial({ color: 0x191426, roughness: 0.42, metalness: 0.6, envMapIntensity: 1.1 });
+  var wallMat = new THREE.MeshStandardMaterial({ map: plasterTexture(), roughness: 0.92, metalness: 0.0 });
+  var floorMat = new THREE.MeshStandardMaterial({ map: marbleTexture(), roughness: 0.16, metalness: 0.06, envMapIntensity: 1.25 });
+  var stoneMat = new THREE.MeshStandardMaterial({ color: 0xE9E5F2, roughness: 0.5, metalness: 0.05, envMapIntensity: 0.9 });
+  var trimMat = new THREE.MeshStandardMaterial({ color: 0xD8D3E6, roughness: 0.45, metalness: 0.2 });
+  var glowLineMat = new THREE.MeshBasicMaterial({ color: 0x7a68e8 });
+  var frameMat = new THREE.MeshStandardMaterial({ color: 0x2a2438, roughness: 0.32, metalness: 0.8, envMapIntensity: 1.1 });
 
   var floor = new THREE.Mesh(new THREE.PlaneGeometry(HALL.w, HALL.l), floorMat);
   floor.rotation.x = -Math.PI / 2;
   scene.add(floor);
 
-  /* coffered ceiling with a starfield skylight down the spine */
-  var ceilMat = new THREE.MeshStandardMaterial({ map: cofferTexture(), roughness: 0.9, metalness: 0.0, emissive: 0x2c2452, emissiveMap: cofferTexture(), emissiveIntensity: 0.55 });
+  /* light coffered ceiling flanking a long sky-window */
+  var ceilMat = new THREE.MeshStandardMaterial({ map: cofferTexture(), roughness: 0.9, metalness: 0.0 });
   [[-(HALL.w / 4 + 1.25), HALL.w / 2 - 2.5], [HALL.w / 4 + 1.25, HALL.w / 2 - 2.5]].forEach(function (s) {
     var m = new THREE.Mesh(new THREE.PlaneGeometry(s[1], HALL.l), ceilMat);
     m.rotation.x = Math.PI / 2;
     m.position.set(s[0], HALL.h, 0);
     scene.add(m);
   });
-  var sky = new THREE.Mesh(new THREE.PlaneGeometry(5, HALL.l), new THREE.MeshBasicMaterial({ map: starfieldTexture() }));
+  var sky = new THREE.Mesh(new THREE.PlaneGeometry(5, HALL.l), new THREE.MeshBasicMaterial({ map: dayskyTexture() }));
   sky.rotation.x = Math.PI / 2;
   sky.position.set(0, HALL.h + 0.01, 0);
   scene.add(sky);
-  /* glowing skylight frame */
   [-2.6, 2.6].forEach(function (x) {
     var rail = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.06, HALL.l - 2), glowLineMat);
     rail.position.set(x, HALL.h - 0.05, 0);
@@ -497,7 +539,6 @@
     base.rotation.y = ry;
     base.translateZ(0.03);
     scene.add(base);
-    /* glowing accent line low on the wall + cornice line high */
     [0.26, HALL.h - 0.5].forEach(function (yy) {
       var line = new THREE.Mesh(new THREE.BoxGeometry(w, 0.025, 0.02), glowLineMat);
       line.position.set(x, yy, z);
@@ -511,135 +552,237 @@
   wall(HALL.w, HALL.h, 0, HALL.h / 2, -HALL.l / 2, 0);
   wall(HALL.w, HALL.h, 0, HALL.h / 2, HALL.l / 2, Math.PI);
 
-  /* pilaster columns with lit edges */
-  for (var cz = -24; cz <= 24; cz += 8) {
+  /* arched ribs span the hall — the box becomes a vault */
+  for (var az = -24; az <= 24; az += 8) {
+    var rib = new THREE.Mesh(new THREE.TorusGeometry(9, 0.16, 10, 30, Math.PI), stoneMat);
+    rib.position.set(0, 0, az);
+    rib.scale.y = 0.84;
+    scene.add(rib);
+    var ribLine = new THREE.Mesh(new THREE.TorusGeometry(8.8, 0.03, 6, 30, Math.PI), glowLineMat);
+    ribLine.position.set(0, 0, az);
+    ribLine.scale.y = 0.84;
+    scene.add(ribLine);
+    /* pilaster feet under each rib */
     [-1, 1].forEach(function (side) {
-      var col = new THREE.Mesh(new THREE.BoxGeometry(0.7, HALL.h, 0.7), columnMat);
-      col.position.set(side * (HALL.w / 2 - 0.3), HALL.h / 2, cz);
+      var col = new THREE.Mesh(new THREE.BoxGeometry(0.7, 5.2, 0.7), stoneMat);
+      col.position.set(side * (HALL.w / 2 - 0.3), 2.6, az);
       scene.add(col);
-      [-0.36, 0.36].forEach(function (o) {
-        var strip = new THREE.Mesh(new THREE.BoxGeometry(0.02, HALL.h - 0.6, 0.02), glowLineMat);
-        strip.position.set(side * (HALL.w / 2 - 0.66), HALL.h / 2 - 0.1, cz + o);
-        scene.add(strip);
-      });
-      /* capital */
       var cap = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.16, 0.9), trimMat);
-      cap.position.set(side * (HALL.w / 2 - 0.3), HALL.h - 0.35, cz);
+      cap.position.set(side * (HALL.w / 2 - 0.3), 5.28, az);
       scene.add(cap);
     });
   }
 
-  /* the doorway you came in through */
+  /* the glowing brand sign over the door — no more hiding */
+  var brandWall = new THREE.Mesh(
+    new THREE.PlaneGeometry(9, 2.25),
+    new THREE.MeshBasicMaterial({ map: brandTexture(), transparent: true, depthWrite: false })
+  );
+  brandWall.position.set(0, 6.0, HALL.l / 2 - 0.07);
+  brandWall.rotation.y = Math.PI;
+  scene.add(brandWall);
   var doorGlow = new THREE.Mesh(
-    new THREE.PlaneGeometry(3.2, 5),
-    new THREE.MeshBasicMaterial({ map: radialTexture('rgba(157, 140, 255, 0.5)', 'rgba(157, 140, 255, 0)'), transparent: true, opacity: 0.65, blending: THREE.AdditiveBlending, depthWrite: false })
+    new THREE.PlaneGeometry(3.4, 5),
+    new THREE.MeshBasicMaterial({ map: radialTexture('rgba(108, 92, 255, 0.35)', 'rgba(108, 92, 255, 0)'), transparent: true, depthWrite: false })
   );
   doorGlow.position.set(0, 2.4, HALL.l / 2 - 0.06);
   doorGlow.rotation.y = Math.PI;
   scene.add(doorGlow);
-  var brandWall = new THREE.Mesh(
-    new THREE.PlaneGeometry(7, 1.75),
-    new THREE.MeshBasicMaterial({ map: wingTexture('ORBO·GALLERY', true), transparent: true, depthWrite: false })
-  );
-  brandWall.position.set(0, 6.1, HALL.l / 2 - 0.07);
-  brandWall.rotation.y = Math.PI;
-  scene.add(brandWall);
 
-  /* base lights — a bright night, not a dark one */
-  scene.add(new THREE.AmbientLight(0xa89ede, 0.5));
-  scene.add(new THREE.HemisphereLight(0x7a6ec2, 0x141020, 0.55));
+  /* base lights — soft daylight */
+  scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+  scene.add(new THREE.HemisphereLight(0xdfe4ff, 0xf3ece0, 0.85));
+  var sun = new THREE.DirectionalLight(0xfff1dd, 1.5);
+  sun.position.set(4, 14, 6);
+  scene.add(sun);
   [24, 12, 0, -12, -24].forEach(function (z, i) {
-    var p = new THREE.PointLight(i % 2 ? 0xb7a6ff : 0xffd9bd, 34, 24, 1.6);
-    p.position.set(0, HALL.h - 0.7, z);
+    var p = new THREE.PointLight(i % 2 ? 0xcfc4ff : 0xffe6cf, 16, 22, 1.7);
+    p.position.set(0, HALL.h - 0.8, z);
     scene.add(p);
   });
-  /* warm washes along the walls so the bays read clearly */
-  [18, 0, -18].forEach(function (z) {
+
+  /* ---------- the stream ---------- */
+  var STREAM = { half: 0.85, zTop: 27, zBot: -27 };
+  var BRIDGES = [26, 12, -4, -20];   /* walkable crossings */
+  (function buildStream() {
+    var len = STREAM.zTop - STREAM.zBot;
+    /* dark bed gives the water depth on the bright floor */
+    var bed = new THREE.Mesh(new THREE.PlaneGeometry(STREAM.half * 2, len), new THREE.MeshBasicMaterial({ color: 0x322c66 }));
+    bed.rotation.x = -Math.PI / 2;
+    bed.position.set(0, 0.012, (STREAM.zTop + STREAM.zBot) / 2);
+    scene.add(bed);
+    /* two scrolling ripple sheets */
+    var rip = rippleTexture();
+    rip.repeat.set(2, 22);
+    var rip2 = rippleTexture();
+    rip2.repeat.set(3, 30);
+    var w1 = new THREE.Mesh(new THREE.PlaneGeometry(STREAM.half * 2, len), new THREE.MeshBasicMaterial({ map: rip, transparent: true, opacity: 0.5, depthWrite: false }));
+    w1.rotation.x = -Math.PI / 2;
+    w1.position.set(0, 0.03, bed.position.z);
+    scene.add(w1);
+    var w2 = new THREE.Mesh(new THREE.PlaneGeometry(STREAM.half * 2, len), new THREE.MeshBasicMaterial({ map: rip2, transparent: true, opacity: 0.3, depthWrite: false }));
+    w2.rotation.x = -Math.PI / 2;
+    w2.position.set(0, 0.04, bed.position.z);
+    scene.add(w2);
+    window.__streamMaps = [rip, rip2];
+    /* stone curbs with a glowing thread */
     [-1, 1].forEach(function (side) {
-      var w = new THREE.PointLight(0xf5e6ff, 10, 12, 1.8);
-      w.position.set(side * 5.4, HALL.h - 1.4, z);
-      scene.add(w);
+      var curb = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.12, len), stoneMat);
+      curb.position.set(side * (STREAM.half + 0.11), 0.06, bed.position.z);
+      scene.add(curb);
+      var thread = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.02, len), glowLineMat);
+      thread.position.set(side * (STREAM.half + 0.11), 0.125, bed.position.z);
+      scene.add(thread);
     });
-  });
-
-  /* light benches */
-  var blobTex = radialTexture('rgba(0,0,0,0.55)', 'rgba(0,0,0,0)');
-  var benches = [];
-  [12, -12].forEach(function (z) {
-    var b = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.42, 0.62), new THREE.MeshStandardMaterial({ color: 0x1d1830, roughness: 0.4, metalness: 0.3, envMapIntensity: 1 }));
-    b.position.set(0, 0.21, z);
-    scene.add(b);
-    var edge = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.02, 0.02), glowLineMat);
-    edge.position.set(0, 0.43, z + 0.3);
-    scene.add(edge);
-    var s = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 1.7), new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, depthWrite: false }));
-    s.rotation.x = -Math.PI / 2;
-    s.position.set(0, 0.012, z);
-    scene.add(s);
-    benches.push({ x: 0, z: z, hx: 1.5, hz: 0.7 });
-  });
-
-  /* floating dust */
-  var dust = null;
-  (function () {
-    var N = 320;
-    var pos = new Float32Array(N * 3);
-    for (var i = 0; i < N; i++) {
-      pos[i * 3] = (Math.random() - 0.5) * (HALL.w - 2);
-      pos[i * 3 + 1] = Math.random() * (HALL.h - 1) + 0.4;
-      pos[i * 3 + 2] = (Math.random() - 0.5) * (HALL.l - 3);
-    }
-    var g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    dust = new THREE.Points(g, new THREE.PointsMaterial({
-      color: 0xa79aff, size: 0.022, transparent: true, opacity: 0.4,
-      blending: THREE.AdditiveBlending, depthWrite: false
-    }));
-    scene.add(dust);
+    /* bridges */
+    BRIDGES.forEach(function (bz) {
+      var slab = new THREE.Mesh(new THREE.BoxGeometry(STREAM.half * 2 + 0.9, 0.09, 1.9), stoneMat);
+      slab.position.set(0, 0.045, bz);
+      scene.add(slab);
+      [-1, 1].forEach(function (s) {
+        var edge = new THREE.Mesh(new THREE.BoxGeometry(STREAM.half * 2 + 0.9, 0.02, 0.03), glowLineMat);
+        edge.position.set(0, 0.095, bz + s * 0.93);
+        scene.add(edge);
+      });
+    });
   })();
 
-  /* a soft ring of light follows the visitor across the marble */
-  var playerHalo = new THREE.Mesh(
-    new THREE.PlaneGeometry(3.4, 3.4),
-    new THREE.MeshBasicMaterial({ map: radialTexture('rgba(157, 140, 255, 0.20)', 'rgba(157, 140, 255, 0)'), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false })
-  );
-  playerHalo.rotation.x = -Math.PI / 2;
-  playerHalo.position.y = 0.015;
-  scene.add(playerHalo);
-
-  /* an aurora river flows beneath the skylight, painted live by the lab engine */
+  /* the aurora shimmer flows down the water */
   var auroraRiver = null;
   if (window.ORBO_LAB) {
-    var arW = 1024, arH = 192;
+    var arW = 256, arH = 1024;
     var arCtx = ctx2d(arW, arH);
     var arTex = asTexture(arCtx.canvas);
     auroraRiver = {
       ctx: arCtx, tex: arTex, w: arW, h: arH, t: Math.random() * 40,
       mesh: new THREE.Mesh(
-        new THREE.PlaneGeometry(HALL.l - 6, 4.4),
-        new THREE.MeshBasicMaterial({ map: arTex, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })
+        new THREE.PlaneGeometry(STREAM.half * 2, STREAM.zTop - STREAM.zBot),
+        new THREE.MeshBasicMaterial({ map: arTex, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending, depthWrite: false })
       )
     };
-    auroraRiver.mesh.rotation.set(Math.PI / 2, 0, Math.PI / 2);
-    auroraRiver.mesh.position.set(0, HALL.h - 0.18, 0);
+    auroraRiver.mesh.rotation.x = -Math.PI / 2;
+    auroraRiver.mesh.position.set(0, 0.05, 0);
     scene.add(auroraRiver.mesh);
   }
 
-  /* comets circling the atrium star */
-  var comets = [];
-  (function () {
-    var cometTex = radialTexture('rgba(201, 175, 255, 0.9)', 'rgba(201, 175, 255, 0)');
+  /* ---------- plants ---------- */
+  var plantCollide = [];
+  var foliage = [];
+  function makeTree(x, z, s) {
+    var g = new THREE.Group();
+    var pot = new THREE.Mesh(new THREE.CylinderGeometry(0.5 * s, 0.6 * s, 0.5 * s, 18), stoneMat);
+    pot.position.y = 0.25 * s;
+    g.add(pot);
+    var potLine = new THREE.Mesh(new THREE.TorusGeometry(0.5 * s, 0.015, 6, 24), glowLineMat);
+    potLine.rotation.x = Math.PI / 2;
+    potLine.position.y = 0.5 * s;
+    g.add(potLine);
+    var soil = new THREE.Mesh(new THREE.CylinderGeometry(0.46 * s, 0.46 * s, 0.04, 18), new THREE.MeshStandardMaterial({ color: 0x3d3448, roughness: 1 }));
+    soil.position.y = 0.5 * s;
+    g.add(soil);
+    var trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.06 * s, 0.09 * s, 1.15 * s, 8), new THREE.MeshStandardMaterial({ color: 0x8a755f, roughness: 0.9 }));
+    trunk.position.y = 1.0 * s;
+    g.add(trunk);
+    var greens = [0x7fa578, 0x6f9670, 0x93b58a];
     for (var i = 0; i < 3; i++) {
-      var m = new THREE.Mesh(
-        new THREE.PlaneGeometry(0.55, 0.55),
-        new THREE.MeshBasicMaterial({ map: cometTex, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })
+      var leaf = new THREE.Mesh(
+        new THREE.IcosahedronGeometry((0.42 - i * 0.07) * s, 1),
+        new THREE.MeshStandardMaterial({ color: greens[i], roughness: 0.85, flatShading: true })
       );
-      scene.add(m);
-      comets.push({ mesh: m, r: 2.6 + i * 0.5, sp: 0.5 + i * 0.17, ph: i * 2.1, tilt: 0.35 + i * 0.22 });
+      leaf.position.set((Math.random() - 0.5) * 0.3 * s, (1.55 + i * 0.36) * s, (Math.random() - 0.5) * 0.3 * s);
+      g.add(leaf);
+      foliage.push(leaf);
+    }
+    /* a few violet blossoms — the museum's signature in the greenery */
+    for (var b = 0; b < 4; b++) {
+      var bl = new THREE.Mesh(new THREE.SphereGeometry(0.045 * s, 6, 6), new THREE.MeshBasicMaterial({ color: 0x9d8cff }));
+      bl.position.set((Math.random() - 0.5) * 0.7 * s, (1.6 + Math.random() * 0.8) * s, (Math.random() - 0.5) * 0.7 * s);
+      g.add(bl);
+    }
+    g.position.set(x, 0, z);
+    scene.add(g);
+    /* soft contact shadow */
+    var sh = new THREE.Mesh(new THREE.PlaneGeometry(1.9 * s, 1.9 * s), new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, opacity: 0.5, depthWrite: false }));
+    sh.rotation.x = -Math.PI / 2;
+    sh.position.set(x, 0.014, z);
+    scene.add(sh);
+    plantCollide.push({ x: x, z: z, r: 0.85 * s });
+  }
+  var blobTex = radialTexture('rgba(40, 34, 66, 0.5)', 'rgba(40, 34, 66, 0)');
+  /* wall-side trees between the bays */
+  makeTree(-7.3, 25, 1.15);
+  makeTree(7.3, 25, 1.05);
+  makeTree(-7.3, 4, 1.1);
+  makeTree(7.3, 4, 1.15);
+  makeTree(-7.3, -17, 1.05);
+  makeTree(7.3, -17, 1.1);
+  /* smaller shrubs by the water */
+  makeTree(-1.9, 18, 0.62);
+  makeTree(1.9, 2, 0.6);
+  makeTree(-1.9, -12, 0.64);
+  /* grass tufts along the banks */
+  (function () {
+    var grassMat = new THREE.MeshStandardMaterial({ color: 0x86a781, roughness: 0.9, flatShading: true });
+    for (var i = 0; i < 14; i++) {
+      var gz = STREAM.zBot + 4 + Math.random() * (STREAM.zTop - STREAM.zBot - 8);
+      var onBridge = BRIDGES.some(function (b) { return Math.abs(gz - b) < 1.6; });
+      if (onBridge) continue;
+      var gx = (Math.random() < 0.5 ? -1 : 1) * (STREAM.half + 0.35 + Math.random() * 0.25);
+      for (var k = 0; k < 5; k++) {
+        var blade = new THREE.Mesh(new THREE.ConeGeometry(0.035, 0.24 + Math.random() * 0.18, 5), grassMat);
+        blade.position.set(gx + (Math.random() - 0.5) * 0.22, 0.12, gz + (Math.random() - 0.5) * 0.22);
+        blade.rotation.z = (Math.random() - 0.5) * 0.35;
+        scene.add(blade);
+      }
     }
   })();
 
-  /* wing titles */
+  /* benches */
+  var benches = [];
+  [16, -8].forEach(function (z) {
+    [-1, 1].forEach(function (side) {
+      var b = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.42, 0.6), stoneMat);
+      b.position.set(side * 3.4, 0.21, z);
+      scene.add(b);
+      var edge = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.02, 0.02), glowLineMat);
+      edge.position.set(side * 3.4, 0.43, z + 0.29);
+      scene.add(edge);
+      var s = new THREE.Mesh(new THREE.PlaneGeometry(3.0, 1.5), new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, opacity: 0.6, depthWrite: false }));
+      s.rotation.x = -Math.PI / 2;
+      s.position.set(side * 3.4, 0.013, z);
+      scene.add(s);
+      benches.push({ x: side * 3.4, z: z, hx: 1.35, hz: 0.65 });
+    });
+  });
+
+  /* floating dust — visible as soft violet motes in the light */
+  var dust = null;
+  (function () {
+    var N = 260;
+    var pos0 = new Float32Array(N * 3);
+    for (var i = 0; i < N; i++) {
+      pos0[i * 3] = (Math.random() - 0.5) * (HALL.w - 2);
+      pos0[i * 3 + 1] = Math.random() * (HALL.h - 1) + 0.4;
+      pos0[i * 3 + 2] = (Math.random() - 0.5) * (HALL.l - 3);
+    }
+    var g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(pos0, 3));
+    dust = new THREE.Points(g, new THREE.PointsMaterial({
+      color: 0x8f7bff, size: 0.028, transparent: true, opacity: 0.4, depthWrite: false
+    }));
+    scene.add(dust);
+  })();
+
+  /* a soft ring of light follows the visitor */
+  var playerHalo = new THREE.Mesh(
+    new THREE.PlaneGeometry(3.2, 3.2),
+    new THREE.MeshBasicMaterial({ map: radialTexture('rgba(91, 76, 245, 0.16)', 'rgba(91, 76, 245, 0)'), transparent: true, depthWrite: false })
+  );
+  playerHalo.rotation.x = -Math.PI / 2;
+  playerHalo.position.y = 0.016;
+  scene.add(playerHalo);
+
+  /* wing titles float off the wall at bay centers */
   function wingTitle(text, x, z, ry) {
     var m = new THREE.Mesh(
       new THREE.PlaneGeometry(5, 1.25),
@@ -649,19 +792,17 @@
     m.rotation.y = ry;
     scene.add(m);
   }
-  /* titles float off the wall, centered on bays between the pilasters
-     (columns stand at z = ±8, ±16, ±24 — bay centers at 20 / -12 clear them) */
   wingTitle('העבודות', LX + 0.55, 20, Math.PI / 2);
   wingTitle('אמנות בקוד', RX - 0.55, 20, -Math.PI / 2);
   wingTitle('המעבדה', LX + 0.55, -12, Math.PI / 2);
   wingTitle('המעבדה', RX - 0.55, -12, -Math.PI / 2);
 
-  /* ---------- holograms ---------- */
+  /* ---------- holograms (saturated for daylight) ---------- */
   var holoLineMat = function (color) {
-    return new THREE.LineBasicMaterial({ color: color || 0x8fd8ff, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending, depthWrite: false });
+    return new THREE.LineBasicMaterial({ color: color, transparent: true, opacity: 0.92, depthWrite: false });
   };
   var holoFillMat = function (color) {
-    return new THREE.MeshBasicMaterial({ color: color || 0x5b8cf5, transparent: true, opacity: 0.07, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
+    return new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: 0.10, depthWrite: false, side: THREE.DoubleSide });
   };
 
   function starShape(r) {
@@ -680,26 +821,29 @@
 
   function makeHologram(kind, scale) {
     var g = new THREE.Group();
+    /* a soft violet backdrop keeps holograms present against the light hall */
+    var aura = new THREE.Mesh(
+      new THREE.PlaneGeometry(2.2, 2.2),
+      new THREE.MeshBasicMaterial({ map: radialTexture('rgba(108, 92, 255, 0.30)', 'rgba(108, 92, 255, 0)'), transparent: true, depthWrite: false, side: THREE.DoubleSide })
+    );
+    g.add(aura);
     var core = new THREE.Group();
     g.add(core);
     var i, m;
 
     if (kind === 'globe') {
-      core.add(new THREE.LineSegments(new THREE.WireframeGeometry(new THREE.SphereGeometry(0.52, 18, 12)), holoLineMat(0x8fd8ff)));
-      m = new THREE.Mesh(new THREE.SphereGeometry(0.52, 18, 12), holoFillMat(0x5b8cf5));
-      core.add(m);
-      var ring = new THREE.Mesh(new THREE.TorusGeometry(0.74, 0.008, 6, 48), new THREE.MeshBasicMaterial({ color: 0xa08bff, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending, depthWrite: false }));
+      core.add(new THREE.LineSegments(new THREE.WireframeGeometry(new THREE.SphereGeometry(0.52, 18, 12)), holoLineMat(0x1F8FD8)));
+      core.add(new THREE.Mesh(new THREE.SphereGeometry(0.52, 18, 12), holoFillMat(0x1F8FD8)));
+      var ring = new THREE.Mesh(new THREE.TorusGeometry(0.74, 0.01, 6, 48), new THREE.MeshBasicMaterial({ color: 0x5B4CF5, transparent: true, opacity: 0.8, depthWrite: false }));
       ring.rotation.x = Math.PI / 2.4;
       core.add(ring);
     } else if (kind === 'device') {
-      core.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(0.44, 0.84, 0.05)), holoLineMat(0x9fe8d8)));
-      m = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.84, 0.05), holoFillMat(0x5bd8b0));
-      core.add(m);
+      core.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(0.44, 0.84, 0.05)), holoLineMat(0x0FA88C)));
+      core.add(new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.84, 0.05), holoFillMat(0x0FA88C)));
       for (i = 0; i < 3; i++) {
-        var card = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.18), holoFillMat(0x9fe8d8));
+        var card = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.18), holoFillMat(0x0FA88C));
         card.userData.orbit = { r: 0.62, sp: 0.7 + i * 0.25, ph: i * 2.1, y: -0.15 + i * 0.16 };
-        var cardLine = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.PlaneGeometry(0.3, 0.18)), holoLineMat(0x9fe8d8));
-        card.add(cardLine);
+        card.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.PlaneGeometry(0.3, 0.18)), holoLineMat(0x0FA88C)));
         core.add(card);
       }
     } else if (kind === 'neural') {
@@ -707,7 +851,7 @@
       for (i = 0; i < 15; i++) {
         var v = new THREE.Vector3((Math.random() - 0.5) * 1.15, (Math.random() - 0.5) * 0.95, (Math.random() - 0.5) * 1.15);
         nodes.push(v);
-        var nm = new THREE.Mesh(new THREE.SphereGeometry(0.032, 8, 8), new THREE.MeshBasicMaterial({ color: 0xc9afff, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false }));
+        var nm = new THREE.Mesh(new THREE.SphereGeometry(0.034, 8, 8), new THREE.MeshBasicMaterial({ color: 0x6C5CFF, transparent: true, opacity: 0.95, depthWrite: false }));
         nm.position.copy(v);
         nm.userData.pulse = Math.random() * 6.28;
         core.add(nm);
@@ -719,21 +863,20 @@
         }
       }
       var lg = new THREE.BufferGeometry().setFromPoints(pts);
-      core.add(new THREE.LineSegments(lg, holoLineMat(0xa08bff)));
+      core.add(new THREE.LineSegments(lg, holoLineMat(0x6C5CFF)));
     } else if (kind === 'game') {
-      core.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(0.48)), holoLineMat(0xffc79a)));
-      m = new THREE.Mesh(new THREE.IcosahedronGeometry(0.48), holoFillMat(0xff9a5b));
-      core.add(m);
+      core.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(0.48)), holoLineMat(0xE8722E)));
+      core.add(new THREE.Mesh(new THREE.IcosahedronGeometry(0.48), holoFillMat(0xE8722E)));
       for (i = 0; i < 4; i++) {
-        var cube = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(0.09, 0.09, 0.09)), holoLineMat(0xffc79a));
+        var cube = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(0.09, 0.09, 0.09)), holoLineMat(0xE8722E));
         cube.userData.orbit = { r: 0.78, sp: 0.9 + i * 0.3, ph: i * 1.57, y: 0 };
         core.add(cube);
       }
     } else { /* star */
       var shape = starShape(0.62);
-      core.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.ShapeGeometry(shape)), holoLineMat(0xc9afff)));
-      m = new THREE.Mesh(new THREE.ShapeGeometry(shape), holoFillMat(0x9d8cff));
-      m.material.opacity = 0.12;
+      core.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.ShapeGeometry(shape)), holoLineMat(0x5B4CF5)));
+      m = new THREE.Mesh(new THREE.ShapeGeometry(shape), holoFillMat(0x6C5CFF));
+      m.material.opacity = 0.16;
       core.add(m);
       var halo = [];
       for (i = 0; i < 60; i++) {
@@ -741,13 +884,12 @@
         halo.push(new THREE.Vector3(Math.cos(a) * rr, (Math.random() - 0.5) * 0.5, Math.sin(a) * rr));
       }
       var hg = new THREE.BufferGeometry().setFromPoints(halo);
-      core.add(new THREE.Points(hg, new THREE.PointsMaterial({ color: 0xc9afff, size: 0.02, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending, depthWrite: false })));
+      core.add(new THREE.Points(hg, new THREE.PointsMaterial({ color: 0x6C5CFF, size: 0.022, transparent: true, opacity: 0.8, depthWrite: false })));
     }
 
-    /* scan rings riding up the beam */
     var rings = [];
     for (i = 0; i < 2; i++) {
-      var r = new THREE.Mesh(new THREE.TorusGeometry(0.72, 0.006, 5, 40), new THREE.MeshBasicMaterial({ color: 0x8fd8ff, transparent: true, opacity: 0.3, blending: THREE.AdditiveBlending, depthWrite: false }));
+      var r = new THREE.Mesh(new THREE.TorusGeometry(0.72, 0.008, 5, 40), new THREE.MeshBasicMaterial({ color: 0x5B4CF5, transparent: true, opacity: 0.4, depthWrite: false }));
       r.rotation.x = Math.PI / 2;
       r.userData.phase = i * 0.5;
       rings.push(r);
@@ -755,7 +897,7 @@
     }
 
     g.scale.setScalar(scale || 1);
-    g.userData = { core: core, rings: rings, excite: 0, spin: 0.5 + Math.random() * 0.2 };
+    g.userData = { core: core, rings: rings, aura: aura, excite: 0, spin: 0.5 + Math.random() * 0.2 };
     return g;
   }
 
@@ -764,13 +906,13 @@
   /* ---------- pedestals ---------- */
   var coneTex = coneTexture();
   var pedestalDefs = [
-    { id: 'cap-web', holo: 'globe', x: -3.2, z: 16, label: 'אתרים וחוויות', tag: 'מה אנחנו בונים', accent: '#8fd8ff',
+    { id: 'cap-web', holo: 'globe', x: -3.2, z: 16, label: 'אתרים וחוויות', tag: 'מה אנחנו בונים', accent: '#1F8FD8',
       body: 'אתרים שמרגישים כמו מקום, לא כמו דף. האולם שאתם עומדים בו עכשיו נבנה באותם כלים בדיוק — ורץ בדפדפן, בלי להתקין כלום.', link: 'services.html', linkText: 'לעמוד השירותים' },
-    { id: 'cap-sys', holo: 'device', x: 3.2, z: 8, label: 'אפליקציות ומערכות', tag: 'מה אנחנו בונים', accent: '#9fe8d8',
+    { id: 'cap-sys', holo: 'device', x: 3.2, z: 8, label: 'אפליקציות ומערכות', tag: 'מה אנחנו בונים', accent: '#0FA88C',
       body: 'מהרעיון ועד מוצר שרץ בענן: אפליקציות, מערכות ניהול וכלים פנימיים שנתפרים בדיוק לצורת העבודה של העסק.', link: 'services.html', linkText: 'לעמוד השירותים' },
-    { id: 'cap-ai', holo: 'neural', x: -3.2, z: -8, label: 'AI ואוטומציה', tag: 'מה אנחנו בונים', accent: '#c9afff',
+    { id: 'cap-ai', holo: 'neural', x: -3.2, z: -8, label: 'AI ואוטומציה', tag: 'מה אנחנו בונים', accent: '#6C5CFF',
       body: 'תהליכים שקורים מעצמם: מיון פניות, טיוטות מסמכים, חיבורים בין מערכות — עם בקרה אנושית בנקודות שחשוב.', link: 'services.html', linkText: 'לעמוד השירותים' },
-    { id: 'cap-play', holo: 'game', x: 3.2, z: -16, label: 'משחקים וחוויות', tag: 'מה אנחנו בונים', accent: '#ffc79a',
+    { id: 'cap-play', holo: 'game', x: 3.2, z: -16, label: 'משחקים וחוויות', tag: 'מה אנחנו בונים', accent: '#E8722E',
       body: 'הדרך הכי טובה להבין מוצר היא לשחק בו: סימולטורים, קונפיגורטורים וחוויות אינטראקטיביות שהופכות סקרנות להחלטה.', link: 'services.html', linkText: 'לעמוד השירותים' }
   ];
 
@@ -779,7 +921,7 @@
   var billboards = [];
 
   pedestalDefs.forEach(function (def) {
-    var base = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.68, 0.95, 24), columnMat);
+    var base = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.68, 0.95, 24), stoneMat);
     base.position.set(def.x, 0.475, def.z);
     scene.add(base);
     var ring = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.022, 8, 40), new THREE.MeshBasicMaterial({ color: new THREE.Color(def.accent) }));
@@ -787,10 +929,9 @@
     ring.position.set(def.x, 0.96, def.z);
     scene.add(ring);
 
-    /* beam of light */
     var cone = new THREE.Mesh(
       new THREE.CylinderGeometry(0.16, 0.85, 2.6, 20, 1, true),
-      new THREE.MeshBasicMaterial({ map: coneTex, transparent: true, opacity: 0.16, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })
+      new THREE.MeshBasicMaterial({ map: coneTex, transparent: true, opacity: 0.12, depthWrite: false, side: THREE.DoubleSide })
     );
     cone.position.set(def.x, 2.35, def.z);
     scene.add(cone);
@@ -801,12 +942,6 @@
     holograms.push(holo);
     def._holo = holo;
 
-    /* soft violet point light at the pedestal */
-    var pl = new THREE.PointLight(new THREE.Color(def.accent), 5, 6, 1.8);
-    pl.position.set(def.x, 2.1, def.z);
-    scene.add(pl);
-
-    /* floating label, always facing the visitor */
     var label = new THREE.Mesh(
       new THREE.PlaneGeometry(1.5, 0.375),
       new THREE.MeshBasicMaterial({ map: holoLabelTexture(def.label), transparent: true, depthWrite: false })
@@ -815,7 +950,6 @@
     scene.add(label);
     billboards.push(label);
 
-    /* invisible hit cylinder */
     var hit = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 0.95, 3.4, 8), new THREE.MeshBasicMaterial({ visible: false }));
     hit.position.set(def.x, 1.7, def.z);
     hit.userData.art = { title: def.label, tag: def.tag, body: def.body, link: def.link, self: true, linkText: def.linkText, _holo: holo, _glow: null };
@@ -832,56 +966,68 @@
   atriumHit.position.copy(atriumStar.position);
   atriumHit.userData.art = {
     title: 'ORBO', tag: 'הסטודיו', _holo: atriumStar, _glow: null, self: true,
-    body: 'הכוכב של אורבו. כל מה שבמוזיאון הזה — האולם, ההולוגרמות, הציורים החיים — נבנה אצלנו, בקוד, בלי אף קובץ מוכן. ככה אנחנו ניגשים לכל פרויקט.',
+    body: 'הכוכב של אורבו. כל מה שבמוזיאון — האולם, הנחל, ההולוגרמות והציורים החיים — נבנה כאן, בקוד, בלי אף קובץ מוכן. ככה נראית אצלנו גישה לפרויקט.',
     link: 'studio.html', linkText: 'להכיר אותנו'
   };
   scene.add(atriumHit);
   pickables.push(atriumHit);
 
+  /* comets circling the star */
+  var comets = [];
+  (function () {
+    var cometTex = radialTexture('rgba(108, 92, 255, 0.85)', 'rgba(108, 92, 255, 0)');
+    for (var i = 0; i < 3; i++) {
+      var m = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.5, 0.5),
+        new THREE.MeshBasicMaterial({ map: cometTex, transparent: true, opacity: 0.85, depthWrite: false, side: THREE.DoubleSide })
+      );
+      scene.add(m);
+      comets.push({ mesh: m, r: 2.6 + i * 0.5, sp: 0.5 + i * 0.17, ph: i * 2.1, tilt: 0.35 + i * 0.22 });
+    }
+  })();
+
   /* ---------- the collection (wall pieces) ---------- */
   var ART = [
-    { id: 'bisomna', wall: 'L', z: 20, title: 'BISOMNA', tag: 'אתר · באוויר', style: 'light', sub: 'אתר למיזם שינה ישראלי', domain: 'bisomna.com', link: 'https://bisomna.com',
+    { id: 'bisomna', wall: 'L', z: 20, title: 'BISOMNA', tag: 'אתר · באוויר', style: 'light', sub: 'אתר למיזם שינה ישראלי', domain: 'bisomna.com', link: 'https://bisomna.com', accent: '#5B4CF5',
       body: 'אתר רחב למיזם בתחום השינה — מוצר, מדע, חנות ומשקיעים. וידאו שנע יחד עם הגלילה ותצוגת מוצר שנפתחת לשכבות, והכול נשאר מהיר גם בנייד.' },
-    { id: 'orbo', wall: 'L', z: 10, title: 'orbosolutions.com', tag: 'הבית שלנו', style: 'dark', sub: 'דף הבית של הסטודיו', domain: 'orbosolutions.com', link: 'index.html', self: true,
+    { id: 'orbo', wall: 'L', z: 10, title: 'orbosolutions.com', tag: 'הבית שלנו', style: 'dark', sub: 'דף הבית של הסטודיו', domain: 'orbosolutions.com', link: 'index.html', self: true, accent: '#6C5CFF',
       body: 'דף הבית שלנו הוא מסע: גוללים, והמצלמה עפה דרך עולם של חלקיקים שמתגבשים לצורות. בנוי כולו בקוד, בלי אף קובץ תמונה.' },
-    { id: 'aurora', wall: 'L', z: -2, live: 'aurora', title: 'AURORA', tag: 'ציור חי · המעבדה', accent: '#c6f24e', link: 'lab/01-aurora-gsap/',
+    { id: 'aurora', wall: 'L', z: -2, live: 'aurora', title: 'AURORA', tag: 'ציור חי · המעבדה', accent: '#86B32B', link: 'lab/01-aurora-gsap/',
       body: 'סרטי אור שנעים בזרם. הציור שעל הקיר נצבע מחדש עשרות פעמים בשנייה, ממש עכשיו — כמו כל ציורי המעבדה באגף הזה.' },
-    { id: 'nebula', wall: 'L', z: -12, live: 'nebula', title: 'NEBULA', tag: 'ציור חי · המעבדה', accent: '#4dd8ff', link: 'lab/02-nebula-three/',
+    { id: 'nebula', wall: 'L', z: -12, live: 'nebula', title: 'NEBULA', tag: 'ציור חי · המעבדה', accent: '#1F8FD8', link: 'lab/02-nebula-three/',
       body: 'גלקסיה של חלקיקים שמסתחררת לאט. בגרסה המלאה גוללים אל תוך מרכז הגלקסיה.' },
-    { id: 'prism', wall: 'L', z: -22, live: 'prism', title: 'PRISM', tag: 'ציור חי · המעבדה', accent: '#9d6bff', link: 'lab/03-prism-r3f/',
+    { id: 'prism', wall: 'L', z: -22, live: 'prism', title: 'PRISM', tag: 'ציור חי · המעבדה', accent: '#7A5CFF', link: 'lab/03-prism-r3f/',
       body: 'אלומת אור שנשברת דרך גאומטריה ומתפצלת לספקטרום. בגרסה המלאה — חדר חומרים תלת־ממדי שלם.' },
-    { id: 'genesis', wall: 'R', z: 20, gen: genesisTexture, title: 'GENESIS', tag: 'אמנות גנרטיבית', accent: '#ffb080',
+    { id: 'genesis', wall: 'R', z: 20, gen: genesisTexture, title: 'GENESIS', tag: 'אמנות גנרטיבית', accent: '#E8722E',
       body: 'שלוש מאות קווים ששוחררו לשדה זרימה מתמטי. אף אחד לא צייר את היצירה הזאת — היא חושבה, קו אחרי קו, ברגע שנכנסתם למוזיאון.' },
-    { id: 'mosaic', wall: 'R', z: 10, gen: mosaicTexture, title: 'MOSAIC', tag: 'אמנות גנרטיבית', accent: '#9d8cff',
+    { id: 'mosaic', wall: 'R', z: 10, gen: mosaicTexture, title: 'MOSAIC', tag: 'אמנות גנרטיבית', accent: '#6C5CFF',
       body: 'פסיפס שנבנה מחלוקת המרחב בין ארבעים ושש נקודות אקראיות. כל ריצה מייצרת פסיפס שלא היה קיים מעולם.' },
-    { id: 'flux', wall: 'R', z: -2, live: 'flux', title: 'FLUX', tag: 'ציור חי · המעבדה', accent: '#ff4b3e', link: 'lab/04-flux-shaders/',
+    { id: 'flux', wall: 'R', z: -2, live: 'flux', title: 'FLUX', tag: 'ציור חי · המעבדה', accent: '#E0402F', link: 'lab/04-flux-shaders/',
       body: 'שדות צבע שזורמים על המסך לפי כללים מתמטיים. בגרסה המלאה — שישה שדות שונים, ישר מול המעבד הגרפי.' },
-    { id: 'terra', wall: 'R', z: -12, live: 'terra', title: 'TERRA', tag: 'ציור חי · המעבדה', accent: '#e0c08c', link: 'lab/05-terra-webgl/',
+    { id: 'terra', wall: 'R', z: -12, live: 'terra', title: 'TERRA', tag: 'ציור חי · המעבדה', accent: '#C9A05C', link: 'lab/05-terra-webgl/',
       body: 'רכסי הרים שמחושבים מרעש מתמטי טהור, תחת שמש נמוכה. בגרסה המלאה גולשים בין נופים שלמים.' },
-    { id: 'fractal', wall: 'R', z: -22, gen: fractalTexture, title: 'JULIA', tag: 'אמנות גנרטיבית', accent: '#c9afff',
+    { id: 'fractal', wall: 'R', z: -22, gen: fractalTexture, title: 'JULIA', tag: 'אמנות גנרטיבית', accent: '#7A5CFF',
       body: 'קבוצת ז׳וליה — נוסחה אחת קצרה שמכילה אינסוף. ככל שמתקרבים, מתגלים עוד ועוד עולמות. חושבה פיקסל־פיקסל בכניסתכם.' },
-    { id: 'star', wall: 'F', z: -HALL.l / 2, title: 'ORBO', tag: 'הסטודיו', style: 'dark', big: true, sub: 'רעיונות יש לכולם. אנחנו הופכים אותם למציאות.',
+    { id: 'star', wall: 'F', z: -HALL.l / 2, title: 'ORBO', tag: 'הסטודיו', style: 'dark', big: true, sub: 'רעיונות יש לכולם. אנחנו הופכים אותם למציאות.', accent: '#6C5CFF',
       body: 'תודה שביקרתם. אם משהו כאן הדליק לכם רעיון — נשמח לשמוע עליו.', contact: true }
   ];
 
-  var glowTexNeutral = radialTexture('rgba(255, 255, 255, 0.55)', 'rgba(255, 255, 255, 0)');
-  var poolTex = radialTexture('rgba(255, 225, 195, 0.15)', 'rgba(255, 225, 195, 0)');
-  var frameMat = new THREE.MeshStandardMaterial({ color: 0x2a2438, roughness: 0.32, metalness: 0.8, envMapIntensity: 1.2 });
+  var glowTexNeutral = radialTexture('rgba(255, 255, 255, 0.9)', 'rgba(255, 255, 255, 0)');
+  var poolTex = radialTexture('rgba(91, 76, 245, 0.10)', 'rgba(91, 76, 245, 0)');
 
   ART.forEach(function (art) {
     var group = new THREE.Group();
-    /* the finale screen is a wide cinema wall — same 8:5 aspect as its
-       texture, so the type never squashes */
     var W = art.big ? 4.8 : 2.7, H = art.big ? 3.0 : 1.69;
-    var AY = art.big ? 2.55 : 2.15;   /* artwork center height */
+    var AY = art.big ? 2.55 : 2.15;
 
     if (art.wall === 'L') { group.position.set(LX, 0, art.z); group.rotation.y = Math.PI / 2; }
     else if (art.wall === 'R') { group.position.set(RX, 0, art.z); group.rotation.y = -Math.PI / 2; }
     else { group.position.set(0, 0, -HALL.l / 2 + 0.05); }
 
+    /* colored aura behind the frame (normal blending — reads on light walls) */
     var glow = new THREE.Mesh(
-      new THREE.PlaneGeometry(W * 1.55, H * 1.75),
-      new THREE.MeshBasicMaterial({ map: glowTexNeutral, color: new THREE.Color(art.accent || '#8c78ff'), transparent: true, opacity: 0.32, blending: THREE.AdditiveBlending, depthWrite: false })
+      new THREE.PlaneGeometry(W * 1.5, H * 1.7),
+      new THREE.MeshBasicMaterial({ map: glowTexNeutral, color: new THREE.Color(art.accent || '#6C5CFF'), transparent: true, opacity: 0.28, depthWrite: false })
     );
     glow.position.set(0, AY, 0.015);
     group.add(glow);
@@ -935,21 +1081,21 @@
       group.add(plq);
     }
 
-    var pool = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 2.3), new THREE.MeshBasicMaterial({ map: poolTex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+    var pool = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 2.3), new THREE.MeshBasicMaterial({ map: poolTex, transparent: true, depthWrite: false }));
     pool.rotation.x = -Math.PI / 2;
     var pWorld = new THREE.Vector3(0, 0, 0).applyEuler(group.rotation).add(group.position);
     pool.position.set(pWorld.x + (art.wall === 'L' ? 1.2 : art.wall === 'R' ? -1.2 : 0), 0.013, pWorld.z + (art.wall === 'F' ? 1.2 : 0));
     scene.add(pool);
 
     if (!isTouch) {
-      var sp = new THREE.SpotLight(0xffe9d6, 34, 12, 0.55, 0.65, 1.4);
+      var sp = new THREE.SpotLight(0xfff3e4, 20, 12, 0.55, 0.65, 1.4);
       var sWorld = new THREE.Vector3(0, HALL.h - 0.5, 2.1).applyEuler(group.rotation).add(group.position);
       sp.position.copy(sWorld);
       var tWorld = new THREE.Vector3(0, AY, 0).applyEuler(group.rotation).add(group.position);
       sp.target.position.copy(tWorld);
       scene.add(sp);
       scene.add(sp.target);
-      var hs = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.1, 0.18, 10), trimMat);
+      var hs = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.1, 0.18, 10), frameMat);
       hs.position.copy(sWorld);
       hs.position.y = HALL.h - 0.12;
       scene.add(hs);
@@ -1077,7 +1223,7 @@
 
   function setHover(art) {
     if (art === hoverArt) return;
-    hoverArt = art;   /* glow itself is driven by the proximity system */
+    hoverArt = art;
     if (art) {
       crosshair.classList.add('hot');
       showHint(isTouch ? 'הקישו לפרטים' : '״' + art.title + '״ — לחצו לפרטים');
@@ -1118,7 +1264,7 @@
     } else {
       panelLink.hidden = true;
     }
-    if (art._holo) art._holo.userData.excite = 1;   /* the hologram flares */
+    if (art._holo) art._holo.userData.excite = 1;
     panel.classList.add('open');
     panel.setAttribute('aria-hidden', 'false');
     if (locked && document.exitPointerLock) document.exitPointerLock();
@@ -1155,6 +1301,11 @@
   var fwd = new THREE.Vector3(), rgt = new THREE.Vector3(), wish = new THREE.Vector3();
   var pedCollide = pedestalDefs.map(function (d) { return { x: d.x, z: d.z, r: 1.0 }; });
 
+  function nearBridge(z) {
+    for (var i = 0; i < BRIDGES.length; i++) if (Math.abs(z - BRIDGES[i]) < 1.05) return true;
+    return false;
+  }
+
   function step(dt) {
     if (glide) {
       glide.t += dt;
@@ -1190,7 +1341,12 @@
 
     pos.x = Math.max(-BOUND.x, Math.min(BOUND.x, pos.x));
     pos.z = Math.max(BOUND.zMin, Math.min(BOUND.zMax, pos.z));
-    var i, b, dx, dz;
+
+    var i, b, dx, dz, dd;
+    /* the stream blocks passage except at the bridges */
+    if (Math.abs(pos.x) < STREAM.half + 0.25 && pos.z < STREAM.zTop && pos.z > STREAM.zBot && !nearBridge(pos.z)) {
+      pos.x = (pos.x >= 0 ? 1 : -1) * (STREAM.half + 0.25);
+    }
     for (i = 0; i < benches.length; i++) {
       b = benches[i];
       dx = pos.x - b.x; dz = pos.z - b.z;
@@ -1199,10 +1355,11 @@
         else pos.z = b.z + (dz > 0 ? b.hz : -b.hz);
       }
     }
-    for (i = 0; i < pedCollide.length; i++) {
-      b = pedCollide[i];
+    var circles = pedCollide.concat(plantCollide);
+    for (i = 0; i < circles.length; i++) {
+      b = circles[i];
       dx = pos.x - b.x; dz = pos.z - b.z;
-      var dd = Math.hypot(dx, dz);
+      dd = Math.hypot(dx, dz);
       if (dd < b.r && dd > 0.0001) {
         pos.x = b.x + dx / dd * b.r;
         pos.z = b.z + dz / dd * b.r;
@@ -1225,7 +1382,6 @@
       var L = liveArts[i];
       var wp = L.plane.getWorldPosition(new THREE.Vector3());
       if (wp.distanceTo(pos) > 17) continue;
-      /* paintings paint faster as you approach — the room notices you */
       var near = Math.max(0, 1 - wp.distanceTo(pos) / 10);
       L.t += dt * (2 + near * 2.5);
       ORBO_LAB.draw[L.kind]({ ctx: L.art, w: L.w, h: L.h, t: L.t, seed: L.seed });
@@ -1248,14 +1404,14 @@
       var h = holograms[i];
       var u = h.userData;
       u.excite = Math.max(0, u.excite - dt * 0.8);
-      /* holograms wake up as you walk toward them */
       var prox = Math.max(0, 1 - h.position.distanceTo(pos) / 6);
       var ex = Math.min(1, u.excite + prox * 0.55);
       u.core.rotation.y += dt * (u.spin + ex * 3.2);
       u.core.position.y = Math.sin(t * 0.9 + i * 1.7) * 0.05;
       var flick = 1 + ex * 0.28 + (reduced ? 0 : Math.sin(t * 13 + i * 3) * 0.02);
       u.core.scale.setScalar(flick);
-      /* orbiting bits */
+      u.aura.lookAt(pos.x, h.position.y, pos.z);
+      u.aura.material.opacity = 0.5 + ex * 0.4;
       for (var k = 0; k < u.core.children.length; k++) {
         var ch = u.core.children[k];
         if (ch.userData.orbit) {
@@ -1268,17 +1424,16 @@
           ch.scale.setScalar(1 + Math.sin(t * 3 + ch.userData.pulse) * 0.35);
         }
       }
-      /* scan rings climb */
       for (var r = 0; r < u.rings.length; r++) {
         var ring = u.rings[r];
         var ph = ((t * 0.35 + ring.userData.phase) % 1);
         ring.position.y = -0.7 + ph * 1.5;
-        ring.material.opacity = 0.32 * (1 - ph) + ex * 0.3;
+        ring.material.opacity = 0.4 * (1 - ph) + ex * 0.3;
       }
     }
   }
 
-  /* every piece breathes toward whoever stands in front of it */
+  /* ---------- reactive world ---------- */
   var tmpV = new THREE.Vector3();
   function tickReactive(t, dt) {
     for (var i = 0; i < ART.length; i++) {
@@ -1288,17 +1443,30 @@
       var d = tmpV.distanceTo(pos);
       if (d > 22) continue;
       var prox = Math.max(0, Math.min(1, 1 - (d - 2) / 5));
-      a._glow.material.opacity = 0.3 + prox * 0.3 + (a === hoverArt ? 0.18 : 0);
+      a._glow.material.opacity = 0.24 + prox * 0.3 + (a === hoverArt ? 0.16 : 0);
       var sc = 1 + prox * 0.035;
       a._plane.scale.set(sc, sc, 1);
     }
     playerHalo.position.x = pos.x;
     playerHalo.position.z = pos.z;
-    playerHalo.material.opacity = 0.75 + (reduced ? 0 : Math.sin(t * 1.6) * 0.2);
+    playerHalo.material.opacity = 0.8 + (reduced ? 0 : Math.sin(t * 1.6) * 0.2);
+    /* the water flows */
+    if (window.__streamMaps && !reduced) {
+      window.__streamMaps[0].offset.y -= dt * 0.10;
+      window.__streamMaps[1].offset.y -= dt * 0.16;
+    }
     if (auroraRiver && !reduced && liveTick % 2 === 0) {
-      auroraRiver.t = (auroraRiver.t || 0) + dt * 2.4;
+      auroraRiver.t += dt * 1.8;
       ORBO_LAB.draw.aurora({ ctx: auroraRiver.ctx, w: auroraRiver.w, h: auroraRiver.h, t: auroraRiver.t, seed: [] });
       auroraRiver.tex.needsUpdate = true;
+    }
+    /* leaves breathe */
+    if (!reduced) {
+      for (var f = 0; f < foliage.length; f++) {
+        var lf = foliage[f];
+        lf.rotation.y = Math.sin(t * 0.4 + f * 1.3) * 0.12;
+        lf.rotation.z = Math.sin(t * 0.55 + f * 2.1) * 0.05;
+      }
     }
     for (var k = 0; k < comets.length; k++) {
       var cm = comets[k];
@@ -1326,7 +1494,6 @@
     tickHolograms(t, dt);
     tickReactive(t, dt);
 
-    /* labels face the visitor */
     for (var i = 0; i < billboards.length; i++) {
       billboards[i].lookAt(pos.x, billboards[i].position.y, pos.z);
     }
