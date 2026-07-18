@@ -830,19 +830,6 @@
         cube.userData.orbit = { r: 0.78, sp: 0.9 + i * 0.3, ph: i * 1.57, y: 0 };
         core.add(cube);
       }
-    } else { /* star */
-      var shape = starShape(0.62);
-      core.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.ShapeGeometry(shape)), holoLineMat(0x5B4CF5)));
-      m = new THREE.Mesh(new THREE.ShapeGeometry(shape), holoFillMat(0x6C5CFF));
-      m.material.opacity = 0.16;
-      core.add(m);
-      var halo = [];
-      for (i = 0; i < 60; i++) {
-        var a = Math.random() * 6.28, rr = 0.75 + Math.random() * 0.35;
-        halo.push(new THREE.Vector3(Math.cos(a) * rr, (Math.random() - 0.5) * 0.5, Math.sin(a) * rr));
-      }
-      var hg = new THREE.BufferGeometry().setFromPoints(halo);
-      core.add(new THREE.Points(hg, new THREE.PointsMaterial({ color: 0x6C5CFF, size: 0.022, transparent: true, opacity: 0.8, depthWrite: false })));
     }
 
     var rings = [];
@@ -856,6 +843,147 @@
 
     g.scale.setScalar(scale || 1);
     g.userData = { core: core, rings: rings, aura: aura, excite: 0, spin: 0.5 + Math.random() * 0.2 };
+    return g;
+  }
+
+  /* ---------- the atrium star: the ORBO mark itself, floating ----------
+     built straight off the site logo — the eight-vertex star with the
+     #9d8bff -> #5a46d6 gradient, a bright core, a soft halo — raised to
+     three dimensions: two crossed star planes, gradient edge tubes,
+     precessing halo rings and an orbiting dust of particles. */
+  function makeBrandStar(scale) {
+    var g = new THREE.Group();
+    var topC = new THREE.Color('#9d8bff'), botC = new THREE.Color('#5a46d6');
+    var gradAt = function (y) {
+      return topC.clone().lerp(botC, (0.62 - y) / 1.24);
+    };
+
+    /* star outline vertices (starShape order, r=0.62) */
+    var R0 = 0.62, R1 = 0.124;
+    var pts = [
+      [0, R0], [R1, R1], [R0, 0], [R1, -R1],
+      [0, -R0], [-R1, -R1], [-R0, 0], [-R1, R1]
+    ];
+
+    /* merge helper: vertex-colored local-space geometry */
+    function mergeColored(parts) {
+      var posA = [], colA = [];
+      var v = new THREE.Vector3();
+      parts.forEach(function (it) {
+        var geo = it.geo.index ? it.geo.toNonIndexed() : it.geo;
+        var p = geo.attributes.position;
+        for (var i = 0; i < p.count; i++) {
+          v.fromBufferAttribute(p, i);
+          var cc = it.grad ? gradAt(v.y * (it.gradScale || 1)) : it.color;
+          if (it.matrix) v.applyMatrix4(it.matrix);
+          posA.push(v.x, v.y, v.z);
+          colA.push(cc.r, cc.g, cc.b);
+        }
+      });
+      var geo2 = new THREE.BufferGeometry();
+      geo2.setAttribute('position', new THREE.Float32BufferAttribute(posA, 3));
+      geo2.setAttribute('color', new THREE.Float32BufferAttribute(colA, 3));
+      return geo2;
+    }
+
+    /* crisp edges: one thin tube per outline segment, on two crossed
+       planes, all merged into a single vertex-colored mesh */
+    var edgeParts = [];
+    var crossRot = new THREE.Matrix4().makeRotationY(Math.PI / 2);
+    [null, crossRot].forEach(function (planeM) {
+      for (var i = 0; i < 8; i++) {
+        var a = pts[i], b = pts[(i + 1) % 8];
+        var ax = a[0], ay = a[1], bx = b[0], by = b[1];
+        var len = Math.hypot(bx - ax, by - ay);
+        var cyl = new THREE.CylinderGeometry(0.013, 0.013, len, 6);
+        var mid = new THREE.Vector3((ax + bx) / 2, (ay + by) / 2, 0);
+        var dir = new THREE.Vector3(bx - ax, by - ay, 0).normalize();
+        var q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+        var m4 = new THREE.Matrix4().makeRotationFromQuaternion(q);
+        m4.setPosition(mid.x, mid.y, mid.z);
+        if (planeM) m4.premultiply(planeM);
+        edgeParts.push({ geo: cyl, matrix: m4, color: gradAt((ay + by) / 2) });
+      }
+    });
+    var edges = new THREE.Mesh(mergeColored(edgeParts), new THREE.MeshBasicMaterial({
+      vertexColors: true, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false
+    }));
+
+    /* translucent gradient fill on both planes */
+    var fillGeoA = new THREE.ShapeGeometry(starShape(R0));
+    var fillMat = new THREE.MeshBasicMaterial({
+      vertexColors: true, transparent: true, opacity: 0.15, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide
+    });
+    var fill = new THREE.Mesh(mergeColored([
+      { geo: fillGeoA, grad: true },
+      { geo: fillGeoA, grad: true, matrix: crossRot }
+    ]), fillMat);
+
+    var core = new THREE.Group();
+    core.add(edges);
+    core.add(fill);
+
+    /* the bright heart: a small white orb inside sprite glows */
+    var orb = new THREE.Mesh(new THREE.SphereGeometry(0.085, 12, 10), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+    core.add(orb);
+    var coreGlow = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: radialTexture('rgba(255, 255, 255, 0.9)', 'rgba(230, 222, 255, 0)'),
+      transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending, depthWrite: false
+    }));
+    coreGlow.scale.setScalar(0.62);
+    core.add(coreGlow);
+    var innerHalo = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: radialTexture('rgba(143, 123, 255, 0.5)', 'rgba(143, 123, 255, 0)'),
+      transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending, depthWrite: false
+    }));
+    innerHalo.scale.setScalar(1.55);
+    core.add(innerHalo);
+    g.add(core);
+
+    /* wide soft halo, billboarded to the visitor by the hologram tick */
+    var aura = new THREE.Mesh(
+      new THREE.PlaneGeometry(3.1, 3.1),
+      new THREE.MeshBasicMaterial({ map: radialTexture('rgba(126, 99, 255, 0.22)', 'rgba(126, 99, 255, 0)'), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })
+    );
+    g.add(aura);
+
+    /* halo rings: one calm equator, two slowly precessing tilted rings */
+    var ringMat = function (op) {
+      return new THREE.MeshBasicMaterial({ color: 0x7e63ff, transparent: true, opacity: op, blending: THREE.AdditiveBlending, depthWrite: false });
+    };
+    var eq = new THREE.Mesh(new THREE.TorusGeometry(0.8, 0.007, 5, 48), ringMat(0.5));
+    eq.rotation.x = Math.PI / 2;
+    g.add(eq);
+    var tilts = [];
+    [[0.95, -0.45, 0.34], [1.08, 0.6, 0.26]].forEach(function (td) {
+      var holder = new THREE.Group();
+      var ring = new THREE.Mesh(new THREE.TorusGeometry(td[0], 0.006, 5, 48), ringMat(td[2]));
+      ring.rotation.x = Math.PI / 2 + td[1];
+      holder.add(ring);
+      g.add(holder);
+      tilts.push(holder);
+    });
+
+    /* orbiting particle dust: a bright ecliptic band + a sparse shell */
+    var particles = [];
+    [[95, 0.88, 1.18, 0.16, 0xb9a6ff, 0.028], [55, 1.2, 1.5, 0.55, 0x8f74ff, 0.02]].forEach(function (pd) {
+      var arr = [];
+      for (var i = 0; i < pd[0]; i++) {
+        var a = Math.random() * 6.284, rr = pd[1] + Math.random() * (pd[2] - pd[1]);
+        arr.push(new THREE.Vector3(Math.cos(a) * rr, (Math.random() - 0.5) * 2 * pd[3], Math.sin(a) * rr));
+      }
+      var pg = new THREE.BufferGeometry().setFromPoints(arr);
+      var pm = new THREE.Points(pg, new THREE.PointsMaterial({ color: pd[4], size: pd[5], transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending, depthWrite: false }));
+      g.add(pm);
+      particles.push(pm);
+    });
+
+    g.scale.setScalar(scale || 1);
+    g.userData = {
+      core: core, rings: [], aura: aura, excite: 0,
+      spin: 0.12, exciteSpin: 0.8, flickFreq: 1.1, flickAmp: 0.03,
+      tilts: tilts, particles: particles, coreGlow: coreGlow, fillMat: fillMat
+    };
     return g;
   }
 
@@ -914,12 +1042,12 @@
     pickables.push(hit);
   });
 
-  /* the atrium star floats beneath the oval of stars */
-  var atriumStar = makeHologram('star', 2.1);
+  /* the atrium star floats beneath the strip of stars — the brand mark itself */
+  var atriumStar = makeBrandStar(2.6);
   atriumStar.position.set(0, 4.5, 0);
   scene.add(atriumStar);
   holograms.push(atriumStar);
-  var atriumHit = new THREE.Mesh(new THREE.SphereGeometry(1.6, 10, 8), new THREE.MeshBasicMaterial({ visible: false }));
+  var atriumHit = new THREE.Mesh(new THREE.SphereGeometry(1.9, 10, 8), new THREE.MeshBasicMaterial({ visible: false }));
   atriumHit.position.copy(atriumStar.position);
   atriumHit.userData.art = {
     title: 'ORBO', tag: 'הסטודיו', _holo: atriumStar, _glow: null, self: true,
@@ -1451,12 +1579,26 @@
       u.excite = Math.max(0, u.excite - dt * 0.8);
       var prox = Math.max(0, 1 - h.position.distanceTo(pos) / 6);
       var ex = Math.min(1, u.excite + prox * 0.55);
-      u.core.rotation.y += dt * (u.spin + ex * 3.2);
+      u.core.rotation.y += dt * (u.spin + ex * (u.exciteSpin || 3.2));
       u.core.position.y = Math.sin(t * 0.9 + i * 1.7) * 0.05;
-      var flick = 1 + ex * 0.28 + (reduced ? 0 : Math.sin(t * 13 + i * 3) * 0.02);
+      var flick = 1 + ex * 0.28 + (reduced ? 0 : Math.sin(t * (u.flickFreq || 13) + i * 3) * (u.flickAmp || 0.02));
       u.core.scale.setScalar(flick);
       u.aura.lookAt(pos.x, h.position.y, pos.z);
       u.aura.material.opacity = 0.5 + ex * 0.4;
+      /* the brand star's extra life: precessing rings, orbiting dust,
+         a heart that breathes */
+      if (u.tilts) {
+        u.tilts[0].rotation.y += dt * (0.2 + ex * 0.5);
+        u.tilts[1].rotation.y -= dt * (0.14 + ex * 0.35);
+      }
+      if (u.particles) {
+        u.particles[0].rotation.y += dt * (0.1 + ex * 0.55);
+        u.particles[1].rotation.y -= dt * (0.05 + ex * 0.3);
+      }
+      if (u.coreGlow) {
+        u.coreGlow.material.opacity = 0.72 + (reduced ? 0 : Math.sin(t * 1.3) * 0.16) + ex * 0.28;
+        u.fillMat.opacity = 0.13 + (reduced ? 0 : Math.sin(t * 1.3 + 0.9) * 0.04) + ex * 0.2;
+      }
       for (var k = 0; k < u.core.children.length; k++) {
         var ch = u.core.children[k];
         if (ch.userData.orbit) {
