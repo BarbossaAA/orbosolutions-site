@@ -56,18 +56,24 @@
   renderer.setSize(innerWidth, innerHeight);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.08;
+  /* real shadows carry the depth on desktop; phones keep soft blob shadows */
+  if (!isTouch) {
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  }
 
   var scene = new THREE.Scene();
   scene.background = new THREE.Color(0xEDEBF5);
-  scene.fog = new THREE.Fog(0xEDEBF5, 30, 92);
+  scene.fog = new THREE.Fog(0xE9E8F2, 42, 150);
 
-  var camera = new THREE.PerspectiveCamera(68, innerWidth / innerHeight, 0.08, 130);
+  var camera = new THREE.PerspectiveCamera(68, innerWidth / innerHeight, 0.08, 240);
   camera.rotation.order = 'YXZ';
 
   /* ---------- hall dimensions ---------- */
-  var HALL = { w: 18, l: 62, h: 8 };       /* x: ±9, z: ±31 */
+  var HALL = { w: 18, l: 62, h: 8 };       /* x: ±9, z: ±31; a terrace continues past +31 */
   var EYE = 1.65;
-  var BOUND = { x: 7.6, zMin: -29.4, zMax: 29.4 };
+  var TERRACE = { zEnd: 40.6 };
+  var BOUND = { x: 7.6, zMin: -28.6, zMax: 40.2 };
   var LX = -HALL.w / 2 + 0.05, RX = HALL.w / 2 - 0.05;
 
   /* ---------- environment reflections (bright ivory room) ---------- */
@@ -549,8 +555,27 @@
   }
   wall(HALL.l, HALL.h, -HALL.w / 2, HALL.h / 2, 0, Math.PI / 2);
   wall(HALL.l, HALL.h, HALL.w / 2, HALL.h / 2, 0, -Math.PI / 2);
-  wall(HALL.w, HALL.h, 0, HALL.h / 2, -HALL.l / 2, 0);
-  wall(HALL.w, HALL.h, 0, HALL.h / 2, HALL.l / 2, Math.PI);
+  /* the far end is no wall at all — the hall grows out of a cave (built below).
+     the entry end opens through a grand arch onto an outdoor terrace. */
+  var portalMat = new THREE.MeshStandardMaterial({ map: plasterTexture(), roughness: 0.92, metalness: 0.0, side: THREE.DoubleSide });
+  var portalWalls = [];
+  [-1, 1].forEach(function (side) {
+    var seg = new THREE.Mesh(new THREE.PlaneGeometry(4.5, HALL.h), portalMat);
+    seg.position.set(side * 6.75, HALL.h / 2, HALL.l / 2);
+    scene.add(seg);
+    portalWalls.push({ x: side * 6.75, hx: 2.25, z: HALL.l / 2, hz: 0.45 });
+  });
+  var header = new THREE.Mesh(new THREE.PlaneGeometry(9, 3), portalMat);
+  header.position.set(0, HALL.h - 1.5, HALL.l / 2);
+  scene.add(header);
+  var archRib = new THREE.Mesh(new THREE.TorusGeometry(4.5, 0.16, 10, 26, Math.PI), stoneMat);
+  archRib.position.set(0, 0, HALL.l / 2);
+  archRib.scale.y = 1.11;
+  scene.add(archRib);
+  var archLine = new THREE.Mesh(new THREE.TorusGeometry(4.32, 0.03, 6, 26, Math.PI), glowLineMat);
+  archLine.position.set(0, 0, HALL.l / 2);
+  archLine.scale.y = 1.11;
+  scene.add(archLine);
 
   /* arched ribs span the hall — the box becomes a vault */
   for (var az = -24; az <= 24; az += 8) {
@@ -573,37 +598,46 @@
     });
   }
 
-  /* the glowing brand sign over the door — no more hiding */
-  var brandWall = new THREE.Mesh(
-    new THREE.PlaneGeometry(9, 2.25),
-    new THREE.MeshBasicMaterial({ map: brandTexture(), transparent: true, depthWrite: false })
-  );
-  brandWall.position.set(0, 6.0, HALL.l / 2 - 0.07);
-  brandWall.rotation.y = Math.PI;
-  scene.add(brandWall);
-  var doorGlow = new THREE.Mesh(
-    new THREE.PlaneGeometry(3.4, 5),
-    new THREE.MeshBasicMaterial({ map: radialTexture('rgba(108, 92, 255, 0.35)', 'rgba(108, 92, 255, 0)'), transparent: true, depthWrite: false })
-  );
-  doorGlow.position.set(0, 2.4, HALL.l / 2 - 0.06);
-  doorGlow.rotation.y = Math.PI;
-  scene.add(doorGlow);
+  /* the glowing brand sign rides the arch — readable from both sides */
+  var brandTex = brandTexture();
+  [[HALL.l / 2 - 0.09, Math.PI], [HALL.l / 2 + 0.09, 0]].forEach(function (s) {
+    var sign = new THREE.Mesh(
+      new THREE.PlaneGeometry(8, 2),
+      new THREE.MeshBasicMaterial({ map: brandTex, transparent: true, depthWrite: false })
+    );
+    sign.position.set(0, 6.55, s[0]);
+    sign.rotation.y = s[1];
+    scene.add(sign);
+  });
 
-  /* base lights — soft daylight */
-  scene.add(new THREE.AmbientLight(0xffffff, 0.7));
-  scene.add(new THREE.HemisphereLight(0xdfe4ff, 0xf3ece0, 0.85));
-  var sun = new THREE.DirectionalLight(0xfff1dd, 1.5);
-  sun.position.set(4, 14, 6);
+  /* base lights — soft daylight, one true sun */
+  scene.add(new THREE.AmbientLight(0xffffff, 0.62));
+  scene.add(new THREE.HemisphereLight(0xdfe4ff, 0xf3ece0, 0.8));
+  var sun = new THREE.DirectionalLight(0xfff1dd, 1.7);
+  sun.position.set(16, 30, 52);
+  if (!isTouch) {
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(2048, 2048);
+    sun.shadow.camera.left = -42;
+    sun.shadow.camera.right = 42;
+    sun.shadow.camera.top = 46;
+    sun.shadow.camera.bottom = -46;
+    sun.shadow.camera.near = 1;
+    sun.shadow.camera.far = 140;
+    sun.shadow.bias = -0.0004;
+  }
   scene.add(sun);
+  scene.add(sun.target);
+  floor.receiveShadow = true;
   [24, 12, 0, -12, -24].forEach(function (z, i) {
     var p = new THREE.PointLight(i % 2 ? 0xcfc4ff : 0xffe6cf, 16, 22, 1.7);
     p.position.set(0, HALL.h - 0.8, z);
     scene.add(p);
   });
 
-  /* ---------- the stream ---------- */
-  var STREAM = { half: 0.85, zTop: 27, zBot: -27 };
-  var BRIDGES = [26, 12, -4, -20];   /* walkable crossings */
+  /* ---------- the stream: born in the cave, lost over the terrace edge ---------- */
+  var STREAM = { half: 0.85, zTop: 40, zBot: -28.6 };
+  var BRIDGES = [35, 26, 12, -4, -20];   /* walkable crossings */
   (function buildStream() {
     var len = STREAM.zTop - STREAM.zBot;
     /* dark bed gives the water depth on the bright floor */
@@ -661,9 +695,192 @@
       )
     };
     auroraRiver.mesh.rotation.x = -Math.PI / 2;
-    auroraRiver.mesh.position.set(0, 0.05, 0);
+    auroraRiver.mesh.position.set(0, 0.05, (STREAM.zTop + STREAM.zBot) / 2);
     scene.add(auroraRiver.mesh);
   }
+
+  /* ---------- the world outside ---------- */
+  function skyDomeTexture() {
+    var W = 1024, H = 512;
+    var c = ctx2d(W, H);
+    var g = c.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#AFC4FF');
+    g.addColorStop(0.42, '#DCE5FF');
+    g.addColorStop(0.58, '#FFE9D8');
+    g.addColorStop(0.72, '#F2EEF6');
+    g.addColorStop(1, '#EDEBF5');
+    c.fillStyle = g;
+    c.fillRect(0, 0, W, H);
+    /* the sun sits over the valley */
+    var sx = W * 0.5, sy = H * 0.40;
+    var sg = c.createRadialGradient(sx, sy, 0, sx, sy, 150);
+    sg.addColorStop(0, 'rgba(255, 248, 230, 1)');
+    sg.addColorStop(0.2, 'rgba(255, 236, 200, 0.75)');
+    sg.addColorStop(1, 'rgba(255, 236, 200, 0)');
+    c.fillStyle = sg;
+    c.fillRect(0, 0, W, H);
+    for (var n = 0; n < 20; n++) {
+      var x = Math.random() * W, y = H * (0.15 + Math.random() * 0.35), r = 40 + Math.random() * 90;
+      var cl = c.createRadialGradient(x, y, 0, x, y, r);
+      cl.addColorStop(0, 'rgba(255, 255, 255, 0.55)');
+      cl.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      c.fillStyle = cl;
+      c.fillRect(x - r, y - r, r * 2, r * 2);
+    }
+    return asTexture(c.canvas);
+  }
+  var dome = new THREE.Mesh(
+    new THREE.SphereGeometry(110, 24, 16),
+    new THREE.MeshBasicMaterial({ map: skyDomeTexture(), side: THREE.BackSide, fog: false })
+  );
+  dome.rotation.y = Math.PI;   /* sun band faces the terrace view (+z) */
+  scene.add(dome);
+
+  /* painted ridge lines fading into the haze */
+  function ridgeTexture(tint, alpha) {
+    var W = 1024, H = 256;
+    var c = ctx2d(W, H);
+    c.clearRect(0, 0, W, H);
+    c.beginPath();
+    c.moveTo(0, H);
+    var ph = Math.random() * 9;
+    for (var x = 0; x <= W; x += 8) {
+      var u = x * 0.006 + ph;
+      var y = H * 0.62 - Math.abs(Math.sin(u * 0.9) * 60 + noise(u * 1.4, ph) * 70 - 35);
+      c.lineTo(x, y);
+    }
+    c.lineTo(W, H);
+    c.closePath();
+    c.fillStyle = tint;
+    c.globalAlpha = alpha;
+    c.fill();
+    c.globalAlpha = 1;
+    return asTexture(c.canvas);
+  }
+  [
+    { z: 62, w: 170, h: 22, y: 2, tint: '#B9B2D8', a: 0.95 },
+    { z: 78, w: 220, h: 28, y: 5, tint: '#C8C2E2', a: 0.9 },
+    { z: 96, w: 280, h: 36, y: 8, tint: '#D8D3EA', a: 0.85 }
+  ].forEach(function (r) {
+    var m = new THREE.Mesh(
+      new THREE.PlaneGeometry(r.w, r.h),
+      new THREE.MeshBasicMaterial({ map: ridgeTexture(r.tint, r.a), transparent: true, depthWrite: false })
+    );
+    m.position.set(0, r.y, r.z);
+    m.rotation.y = Math.PI;
+    scene.add(m);
+  });
+  /* the valley floor far below */
+  var valley = new THREE.Mesh(new THREE.PlaneGeometry(320, 200), new THREE.MeshBasicMaterial({ color: 0xC9CBBE }));
+  valley.rotation.x = -Math.PI / 2;
+  valley.position.set(0, -13, 110);
+  scene.add(valley);
+
+  /* the terrace: an open stone deck past the arch */
+  var terraceLen = TERRACE.zEnd - HALL.l / 2 + 0.6;
+  var deck = new THREE.Mesh(new THREE.PlaneGeometry(HALL.w, terraceLen + 1), new THREE.MeshStandardMaterial({ color: 0xE8E4DB, roughness: 0.7, metalness: 0.02 }));
+  deck.rotation.x = -Math.PI / 2;
+  deck.position.set(0, 0.001, HALL.l / 2 + terraceLen / 2);
+  deck.receiveShadow = true;
+  scene.add(deck);
+  /* railing: low stone parapet with a light thread */
+  function rail(w, x, z, ry) {
+    var m = new THREE.Mesh(new THREE.BoxGeometry(w, 1.05, 0.16), stoneMat);
+    m.position.set(x, 0.525, z);
+    m.rotation.y = ry;
+    scene.add(m);
+    var line = new THREE.Mesh(new THREE.BoxGeometry(w, 0.025, 0.03), glowLineMat);
+    line.position.set(x, 1.07, z);
+    line.rotation.y = ry;
+    scene.add(line);
+  }
+  rail(HALL.w + 0.4, 0, TERRACE.zEnd + 0.35, 0);
+  rail(terraceLen, -(HALL.w / 2 - 0.08), HALL.l / 2 + terraceLen / 2, Math.PI / 2);
+  rail(terraceLen, HALL.w / 2 - 0.08, HALL.l / 2 + terraceLen / 2, Math.PI / 2);
+
+  /* the stream leaves the terrace as a waterfall into the valley */
+  var fallMaps = [];
+  function waterfall(w, h, x, y, z, ry) {
+    var t = rippleTexture();
+    t.repeat.set(1, h / 2);
+    var m = new THREE.Mesh(
+      new THREE.PlaneGeometry(w, h),
+      new THREE.MeshBasicMaterial({ map: t, transparent: true, opacity: 0.75, depthWrite: false, side: THREE.DoubleSide })
+    );
+    m.position.set(x, y, z);
+    m.rotation.y = ry || 0;
+    scene.add(m);
+    fallMaps.push(t);
+    return m;
+  }
+  waterfall(STREAM.half * 2, 12, 0, -5.9, TERRACE.zEnd + 0.55, 0);
+  var lipFoam = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 1.1), new THREE.MeshBasicMaterial({ map: radialTexture('rgba(255,255,255,0.85)', 'rgba(255,255,255,0)'), transparent: true, depthWrite: false }));
+  lipFoam.rotation.x = -Math.PI / 2;
+  lipFoam.position.set(0, 0.06, TERRACE.zEnd - 0.4);
+  scene.add(lipFoam);
+
+  /* ---------- the cave the stream is born in ---------- */
+  var rockMat = new THREE.MeshStandardMaterial({ color: 0xBAB2C8, roughness: 0.96, metalness: 0.0, flatShading: true });
+  function makeRock(x, y, z, s) {
+    var geo = new THREE.IcosahedronGeometry(1, 2);
+    var p = geo.attributes.position;
+    for (var i = 0; i < p.count; i++) {
+      var vx = p.getX(i), vy = p.getY(i), vz = p.getZ(i);
+      var n = noise(vx * 1.6 + x, vy * 1.6 + z) - 0.5;
+      var k = 1 + n * 0.55;
+      p.setXYZ(i, vx * k, vy * k * 0.82, vz * k);
+    }
+    geo.computeVertexNormals();
+    var m = new THREE.Mesh(geo, rockMat);
+    m.position.set(x, y, z);
+    m.scale.setScalar(s);
+    m.rotation.y = Math.random() * 6.28;
+    scene.add(m);
+    return m;
+  }
+  /* the mouth: rock masses closing the far end, an opening at the center */
+  [
+    [-8.2, 1.6, -29.6, 3.4], [-5.6, 1.0, -31.2, 3.0], [-6.8, 4.8, -30.4, 3.0], [-3.6, 5.6, -32.4, 3.1],
+    [8.2, 1.6, -29.6, 3.4], [5.6, 1.0, -31.2, 3.0], [6.8, 4.8, -30.4, 3.0], [3.6, 5.6, -32.4, 3.1],
+    [0, 8.3, -32.4, 3.6], [-1.8, 7.4, -32.6, 2.6], [1.8, 7.4, -32.6, 2.6],
+    [-8.4, 6.4, -29.8, 2.8], [8.4, 6.4, -29.8, 2.8]
+  ].forEach(function (r) { makeRock(r[0], r[1], r[2], r[3]); });
+  /* cave depth behind everything */
+  var caveBack = new THREE.Mesh(new THREE.PlaneGeometry(30, 18), new THREE.MeshBasicMaterial({ color: 0x2B2542 }));
+  caveBack.position.set(0, 5, -36);
+  scene.add(caveBack);
+  /* glowing crystals + a soft cave light */
+  [[-3.2, 1.1, -30.2, 0.5], [3.6, 0.8, -30.6, 0.4], [-1.2, 6.2, -30.9, 0.45], [2.2, 5.8, -31.2, 0.35]].forEach(function (cr) {
+    var c = new THREE.Mesh(new THREE.IcosahedronGeometry(cr[3], 0), new THREE.MeshBasicMaterial({ color: 0x9d8cff }));
+    c.position.set(cr[0], cr[1], cr[2]);
+    c.rotation.set(Math.random(), Math.random(), Math.random());
+    scene.add(c);
+  });
+  var caveLight = new THREE.PointLight(0x9d8cff, 14, 16, 1.6);
+  caveLight.position.set(0, 3.4, -29.5);
+  scene.add(caveLight);
+
+  /* the source: water slips out of the rock into the channel */
+  var sourceRock = makeRock(0, 0.6, -30.6, 1.8);
+  waterfall(1.5, 1.7, 0, 0.8, -28.9);
+  var sourceFoam = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 1.3), new THREE.MeshBasicMaterial({ map: radialTexture('rgba(255,255,255,0.8)', 'rgba(255,255,255,0)'), transparent: true, depthWrite: false }));
+  sourceFoam.rotation.x = -Math.PI / 2;
+  sourceFoam.position.set(0, 0.055, -27.9);
+  scene.add(sourceFoam);
+  /* mist motes drifting at the source */
+  (function () {
+    var N = 40;
+    var mp = new Float32Array(N * 3);
+    for (var i = 0; i < N; i++) {
+      mp[i * 3] = (Math.random() - 0.5) * 2.2;
+      mp[i * 3 + 1] = Math.random() * 2.2;
+      mp[i * 3 + 2] = -28.4 + (Math.random() - 0.5) * 1.6;
+    }
+    var mg = new THREE.BufferGeometry();
+    mg.setAttribute('position', new THREE.BufferAttribute(mp, 3));
+    var mist = new THREE.Points(mg, new THREE.PointsMaterial({ color: 0xffffff, size: 0.05, transparent: true, opacity: 0.5, depthWrite: false }));
+    scene.add(mist);
+  })();
 
   /* ---------- plants ---------- */
   var plantCollide = [];
@@ -682,6 +899,7 @@
     g.add(soil);
     var trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.06 * s, 0.09 * s, 1.15 * s, 8), new THREE.MeshStandardMaterial({ color: 0x8a755f, roughness: 0.9 }));
     trunk.position.y = 1.0 * s;
+    trunk.castShadow = !isTouch;
     g.add(trunk);
     var greens = [0x7fa578, 0x6f9670, 0x93b58a];
     for (var i = 0; i < 3; i++) {
@@ -690,6 +908,7 @@
         new THREE.MeshStandardMaterial({ color: greens[i], roughness: 0.85, flatShading: true })
       );
       leaf.position.set((Math.random() - 0.5) * 0.3 * s, (1.55 + i * 0.36) * s, (Math.random() - 0.5) * 0.3 * s);
+      leaf.castShadow = !isTouch;
       g.add(leaf);
       foliage.push(leaf);
     }
@@ -701,11 +920,13 @@
     }
     g.position.set(x, 0, z);
     scene.add(g);
-    /* soft contact shadow */
-    var sh = new THREE.Mesh(new THREE.PlaneGeometry(1.9 * s, 1.9 * s), new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, opacity: 0.5, depthWrite: false }));
-    sh.rotation.x = -Math.PI / 2;
-    sh.position.set(x, 0.014, z);
-    scene.add(sh);
+    /* fake contact shadow only where the real sun can't draw one */
+    if (isTouch) {
+      var sh = new THREE.Mesh(new THREE.PlaneGeometry(1.9 * s, 1.9 * s), new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, opacity: 0.5, depthWrite: false }));
+      sh.rotation.x = -Math.PI / 2;
+      sh.position.set(x, 0.014, z);
+      scene.add(sh);
+    }
     plantCollide.push({ x: x, z: z, r: 0.85 * s });
   }
   var blobTex = radialTexture('rgba(40, 34, 66, 0.5)', 'rgba(40, 34, 66, 0)');
@@ -716,43 +937,59 @@
   makeTree(7.3, 4, 1.15);
   makeTree(-7.3, -17, 1.05);
   makeTree(7.3, -17, 1.1);
-  /* smaller shrubs by the water */
+  /* smaller shrubs by the water, on the terrace and at the cave mouth */
   makeTree(-1.9, 18, 0.62);
   makeTree(1.9, 2, 0.6);
   makeTree(-1.9, -12, 0.64);
-  /* grass tufts along the banks */
+  makeTree(-6.6, 36, 1.0);
+  makeTree(6.6, 36, 0.95);
+  makeTree(-4.6, -26.2, 0.72);
+  makeTree(4.4, -27.0, 0.75);
+  /* grass along the banks — one instanced draw call for every blade */
   (function () {
-    var grassMat = new THREE.MeshStandardMaterial({ color: 0x86a781, roughness: 0.9, flatShading: true });
-    for (var i = 0; i < 14; i++) {
-      var gz = STREAM.zBot + 4 + Math.random() * (STREAM.zTop - STREAM.zBot - 8);
-      var onBridge = BRIDGES.some(function (b) { return Math.abs(gz - b) < 1.6; });
-      if (onBridge) continue;
-      var gx = (Math.random() < 0.5 ? -1 : 1) * (STREAM.half + 0.35 + Math.random() * 0.25);
-      for (var k = 0; k < 5; k++) {
-        var blade = new THREE.Mesh(new THREE.ConeGeometry(0.035, 0.24 + Math.random() * 0.18, 5), grassMat);
-        blade.position.set(gx + (Math.random() - 0.5) * 0.22, 0.12, gz + (Math.random() - 0.5) * 0.22);
-        blade.rotation.z = (Math.random() - 0.5) * 0.35;
-        scene.add(blade);
+    var blade = new THREE.ConeGeometry(0.035, 0.3, 5);
+    var mats = [
+      new THREE.MeshStandardMaterial({ color: 0x86a781, roughness: 0.9, flatShading: true }),
+      new THREE.MeshStandardMaterial({ color: 0x74997a, roughness: 0.9, flatShading: true })
+    ];
+    var perMat = 110;
+    var dummy = new THREE.Object3D();
+    mats.forEach(function (mat, mi) {
+      var inst = new THREE.InstancedMesh(blade, mat, perMat);
+      var n = 0, guard = 0;
+      while (n < perMat && guard++ < 800) {
+        var gz = STREAM.zBot + 1.5 + Math.random() * (STREAM.zTop - STREAM.zBot - 3);
+        if (BRIDGES.some(function (b) { return Math.abs(gz - b) < 1.5; })) continue;
+        var gx = (Math.random() < 0.5 ? -1 : 1) * (STREAM.half + 0.32 + Math.random() * 0.3);
+        dummy.position.set(gx + (Math.random() - 0.5) * 0.2, 0.12 + Math.random() * 0.04, gz);
+        dummy.rotation.set(0, Math.random() * 6.28, (Math.random() - 0.5) * 0.4);
+        dummy.scale.setScalar(0.7 + Math.random() * 0.8);
+        dummy.updateMatrix();
+        inst.setMatrixAt(n++, dummy.matrix);
       }
-    }
+      inst.count = n;
+      inst.instanceMatrix.needsUpdate = true;
+      scene.add(inst);
+    });
   })();
 
-  /* benches */
+  /* benches — two, not a furniture store */
   var benches = [];
-  [16, -8].forEach(function (z) {
-    [-1, 1].forEach(function (side) {
-      var b = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.42, 0.6), stoneMat);
-      b.position.set(side * 3.4, 0.21, z);
-      scene.add(b);
-      var edge = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.02, 0.02), glowLineMat);
-      edge.position.set(side * 3.4, 0.43, z + 0.29);
-      scene.add(edge);
+  [[-3.4, 16], [3.4, -8]].forEach(function (bz) {
+    var b = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.42, 0.6), stoneMat);
+    b.position.set(bz[0], 0.21, bz[1]);
+    b.castShadow = !isTouch;
+    scene.add(b);
+    var edge = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.02, 0.02), glowLineMat);
+    edge.position.set(bz[0], 0.43, bz[1] + 0.29);
+    scene.add(edge);
+    if (isTouch) {
       var s = new THREE.Mesh(new THREE.PlaneGeometry(3.0, 1.5), new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, opacity: 0.6, depthWrite: false }));
       s.rotation.x = -Math.PI / 2;
-      s.position.set(side * 3.4, 0.013, z);
+      s.position.set(bz[0], 0.013, bz[1]);
       scene.add(s);
-      benches.push({ x: side * 3.4, z: z, hx: 1.35, hz: 0.65 });
-    });
+    }
+    benches.push({ x: bz[0], z: bz[1], hx: 1.35, hz: 0.65 });
   });
 
   /* floating dust — visible as soft violet motes in the light */
@@ -923,6 +1160,7 @@
   pedestalDefs.forEach(function (def) {
     var base = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.68, 0.95, 24), stoneMat);
     base.position.set(def.x, 0.475, def.z);
+    base.castShadow = !isTouch;
     scene.add(base);
     var ring = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.022, 8, 40), new THREE.MeshBasicMaterial({ color: new THREE.Color(def.accent) }));
     ring.rotation.x = Math.PI / 2;
@@ -1018,11 +1256,11 @@
   ART.forEach(function (art) {
     var group = new THREE.Group();
     var W = art.big ? 4.8 : 2.7, H = art.big ? 3.0 : 1.69;
-    var AY = art.big ? 2.55 : 2.15;
+    var AY = art.big ? 4.0 : 2.15;   /* the cave screen hangs high over the source */
 
     if (art.wall === 'L') { group.position.set(LX, 0, art.z); group.rotation.y = Math.PI / 2; }
     else if (art.wall === 'R') { group.position.set(RX, 0, art.z); group.rotation.y = -Math.PI / 2; }
-    else { group.position.set(0, 0, -HALL.l / 2 + 0.05); }
+    else { group.position.set(0, 0, -29.6); }   /* the finale floats in the cave mouth */
 
     /* colored aura behind the frame (normal blending — reads on light walls) */
     var glow = new THREE.Mesh(
@@ -1347,8 +1585,9 @@
     if (Math.abs(pos.x) < STREAM.half + 0.25 && pos.z < STREAM.zTop && pos.z > STREAM.zBot && !nearBridge(pos.z)) {
       pos.x = (pos.x >= 0 ? 1 : -1) * (STREAM.half + 0.25);
     }
-    for (i = 0; i < benches.length; i++) {
-      b = benches[i];
+    var boxes = benches.concat(portalWalls);
+    for (i = 0; i < boxes.length; i++) {
+      b = boxes[i];
       dx = pos.x - b.x; dz = pos.z - b.z;
       if (Math.abs(dx) < b.hx && Math.abs(dz) < b.hz) {
         if (b.hx - Math.abs(dx) < b.hz - Math.abs(dz)) pos.x = b.x + (dx > 0 ? b.hx : -b.hx);
@@ -1450,10 +1689,11 @@
     playerHalo.position.x = pos.x;
     playerHalo.position.z = pos.z;
     playerHalo.material.opacity = 0.8 + (reduced ? 0 : Math.sin(t * 1.6) * 0.2);
-    /* the water flows */
+    /* the water flows — down the channel and over both falls */
     if (window.__streamMaps && !reduced) {
       window.__streamMaps[0].offset.y -= dt * 0.10;
       window.__streamMaps[1].offset.y -= dt * 0.16;
+      for (var wf = 0; wf < fallMaps.length; wf++) fallMaps[wf].offset.y += dt * 0.55;
     }
     if (auroraRiver && !reduced && liveTick % 2 === 0) {
       auroraRiver.t += dt * 1.8;
