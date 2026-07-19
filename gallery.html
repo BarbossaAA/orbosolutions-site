@@ -46,7 +46,57 @@
   button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
   a { color: inherit; text-decoration: none; }
 
-  #glCanvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+  #glCanvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: 1; }
+
+  /* the real-site screen layer: live iframes composited BEHIND the
+     transparent WebGL canvas, aligned by a CSS 3D camera that mirrors
+     the museum camera. the hall punches a hole where a screen lives. */
+  #screenLayer {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  #screenCam {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+  }
+  .screen-obj {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: #0F0D18;
+    box-shadow: 0 0 60px rgba(108, 92, 255, 0.25);
+  }
+  .screen-obj iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+    background: #0F0D18;
+    pointer-events: none;
+  }
+  body.browsing .screen-obj iframe { pointer-events: auto; }
+  /* while browsing, the hall's canvas lets the pointer through to the site */
+  body.browsing #glCanvas { pointer-events: none; cursor: auto; }
+  #screenExit {
+    position: fixed;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-70px);
+    z-index: 60;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #0e0c18;
+    background: var(--g-accent);
+    border-radius: 999px;
+    padding: 12px 22px;
+    box-shadow: 0 8px 30px rgba(108, 92, 255, 0.5);
+    transition: transform 0.45s var(--ease);
+  }
+  body.browsing #screenExit { transform: translateX(-50%) translateY(0); }
 
   .grain {
     position: fixed;
@@ -337,7 +387,9 @@
 <script>document.documentElement.classList.remove('no-js');
 if ('ontouchstart' in window && matchMedia('(pointer: coarse)').matches) document.documentElement.classList.add('touch');</script>
 
+<div id="screenLayer" aria-hidden="true"><div id="screenCam"></div></div>
 <canvas id="glCanvas"></canvas>
+<button id="screenExit" hidden>✕ חזרה לסיור</button>
 <div class="vignette" aria-hidden="true"></div>
 <div class="grain" aria-hidden="true"></div>
 

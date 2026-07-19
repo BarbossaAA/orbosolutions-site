@@ -48,7 +48,9 @@
   /* ---------- renderer ---------- */
   var renderer;
   try {
-    renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, powerPreference: 'high-performance' });
+    /* alpha canvas: where the hall punches a screen hole, the real
+       site (an iframe on the layer below) shows through */
+    renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
   } catch (e) { renderer = null; }
   if (!renderer || !renderer.getContext()) {
     enterEl.classList.add('no-gl');
@@ -56,11 +58,13 @@
   }
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isTouch ? 1.35 : 1.6));
   renderer.setSize(innerWidth, innerHeight);
+  renderer.setClearColor(0x0a0916, 0);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.06;
 
+  /* no opaque background — the twin star shells cover every direction,
+     so the view is identical, but cleared pixels stay transparent */
   var scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x0a0916);
 
   var camera = new THREE.PerspectiveCamera(66, innerWidth / innerHeight, 0.08, 160);
   camera.rotation.order = 'YXZ';
@@ -2293,19 +2297,19 @@
       body: 'תודה שביקרתם. אם משהו כאן הדליק לכם רעיון — נשמח לשמוע עליו.', contact: true },
     { id: 'terra', num: '08', desc: 'נופים מחושבים מרעש טהור: חול, טחב, חימר, קרח ואבן', px: farR.px, pz: farR.pz, ry: farR.ry, live: 'terra', title: 'TERRA', tag: 'ציור חי · המעבדה', demo: 'מדגים: עולמות מקוד טהור', accent: '#C9A05C', link: 'lab/05-terra-webgl/',
       body: 'רכסי הרים שמחושבים מרעש מתמטי טהור, תחת שמש נמוכה. בגרסה המלאה — חמישה מחקרי נוף: חול, טחב, חימר, קרח ואבן.' },
-    { id: 'mosaic', num: '09', desc: 'פסיפס וורונוי שנולד מחדש בכל כניסה למוזיאון', px: farRR.px, pz: farRR.pz, ry: farRR.ry, gen: mosaicArt, title: 'MOSAIC', tag: 'אמנות גנרטיבית', demo: 'מדגים: אלגוריתם כמעצב', accent: '#6C5CFF',
+    { id: 'mosaic', num: '09', desc: 'פסיפס וורונוי שנולד מחדש בכל כניסה למוזיאון', px: farRR.px, pz: farRR.pz, ry: farRR.ry, live: 'mosaic', title: 'MOSAIC', tag: 'אמנות גנרטיבית', demo: 'מדגים: אלגוריתם כמעצב', accent: '#6C5CFF',
       body: 'פסיפס שנבנה מחלוקת המרחב בין ארבעים ושש נקודות אקראיות. כל כניסה למוזיאון מייצרת פסיפס שלא היה קיים מעולם.' },
     /* right straight wall — systems wing (north), games wing (south) */
     { id: 'crm', num: '10', desc: 'לוח בקרה עסקי חי — כך נראית מערכת שנתפרת לעסק', px: ROOM.hw - 0.06, pz: -4.6, ry: -Math.PI / 2, disp: 'crm', wide: true, title: 'חדר הבקרה', tag: 'תצוגת יכולת · מערכות', demo: 'מדגים: מערכות ניהול ו־BI', accent: '#0FA88C', contact: true,
       body: 'חדר הבקרה של עסק: לוח מחוונים שמראה בדיוק מה שחשוב הבוקר, לקוחות, גרפים וטבלאות שמתעדכנים לבד. בלי אקסלים אבודים ובלי ״רגע, אבדוק ואחזור אליך״. כל עסק מקבל חדר בקרה משלו — דברו איתנו.' },
-    { id: 'genesis', num: '11', desc: 'שלוש מאות קווים בשדה זרימה מתמטי, חושבו בכניסתכם', px: ROOM.hw - 0.06, pz: 0, ry: -Math.PI / 2, gen: genesisArt, title: 'GENESIS', tag: 'אמנות גנרטיבית', demo: 'מדגים: אמנות מקוד', accent: '#0FA88C',
+    { id: 'genesis', num: '11', desc: 'שלוש מאות קווים בשדה זרימה מתמטי, חושבו בכניסתכם', px: ROOM.hw - 0.06, pz: 0, ry: -Math.PI / 2, live: 'genesis', title: 'GENESIS', tag: 'אמנות גנרטיבית', demo: 'מדגים: אמנות מקוד', accent: '#0FA88C',
       body: 'שלוש מאות קווים ששוחררו לשדה זרימה מתמטי. אף אחד לא צייר את היצירה הזאת — היא חושבה, קו אחרי קו, ברגע שנכנסתם.' },
     { id: 'game', num: '12', desc: 'קונפיגורטור אינטראקטיבי — מוצר שמרכיבים תוך כדי משחק', px: ROOM.hw - 0.06, pz: 4.6, ry: -Math.PI / 2, disp: 'game', wide: true, title: 'המגרש', tag: 'תצוגת יכולת · משחקים', demo: 'מדגים: משחקים וקונפיגורטורים', accent: '#E8722E', contact: true,
       body: 'הדרך הכי מהירה להבין מוצר היא לשחק בו: קונפיגורטור שמרכיב מוצר בלייב, סימולטור שמלמד תהליך, משחק שמשאיר מבקרים עוד דקה. אינטראקציה הופכת סקרנות להחלטה — בואו נבנה אחת לשלכם.' },
     /* near curve, right of the door — the walk ends */
     { id: 'flux', num: '13', desc: 'שמונה תוכניות שיידר, ביניהן נוזל שנצבע עם הסמן', px: nearRR.px, pz: nearRR.pz, ry: nearRR.ry, live: 'flux', title: 'FLUX', tag: 'ציור חי · המעבדה', demo: 'מדגים: שיידרים על ה־GPU', accent: '#E0402F', link: 'lab/04-flux-shaders/',
       body: 'שדות צבע שזורמים לפי כללים מתמטיים, ישר מול המעבד הגרפי. בגרסה המלאה — שמונה יצירות, כולל נוזל שמציירים בו עם הסמן.' },
-    { id: 'fractal', num: '14', desc: 'קבוצת ז׳וליה: נוסחה אחת קצרה, אינסוף עולמות', px: nearR.px, pz: nearR.pz, ry: nearR.ry, gen: fractalArt, title: 'JULIA', tag: 'אמנות גנרטיבית', demo: 'מדגים: מתמטיקה חיה', accent: '#7A5CFF',
+    { id: 'fractal', num: '14', desc: 'קבוצת ז׳וליה: נוסחה אחת קצרה, אינסוף עולמות', px: nearR.px, pz: nearR.pz, ry: nearR.ry, live: 'julia', title: 'JULIA', tag: 'אמנות גנרטיבית', demo: 'מדגים: מתמטיקה חיה', accent: '#7A5CFF',
       body: 'קבוצת ז׳וליה — נוסחה אחת קצרה שמכילה אינסוף. חושבה פיקסל־פיקסל בכניסתכם. לפעמים הקסם הוא פשוט מתמטיקה עם טעם טוב.' }
   ];
 
@@ -2390,6 +2394,15 @@
     if (liveState) {
       liveState.texture = tex;
       liveState.plane = plane;
+      liveState.artDef = art;
+      art._live = liveState;
+      /* lab pieces can host their REAL site inside the frame */
+      if (art.link && art.link.indexOf('lab/') === 0) {
+        liveState.embedUrl = art.link;
+        liveState.embedMatrix = gm.clone().multiply(new THREE.Matrix4().makeTranslation(0, AY, off + 0.002));
+        liveState.embedW = W;
+        liveState.embedH = H;
+      }
       liveArts.push(liveState);
     }
 
@@ -2552,8 +2565,10 @@
   addEventListener('keydown', function (e) { keys[e.code] = true; if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') running = true; });
   addEventListener('keyup', function (e) { keys[e.code] = false; if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') running = false; });
   canvas.addEventListener('click', function () {
-    if (!started || isTouch || panelOpen) return;
+    if (!started || isTouch || panelOpen || browsing) return;
     if (!locked) { requestLock(); return; }
+    /* a screen with the real site inside opens for browsing */
+    if (hoverArt && hoverArt._live && hoverArt._live.embedActive) { enterBrowse(); return; }
     if (hoverArt) openPanel(hoverArt);
   });
 
@@ -2635,7 +2650,11 @@
     hoverArt = art;
     if (art) {
       crosshair.classList.add('hot');
-      showHint(isTouch ? 'הקישו לפרטים' : '״' + art.title + '״ — לחצו לפרטים');
+      if (art._live && art._live.embedActive) {
+        showHint('זה האתר האמיתי, רץ בתוך המסך — לחצו כדי לגלוש בו');
+      } else {
+        showHint(isTouch ? 'הקישו לפרטים' : '״' + art.title + '״ — לחצו לפרטים');
+      }
     } else {
       crosshair.classList.remove('hot');
       hintWrap.classList.remove('show');
@@ -2686,7 +2705,10 @@
   }
   panelResume.addEventListener('click', function () { closePanel(true); });
   panelClose.addEventListener('click', function () { closePanel(true); });
-  addEventListener('keydown', function (e) { if (e.code === 'Escape' && panelOpen) closePanel(false); });
+  addEventListener('keydown', function (e) {
+    if (e.code === 'Escape' && panelOpen) closePanel(false);
+    else if (e.code === 'Escape' && browsing) exitBrowse(true);
+  });
 
   /* ---------- entry ---------- */
   enterBtn.addEventListener('click', function () {
@@ -2735,7 +2757,7 @@
     fwd.set(-Math.sin(yaw), 0, -Math.cos(yaw));
     rgt.set(Math.cos(yaw), 0, -Math.sin(yaw));
     wish.set(0, 0, 0);
-    if (!panelOpen) {
+    if (!panelOpen && !browsing) {
       if (keys.KeyW || keys.ArrowUp) wish.add(fwd);
       if (keys.KeyS || keys.ArrowDown) wish.sub(fwd);
       if (keys.KeyD || keys.ArrowRight) wish.add(rgt);
@@ -2787,15 +2809,159 @@
   /* ---------- living paintings ----------
      a painted frame is a full canvas redraw plus a GPU texture upload,
      so ration them hard: every 3rd frame, only pieces actually inside
-     the view frustum and within 10m, and of those the two nearest. */
+     the view frustum and within 12m, and of those the two nearest —
+     plus a rotation so nothing ever freezes. every painting watches
+     the visitor: the gaze point on the canvas feeds mx/my. */
   var liveTick = 0;
   var liveFrustum = new THREE.Frustum();
   var liveProj = new THREE.Matrix4();
   var liveSphere = new THREE.Sphere(new THREE.Vector3(), 1.8);
   var liveWp = new THREE.Vector3();
+  var gazeRay = new THREE.Raycaster();
+
+  /* museum-local live painters (kinds ORBO_LAB doesn't know):
+     the generative pieces, reborn as slow-breathing living works */
+  var LOCAL_LIVE = {
+    /* MOSAIC — the voronoi cells breathe and answer the gaze.
+       cell ownership is computed once; frames only recolor. */
+    mosaic: function (s) {
+      var w = s.w, h = s.h, c = s.ctx;
+      if (!s.cache) {
+        var N = 46;
+        var palette = [[26, 20, 44], [40, 30, 70], [58, 44, 108], [91, 76, 245], [157, 140, 255], [255, 176, 128], [22, 17, 36]];
+        var pts = [];
+        for (var i = 0; i < N; i++) pts.push([Math.random() * w, Math.random() * h, i % palette.length, Math.random() * 6.28]);
+        var idx = new Uint8Array(w * h);
+        var edge = new Float32Array(w * h);
+        for (var y = 0; y < h; y++) {
+          for (var x = 0; x < w; x++) {
+            var d1 = 1e9, d2 = 1e9, ki = 0;
+            for (var k = 0; k < N; k++) {
+              var dx = x - pts[k][0], dy = y - pts[k][1];
+              var d = dx * dx + dy * dy;
+              if (d < d1) { d2 = d1; d1 = d; ki = k; }
+              else if (d < d2) { d2 = d; }
+            }
+            var o = y * w + x;
+            idx[o] = ki;
+            edge[o] = Math.min((Math.sqrt(d2) - Math.sqrt(d1)) / 6, 1);
+          }
+        }
+        s.cache = { pts: pts, palette: palette, idx: idx, edge: edge, img: c.createImageData(w, h), cols: new Float32Array(N * 3) };
+      }
+      var C = s.cache;
+      var gx = (s.mx === undefined ? 0.5 : s.mx) * w, gy = (s.my === undefined ? 0.5 : s.my) * h;
+      for (var k2 = 0; k2 < C.pts.length; k2++) {
+        var P2 = C.palette[C.pts[k2][2]];
+        var breathe = 0.72 + 0.3 * Math.sin(s.t * 0.9 + C.pts[k2][3]);
+        var gd = 1 - Math.min(1, Math.hypot(C.pts[k2][0] - gx, C.pts[k2][1] - gy) / (w * 0.3));
+        var boost = breathe + gd * gd * 0.9;
+        C.cols[k2 * 3] = Math.min(255, P2[0] * boost);
+        C.cols[k2 * 3 + 1] = Math.min(255, P2[1] * boost);
+        C.cols[k2 * 3 + 2] = Math.min(255, P2[2] * boost);
+      }
+      var dd = C.img.data;
+      for (var o2 = 0; o2 < C.idx.length; o2++) {
+        var ci = C.idx[o2] * 3, e = C.edge[o2], b = o2 * 4;
+        dd[b] = C.cols[ci] * e;
+        dd[b + 1] = C.cols[ci + 1] * e;
+        dd[b + 2] = C.cols[ci + 2] * e;
+        dd[b + 3] = 255;
+      }
+      c.putImageData(C.img, 0, 0);
+    },
+    /* GENESIS — the field keeps growing: old strokes sink into the
+       linen while fresh lines spring from wherever you look */
+    genesis: function (s) {
+      var w = s.w, h = s.h, c = s.ctx;
+      var cols = ['rgba(157, 140, 255,', 'rgba(255, 176, 128,', 'rgba(120, 170, 255,', 'rgba(201, 175, 255,'];
+      if (!s.cache) {
+        c.fillStyle = '#0e0a18';
+        c.fillRect(0, 0, w, h);
+        s.cache = { born: 0 };
+      }
+      c.fillStyle = 'rgba(14, 10, 24, 0.03)';
+      c.fillRect(0, 0, w, h);
+      var gx = (s.mx === undefined ? 0.5 : s.mx) * w, gy = (s.my === undefined ? 0.5 : s.my) * h;
+      var burst = s.cache.born < 40 ? 12 : 5;   /* thick first growth, then a steady pulse */
+      s.cache.born++;
+      for (var p = 0; p < burst; p++) {
+        var x = gx + (Math.random() - 0.5) * w * 0.5;
+        var y = gy + (Math.random() - 0.5) * h * 0.5;
+        c.beginPath();
+        c.moveTo(x, y);
+        for (var seg = 0; seg < 60; seg++) {
+          var a = noise(x * 0.008, y * 0.008) * Math.PI * 4;
+          x += Math.cos(a) * 3;
+          y += Math.sin(a) * 3;
+          c.lineTo(x, y);
+        }
+        c.strokeStyle = cols[(Math.random() * 4) | 0] + (0.15 + Math.random() * 0.18) + ')';
+        c.lineWidth = 1.1;
+        c.stroke();
+      }
+    },
+    /* JULIA — the set is computed once; the palette breathes through
+       it and brightens under the gaze */
+    julia: function (s) {
+      var w = s.w, h = s.h, c = s.ctx;
+      if (!s.cache) {
+        var cr = -0.79, ci2 = 0.15;
+        var it = new Float32Array(w * h);
+        for (var y = 0; y < h; y++) {
+          for (var x = 0; x < w; x++) {
+            var zr = (x - w / 2) / (h * 0.42), zi = (y - h / 2) / (h * 0.42);
+            var n2 = 0, max = 70;
+            while (n2 < max && zr * zr + zi * zi < 4) {
+              var tt = zr * zr - zi * zi + cr;
+              zi = 2 * zr * zi + ci2;
+              zr = tt;
+              n2++;
+            }
+            it[y * w + x] = n2 === max ? -1 : n2 / max;
+          }
+        }
+        s.cache = { it: it, img: c.createImageData(w, h) };
+      }
+      var C = s.cache;
+      var k1 = 1 + 0.25 * Math.sin(s.t * 0.6);
+      var k2 = 1 + 0.25 * Math.sin(s.t * 0.6 + 2.1);
+      var k3 = 1 + 0.25 * Math.sin(s.t * 0.6 + 4.2);
+      var gx = (s.mx === undefined ? 0.5 : s.mx) * w, gy = (s.my === undefined ? 0.5 : s.my) * h;
+      var rad2 = (w * 0.28) * (w * 0.28);
+      var dd = C.img.data;
+      for (var o = 0, yy = 0; yy < h; yy++) {
+        var dy2 = (yy - gy) * (yy - gy);
+        for (var xx = 0; xx < w; xx++, o++) {
+          var b = o * 4;
+          var f = C.it[o];
+          if (f < 0) {
+            dd[b] = 12; dd[b + 1] = 9; dd[b + 2] = 22;
+          } else {
+            var dx2 = (xx - gx) * (xx - gx);
+            var gb = 1 + Math.max(0, 1 - (dx2 + dy2) / rad2) * 0.55;
+            dd[b] = Math.min(255, (20 + 200 * Math.pow(f, 1.6)) * k1 * gb);
+            dd[b + 1] = Math.min(255, (14 + 130 * Math.pow(f, 2.1)) * k2 * gb);
+            dd[b + 2] = Math.min(255, (40 + 215 * Math.pow(f, 0.9)) * k3 * gb);
+          }
+          dd[b + 3] = 255;
+        }
+      }
+      c.putImageData(C.img, 0, 0);
+    }
+  };
+
   function paintOne(L, adv) {
     L.t += adv;
-    ORBO_LAB.draw[L.kind]({ ctx: L.art, w: L.w, h: L.h, t: L.t, seed: L.seed });
+    if (!L.state) L.state = { ctx: L.art, w: L.w, h: L.h, seed: L.seed, mx: 0.5, my: 0.5 };
+    L.state.t = L.t;
+    /* attention: gazed-at pieces track the exact look point; the rest
+       wander gently so they read alive from any distance */
+    var tx = L._gx === undefined ? 0.5 + Math.sin(L.t * 0.23) * 0.3 : L._gx;
+    var ty = L._gy === undefined ? 0.5 + Math.sin(L.t * 0.17 + 2) * 0.25 : L._gy;
+    L.state.mx += (tx - L.state.mx) * 0.14;
+    L.state.my += (ty - L.state.my) * 0.14;
+    (ORBO_LAB.draw[L.kind] || LOCAL_LIVE[L.kind])(L.state);
     var g = L.tex;
     g.fillStyle = '#0F0D18';
     g.fillRect(0, 0, L.w, L.h);
@@ -2818,24 +2984,38 @@
       var L = liveArts[i];
       L.plane.getWorldPosition(liveWp);
       L._d = liveWp.distanceTo(pos);
+      L._gx = undefined;
+      L._gy = undefined;
+      if (L.embedActive) continue;   /* the real site is on this wall now */
       if (L._d > 12) continue;
       liveSphere.center.copy(liveWp);
       if (!liveFrustum.intersectsSphere(liveSphere)) continue;
       if (L._d < d1) { d2 = d1; near2 = near1; d1 = L._d; near1 = L; }
       else if (L._d < d2) { d2 = L._d; near2 = L; }
     }
+    /* where exactly is the visitor looking on the nearest canvases? */
+    [near1, near2].forEach(function (L) {
+      if (!L) return;
+      gazeRay.setFromCamera({ x: 0, y: 0 }, camera);
+      var hit = gazeRay.intersectObject(L.plane, false);
+      if (hit.length && hit[0].uv) {
+        L._gx = hit[0].uv.x;
+        L._gy = 1 - hit[0].uv.y;
+      }
+    });
     /* dt*3 keeps on-canvas speed steady at the sparser paint rate */
     if (near1) paintOne(near1, dt * 3 * (1 + Math.max(0, 1 - d1 / 9) * 1.25));
     if (near2) paintOne(near2, dt * 3 * (1 + Math.max(0, 1 - d2 / 9) * 1.25));
-    /* one more painting refreshes in rotation every tick, so EVERY canvas
-       in the hall visibly lives (~4fps each) — a museum where nothing moves
-       is a museum of posters */
-    for (var k = 0; k < liveArts.length; k++) {
+    /* two more paintings refresh in rotation every tick, so EVERY canvas
+       in the hall visibly lives — a museum where nothing moves is a
+       museum of posters */
+    var rotated = 0;
+    for (var k = 0; k < liveArts.length && rotated < 2; k++) {
       liveIdle = (liveIdle + 1) % liveArts.length;
       var IL = liveArts[liveIdle];
       if (IL !== near1 && IL !== near2 && IL._d < 26) {
-        paintOne(IL, dt * 3 * liveArts.length * 0.5);
-        break;
+        paintOne(IL, dt * 3 * liveArts.length * 0.3);
+        rotated++;
       }
     }
   }
@@ -2844,7 +3024,7 @@
      the others settle in a few */
   liveArts.forEach(function (L, i) {
     setTimeout(function () {
-      var warm = L.kind === 'flux' ? 46 : 6;
+      var warm = L.kind === 'flux' ? 46 : L.kind === 'genesis' ? 34 : 6;
       for (var w = 0; w < warm; w++) paintOne(L, 0.05);
     }, 450 + i * 130);
   });
@@ -2882,6 +3062,123 @@
   liveDisplays.forEach(function (L, i) {
     setTimeout(function () { paintDisplayOverlay(L, 0.001); }, 500 + i * 90);
   });
+
+  /* ---------- real sites inside the frames ----------
+     walk up to a lab painting on desktop and the ACTUAL site mounts
+     inside its frame: the wall punches a transparent hole and a live
+     iframe, held in place by a CSS 3D camera that mirrors the museum
+     camera, shows through. click the screen to browse the real site
+     on the wall; ESC (or the return pill) resumes the tour.
+     one screen at a time; phones keep the painted versions. */
+  var screenLayer = document.getElementById('screenLayer');
+  var screenCam = document.getElementById('screenCam');
+  var screenExit = document.getElementById('screenExit');
+  var SCREEN_PPU = 340;                    /* css px per world unit */
+  var punchMat = new THREE.MeshBasicMaterial({ colorWrite: false });
+  var activeScreen = null;
+  var browsing = false;
+  var screenClock = 0;
+  var canEmbed = !isTouch && !reduced && screenLayer && screenCam && window.CSS && CSS.supports && CSS.supports('transform-style', 'preserve-3d');
+
+  function ep(v) { return Math.abs(v) < 1e-10 ? 0 : v; }
+  function cameraCSSMatrix(m) {
+    var e = m.elements;
+    return 'matrix3d(' + ep(e[0]) + ',' + ep(-e[1]) + ',' + ep(e[2]) + ',' + ep(e[3]) + ',' +
+      ep(e[4]) + ',' + ep(-e[5]) + ',' + ep(e[6]) + ',' + ep(e[7]) + ',' +
+      ep(e[8]) + ',' + ep(-e[9]) + ',' + ep(e[10]) + ',' + ep(e[11]) + ',' +
+      ep(e[12]) + ',' + ep(-e[13]) + ',' + ep(e[14]) + ',' + ep(e[15]) + ')';
+  }
+  function objectCSSMatrix(m) {
+    var e = m.elements;
+    return 'translate(-50%,-50%)matrix3d(' + ep(e[0]) + ',' + ep(e[1]) + ',' + ep(e[2]) + ',' + ep(e[3]) + ',' +
+      ep(-e[4]) + ',' + ep(-e[5]) + ',' + ep(-e[6]) + ',' + ep(-e[7]) + ',' +
+      ep(e[8]) + ',' + ep(e[9]) + ',' + ep(e[10]) + ',' + ep(e[11]) + ',' +
+      ep(e[12]) + ',' + ep(e[13]) + ',' + ep(e[14]) + ',' + ep(e[15]) + ')';
+  }
+  function syncScreenCamera() {
+    if (!activeScreen) return;
+    var hh = innerHeight / 2;
+    var fovPx = camera.projectionMatrix.elements[5] * hh;
+    screenLayer.style.perspective = fovPx + 'px';
+    camera.updateMatrixWorld();
+    screenCam.style.transform = 'translateZ(' + fovPx + 'px)' + cameraCSSMatrix(camera.matrixWorldInverse) +
+      'translate(' + (innerWidth / 2) + 'px,' + hh + 'px)';
+  }
+  function mountScreen(L) {
+    var el = document.createElement('div');
+    el.className = 'screen-obj';
+    el.style.width = Math.round(L.embedW * SCREEN_PPU) + 'px';
+    el.style.height = Math.round(L.embedH * SCREEN_PPU) + 'px';
+    var m = L.embedMatrix.clone();
+    m.multiply(new THREE.Matrix4().makeScale(1 / SCREEN_PPU, 1 / SCREEN_PPU, 1 / SCREEN_PPU));
+    el.style.transform = objectCSSMatrix(m);
+    var fr = document.createElement('iframe');
+    fr.src = L.embedUrl;
+    fr.loading = 'eager';
+    fr.title = L.artDef.title;
+    el.appendChild(fr);
+    screenCam.appendChild(el);
+    L._screenEl = el;
+    L.embedActive = true;
+    /* the wall opens: depth-only material punches the hole first */
+    L._origMat = L.plane.material;
+    L.plane.material = punchMat;
+    L.plane.renderOrder = -2;
+    activeScreen = L;
+    syncScreenCamera();
+  }
+  function unmountScreen() {
+    if (!activeScreen) return;
+    var L = activeScreen;
+    if (browsing) exitBrowse(false);
+    L.plane.material = L._origMat;
+    L.plane.renderOrder = 0;
+    L.embedActive = false;
+    if (L._screenEl) {
+      screenCam.removeChild(L._screenEl);
+      L._screenEl = null;
+    }
+    activeScreen = null;
+  }
+  function tickScreens(dt) {
+    if (!canEmbed) return;
+    screenClock += dt;
+    if (screenClock < 0.3) return;
+    screenClock = 0;
+    if (browsing) return;                     /* never swap under the visitor */
+    var best = null, bd = 1e9;
+    /* the screen the visitor is LOOKING at wins; otherwise the nearest */
+    if (hoverArt && hoverArt._live && hoverArt._live.embedUrl && hoverArt._live._d !== undefined && hoverArt._live._d < 5.5) {
+      best = hoverArt._live;
+    } else {
+      for (var i = 0; i < liveArts.length; i++) {
+        var L = liveArts[i];
+        if (!L.embedUrl || L._d === undefined) continue;
+        if (L._d < 5 && L._d < bd) { bd = L._d; best = L; }
+      }
+    }
+    if (activeScreen && (activeScreen._d === undefined || activeScreen._d > 6.5)) unmountScreen();
+    if (best && best !== activeScreen) {
+      unmountScreen();
+      mountScreen(best);
+    }
+  }
+  function enterBrowse() {
+    if (!activeScreen) return;
+    browsing = true;
+    document.body.classList.add('browsing');
+    screenExit.hidden = false;
+    if (locked && document.exitPointerLock) document.exitPointerLock();
+    showHint('אתם בתוך האתר האמיתי — גלשו חופשי. ESC או הכפתור למעלה מחזירים לסיור', 5200);
+  }
+  function exitBrowse(relock) {
+    browsing = false;
+    document.body.classList.remove('browsing');
+    screenExit.hidden = true;
+    hintWrap.classList.remove('show');
+    if (relock && !isTouch) requestLock();
+  }
+  if (screenExit) screenExit.addEventListener('click', function () { exitBrowse(true); });
 
   /* ---------- holograms tick ---------- */
   function tickHolograms(t, dt) {
@@ -2982,6 +3279,8 @@
     if (spotClock > 0.5) { spotClock = 0; assignSpots(); }
     paintLive(dt);
     paintDisplays(dt);
+    tickScreens(dt);
+    if (activeScreen) syncScreenCamera();
     tickHolograms(t, dt);
     tickReactive(t, dt);
 
@@ -3005,6 +3304,7 @@
     camera.aspect = innerWidth / innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(innerWidth, innerHeight);
+    if (activeScreen) syncScreenCamera();
   });
   setTimeout(function () {
     if (!renderer.domElement.width && innerWidth) {
@@ -3028,6 +3328,8 @@
       assignSpots();
       paintLive(dt);
       paintDisplays(dt);
+      tickScreens(dt);
+      if (activeScreen) syncScreenCamera();
       tickHolograms(t, dt);
       tickReactive(t, dt);
       renderer.render(scene, camera);
