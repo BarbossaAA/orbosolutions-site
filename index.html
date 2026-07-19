@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Orbo Solutions | כל מה שהעסק שלכם צריך</title>
-<meta name="description" content="סטודיו דיגיטלי לעסקים: אתרים, אפליקציות, מערכות ואוטומציה, עם ליווי אמיתי מהרעיון ועד המציאות.">
+<title>אורבו סולושנס | בניית אתרים, אפליקציות ואוטומציה לעסקים</title>
+<meta name="description" content="סטודיו בוטיק של שני אחים שבונה בקוד, בלי תבניות: אתרי תדמית, אפליקציות, מערכות עסקיות ואוטומציית AI. עד שלושה פרויקטים במקביל — בואו לראות את המוזיאון.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Orbo Solutions">
-<meta property="og:title" content="Orbo Solutions | כל מה שהעסק שלכם צריך">
-<meta property="og:description" content="סטודיו דיגיטלי לעסקים: אתרים, אפליקציות, מערכות ואוטומציה, עם ליווי אמיתי מהרעיון ועד המציאות.">
+<meta property="og:title" content="אורבו סולושנס | בניית אתרים, אפליקציות ואוטומציה לעסקים">
+<meta property="og:description" content="סטודיו בוטיק של שני אחים שבונה בקוד, בלי תבניות: אתרי תדמית, אפליקציות, מערכות עסקיות ואוטומציית AI. עד שלושה פרויקטים במקביל — בואו לראות את המוזיאון.">
 <meta property="og:url" content="https://orbosolutions.com/">
 <meta property="og:image" content="https://orbosolutions.com/ad/ad-1080x1350.png">
 <meta property="og:locale" content="he_IL">
@@ -20,10 +20,14 @@
   "@context": "https://schema.org",
   "@graph": [
     {
-      "@type": "Organization",
+      "@type": ["Organization", "ProfessionalService"],
       "@id": "https://orbosolutions.com/#org",
       "name": "Orbo Solutions",
-      "alternateName": ["Orbo", "ORBO SOLUTIONS", "אורבו סולושנס"],
+      "alternateName": ["Orbo", "ORBO SOLUTIONS", "אורבו סולושנס", "אורבו"],
+      "priceRange": "₪₪",
+      "address": { "@type": "PostalAddress", "addressCountry": "IL" },
+      "openingHoursSpecification": { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"], "opens": "09:00", "closes": "18:00" },
+      "slogan": "רעיונות יש לכולם. אנחנו הופכים אותם למציאות.",
       "disambiguatingDescription": "Orbo Solutions (orbosolutions.com) — סטודיו ישראלי למוצרים דיגיטליים ואוטומציה. Digital product & automation studio, Israel.",
       "url": "https://orbosolutions.com/",
       "logo": "https://orbosolutions.com/assets/img/app-icon-512.png",
@@ -40,6 +44,19 @@
         "telephone": "+972-52-846-3293",
         "contactType": "sales",
         "availableLanguage": ["he", "en"]
+      },
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "שירותי הסטודיו",
+        "itemListElement": [
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "בניית אתרים ואתרי תדמית", "description": "בניית אתר לעסק: אתרי תדמית פרימיום, חוויות תלת־ממד ו-WebGL, דפי נחיתה, מחשבונים ודשבורדים." } },
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "פיתוח אפליקציות ותוכנה", "description": "פיתוח אפליקציות ווב, MVP לסטארטאפ, מערכות SaaS, תשלומים, הרשאות ו-API בענן." } },
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "מערכות עסקיות ו-CRM", "description": "פיתוח מערכת CRM מותאמת אישית, ניהול עבודות והצעות מחיר, מלאי, פורטלים ודוחות לעסק." } },
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "אוטומציה עסקית ו-AI", "description": "אוטומציה לעסק עם סוכני AI: מיון פניות, עיבוד מסמכים, טיוטות מענה וחיבור בין מערכות." } },
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "משחקים וקונפיגורטורים", "description": "משחקי מותג, סימולטורים, קונפיגורטורים של מוצר והדרכות אינטראקטיביות בדפדפן." } },
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "הצלת קוד ומודרניזציה", "description": "תיקון באגים, סקירת קוד, שדרוג מערכות ישנות, שיפור ביצועים ואבטחה." } },
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "תחזוקת אתרים וליווי שוטף", "description": "תחזוקת אתר חודשית, ניטור, גיבויים, עדכוני תוכן ושיפורים מתמשכים." } }
+        ]
       }
     },
     {
@@ -47,7 +64,7 @@
       "@id": "https://orbosolutions.com/#site",
       "url": "https://orbosolutions.com/",
       "name": "Orbo Solutions",
-      "alternateName": "Orbo",
+      "alternateName": ["Orbo", "אורבו סולושנס"],
       "inLanguage": "he",
       "publisher": { "@id": "https://orbosolutions.com/#org" }
     },
@@ -55,7 +72,7 @@
       "@type": "WebPage",
       "@id": "https://orbosolutions.com/#home",
       "url": "https://orbosolutions.com/",
-      "name": "Orbo Solutions | כל מה שהעסק שלכם צריך",
+      "name": "אורבו סולושנס | בניית אתרים, אפליקציות ואוטומציה לעסקים",
       "isPartOf": { "@id": "https://orbosolutions.com/#site" },
       "about": { "@id": "https://orbosolutions.com/#org" },
       "inLanguage": "he"
@@ -588,7 +605,7 @@
         </svg>
         <span class="logo-text">ORBO<span class="logo-sep">·</span>SOLUTIONS</span>
       </a>
-      <p class="footer-tagline">סטודיו למוצרים דיגיטליים ואוטומציה.<br>מתכננים, מעצבים ובונים, מהרעיון ועד המציאות.</p>
+      <p class="footer-tagline"><strong>אורבו סולושנס</strong> — סטודיו לבניית אתרים, פיתוח אפליקציות,<br>מערכות עסקיות ואוטומציית AI. מהרעיון ועד המציאות.</p>
     </div>
     <nav class="footer-nav" aria-label="ניווט תחתון">
       <a href="index.html">בית</a>
@@ -605,8 +622,13 @@
       <a href="tel:+972528463293" class="footer-mail">052-846-3293</a>
     </div>
   </div>
+  <div class="container" style="padding-block: 6px 22px">
+    <p style="font-size: 0.86rem; color: var(--ink-soft); max-width: 74em; line-height: 1.85; font-weight: 300; border-top: 1px solid var(--line); padding-top: 20px">
+      <strong>אורבו סולושנס (Orbo Solutions)</strong> היא סטודיו ישראלי לבניית אתרים ופיתוח תוכנה בהתאמה אישית: בניית אתרי תדמית פרימיום וחוויות תלת־ממד, פיתוח אפליקציות ווב ו־MVP לסטארטאפים, מערכות ניהול ו־CRM בהתאמה אישית, אוטומציה עסקית עם סוכני AI, קונפיגורטורים ומשחקים שיווקיים, הצלת קוד ומודרניזציה של מערכות קיימות — ותחזוקת אתרים שוטפת. הכול נכתב בקוד, בלי תבניות. אפשר להתרשם מהרמה עוד לפני שיחה ראשונה: ב<a href="gallery.html" style="color: var(--accent)">מוזיאון התלת־ממדי</a> שמשמש אותנו כתיק עבודות, ב<a href="lab/" style="color: var(--accent)">מעבדת ORBO LAB</a>, ובאתר החי שבנינו — <a href="https://bisomna.com" rel="noopener" style="color: var(--accent)" dir="ltr">bisomna.com</a>. עובדים עם עסקים וסטארטאפים בכל הארץ.
+    </p>
+  </div>
   <div class="container footer-bottom">
-    <span>© <span id="year">2026</span> Orbo Solutions. כל הזכויות שמורות.</span>
+    <span>© <span id="year">2026</span> אורבו סולושנס | Orbo Solutions. כל הזכויות שמורות.</span>
     <span class="footer-made">Digital Product &amp; Automation Studio</span>
   </div>
 </footer>

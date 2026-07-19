@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-<url><loc>https://orbosolutions.com/</loc><lastmod>2026-07-18</lastmod></url>
-<url><loc>https://orbosolutions.com/services.html</loc><lastmod>2026-07-18</lastmod></url>
-<url><loc>https://orbosolutions.com/work.html</loc><lastmod>2026-07-18</lastmod></url>
-<url><loc>https://orbosolutions.com/gallery.html</loc><lastmod>2026-07-18</lastmod></url>
-<url><loc>https://orbosolutions.com/studio.html</loc><lastmod>2026-07-18</lastmod></url>
-<url><loc>https://orbosolutions.com/lab/</loc><lastmod>2026-07-18</lastmod></url>
-<url><loc>https://orbosolutions.com/contact.html</loc><lastmod>2026-07-18</lastmod></url>
+<url><loc>https://orbosolutions.com/</loc><lastmod>2026-07-19</lastmod></url>
+<url><loc>https://orbosolutions.com/services.html</loc><lastmod>2026-07-19</lastmod></url>
+<url><loc>https://orbosolutions.com/work.html</loc><lastmod>2026-07-19</lastmod></url>
+<url><loc>https://orbosolutions.com/gallery.html</loc><lastmod>2026-07-19</lastmod></url>
+<url><loc>https://orbosolutions.com/studio.html</loc><lastmod>2026-07-19</lastmod></url>
+<url><loc>https://orbosolutions.com/lab/</loc><lastmod>2026-07-19</lastmod></url>
+<url><loc>https://orbosolutions.com/contact.html</loc><lastmod>2026-07-19</lastmod></url>
+<url><loc>https://orbosolutions.com/lab/01-aurora-gsap/</loc><lastmod>2026-07-19</lastmod></url>
+<url><loc>https://orbosolutions.com/lab/02-nebula-three/</loc><lastmod>2026-07-19</lastmod></url>
+<url><loc>https://orbosolutions.com/lab/03-prism-r3f/</loc><lastmod>2026-07-19</lastmod></url>
+<url><loc>https://orbosolutions.com/lab/04-flux-shaders/</loc><lastmod>2026-07-19</lastmod></url>
+<url><loc>https://orbosolutions.com/lab/05-terra-webgl/</loc><lastmod>2026-07-19</lastmod></url>
 </urlset>
