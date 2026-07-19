@@ -1,5 +1,5 @@
 /* ============================================================
-   FLUX — main.js
+   FLUX - main.js
    Raw WebGL2 engine. One shared requestAnimationFrame drives
    every visible tile; the fullscreen inspector takes over the
    frame budget while it is open. The GL core uses zero
@@ -104,7 +104,7 @@ function createProgram(gl, vsSrc, fsSrc) {
   return prog;
 }
 
-// one fullscreen triangle — cheaper than a quad, no diagonal seam
+// one fullscreen triangle - cheaper than a quad, no diagonal seam
 function setupSurface(gl) {
   const vao = gl.createVertexArray();
   gl.bindVertexArray(vao);
@@ -129,7 +129,7 @@ const CTX_OPTS = { antialias: false, alpha: false, depth: false, stencil: false,
 /* ---------------- ping-pong feedback rig (008 FLOW) ----------- */
 /* Two render targets trade places every frame: read the previous
    state, write the next. RGBA16F when the GPU can render to it,
-   RGBA8 otherwise — the piece survives the downgrade. */
+   RGBA8 otherwise - the piece survives the downgrade. */
 
 class FeedbackRig {
   constructor(gl, def, vao) {
@@ -190,7 +190,7 @@ class FeedbackRig {
 
   resize(canvasW, canvasH) {
     // sim resolution is capped independent of display size (~512 on the
-    // long side); the view pass upscales. Feedback ink is soft — it survives.
+    // long side); the view pass upscales. Feedback ink is soft - it survives.
     const long = Math.max(canvasW, canvasH, 1);
     const s = Math.min(1, SIM_MAX / long);
     const w = Math.max(1, Math.round(canvasW * s));
@@ -203,7 +203,7 @@ class FeedbackRig {
     let a = this.makeTarget(w, h);
     let b = this.makeTarget(w, h);
     if (this.fmt === 'RGBA16F' && (!a.ok || !b.ok)) {
-      // the extension said yes but the framebuffer said no — fall back
+      // the extension said yes but the framebuffer said no - fall back
       this.free(a); this.free(b);
       this.fmt = 'RGBA8';
       a = this.makeTarget(w, h);
@@ -394,7 +394,7 @@ class Tile {
   }
 }
 
-// 008 FLOW — the tile that remembers: ping-pong feedback state
+// 008 FLOW - the tile that remembers: ping-pong feedback state
 class FlowTile extends Tile {
   constructor(def, el, canvas, i) {
     super(def, el, canvas, i);
@@ -439,7 +439,7 @@ function buildTiles() {
     el.dataset.i = i;
     el.style.setProperty('--i', i);
     el.setAttribute('role', 'button');
-    el.setAttribute('aria-label', `Open ${def.name} — ${def.tech} — in the fullscreen inspector`);
+    el.setAttribute('aria-label', `Open ${def.name} - ${def.tech} - in the fullscreen inspector`);
     el.innerHTML = `
       <canvas></canvas>
       <div class="tile-row tile-top">
@@ -747,7 +747,7 @@ function closeModal() {
     G.set(modal.el, { clearProps: 'clipPath' });
     G.set(modalChrome(), { clearProps: 'all' });
     modal.anim = false;
-    if (!modal.open) {              // it was already collapsing — just finish
+    if (!modal.open) {              // it was already collapsing - just finish
       modal.el.hidden = true;
       document.body.classList.remove('modal-open');
       if (lenis) lenis.start();
@@ -1064,7 +1064,7 @@ function updateSpec() {
 /* Watch the rolling frame time. Sustained > 22 ms: step the tile
    DPR down (never below 0.4 device pixels per CSS pixel) and mark
    the HUD "Q AUTO". Sustained headroom: step back up. The ring
-   buffer is preallocated — this path never allocates per frame. */
+   buffer is preallocated - this path never allocates per frame. */
 
 const quality = { scale: 1, auto: false, slow: 0, calm: 0, warm: 0 };
 

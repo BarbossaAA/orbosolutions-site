@@ -1,11 +1,11 @@
 /*
- * TERRA — report.js
+ * TERRA - report.js
  * Field-report dossier overlay: SplitText line-reveal headline,
  * three count-up stat rows, a procedurally drawn topographic
  * mini-map (marching squares over the SAME normalised height
  * field the WebGL texture was built from) and a closing quote.
  *
- * The overlay uses plain native scroll — the slider's own wheel /
+ * The overlay uses plain native scroll - the slider's own wheel /
  * drag / key handling is state-gated off while the report is open,
  * and the landscape behind dissolves via the stage's uReport uniform.
  */
@@ -53,7 +53,7 @@ export function createReport({ stage, RM, onRequestClose }) {
   /* ------------------------------------------------------------ content */
 
   function buildContent(project) {
-    eyebrowEl.textContent = `Field Report — No. ${project.no} · ${project.year}`;
+    eyebrowEl.textContent = `Field Report - No. ${project.no} · ${project.year}`;
     titleEl.innerHTML = project.lines
       .map((line, i) =>
         `<span class="report__tline-mask"><span class="report__tline${i === 1 ? ' is-italic' : ''}">${line}</span></span>`)
@@ -245,7 +245,7 @@ export function createReport({ stage, RM, onRequestClose }) {
     ctx.stroke();
   }
 
-  /* Marching squares over the normalised grid — one flat array of
+  /* Marching squares over the normalised grid - one flat array of
      [x, y] endpoints per level, computed lazily and cached forever. */
   function contourSegments(field, size, level) {
     const segs = [];

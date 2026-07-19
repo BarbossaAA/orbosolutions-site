@@ -1,4 +1,4 @@
-/* LUMEN Studio — hero light field (WebGL tier).
+/* LUMEN Studio - hero light field (WebGL tier).
    Mounts a GL canvas above #heroCanvas; on any failure it removes itself and
    the existing 2D aurora (hero.js) runs untouched. */
 (function () {
@@ -51,7 +51,7 @@
     '  col=mix(col,vec3(0.588,0.745,1.000),smoothstep(0.58,1.20,cr)*0.11*env);\n' +
     '  col=mix(col,ivory,smoothstep(0.75,1.15,length(uv-vec2(0.5,0.55))));\n' +
     '  col=mix(col,ivory,u_scroll*0.35);\n' +
-    /* glass lens ring — aspect-corrected, counter-parallax */
+    /* glass lens ring - aspect-corrected, counter-parallax */
     '  vec2 lensC=' + lensExpr + '-m*0.13;\n' +
     '  float dl=abs(length(pa-lensC)-' + lensRadius + ');\n' +
     '  float band=smoothstep(0.07,0.0,dl);\n' +

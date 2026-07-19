@@ -4,11 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>אורבו סולושנס | בניית אתרים, אפליקציות ואוטומציה לעסקים</title>
-<meta name="description" content="סטודיו בוטיק של שני אחים שבונה בקוד, בלי תבניות: אתרי תדמית, אפליקציות, מערכות עסקיות ואוטומציית AI. עד שלושה פרויקטים במקביל — בואו לראות את המוזיאון.">
+<meta name="description" content="סטודיו בוטיק של שני אחים שבונה בקוד, בלי תבניות: אתרי תדמית, אפליקציות, מערכות עסקיות ואוטומציית AI. עד שלושה פרויקטים במקביל - בואו לראות את המוזיאון.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Orbo Solutions">
 <meta property="og:title" content="אורבו סולושנס | בניית אתרים, אפליקציות ואוטומציה לעסקים">
-<meta property="og:description" content="סטודיו בוטיק של שני אחים שבונה בקוד, בלי תבניות: אתרי תדמית, אפליקציות, מערכות עסקיות ואוטומציית AI. עד שלושה פרויקטים במקביל — בואו לראות את המוזיאון.">
+<meta property="og:description" content="סטודיו בוטיק של שני אחים שבונה בקוד, בלי תבניות: אתרי תדמית, אפליקציות, מערכות עסקיות ואוטומציית AI. עד שלושה פרויקטים במקביל - בואו לראות את המוזיאון.">
 <meta property="og:url" content="https://orbosolutions.com/">
 <meta property="og:image" content="https://orbosolutions.com/ad/ad-1080x1350.png">
 <meta property="og:locale" content="he_IL">
@@ -28,7 +28,7 @@
       "address": { "@type": "PostalAddress", "addressCountry": "IL" },
       "openingHoursSpecification": { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"], "opens": "09:00", "closes": "18:00" },
       "slogan": "רעיונות יש לכולם. אנחנו הופכים אותם למציאות.",
-      "disambiguatingDescription": "Orbo Solutions (orbosolutions.com) — סטודיו ישראלי למוצרים דיגיטליים ואוטומציה. Digital product & automation studio, Israel.",
+      "disambiguatingDescription": "Orbo Solutions (orbosolutions.com) - סטודיו ישראלי למוצרים דיגיטליים ואוטומציה. Digital product & automation studio, Israel.",
       "url": "https://orbosolutions.com/",
       "logo": "https://orbosolutions.com/assets/img/app-icon-512.png",
       "sameAs": ["https://github.com/BarbossaAA/orbosolutions-site", "https://bisomna.com"],
@@ -90,7 +90,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@300..900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/main.css?v=81">
 <style>
-  /* ——— index.html: the story ——— */
+  /* --- index.html: the story --- */
 
   body { background: var(--bg); }
 
@@ -113,7 +113,7 @@
   .beat .eyebrow { margin-bottom: 24px; }
   .beat h1, .beat h2 { margin-bottom: 18px; }
   /* V5.5 legibility directive: headlines were fine, the lines BELOW them
-     were not — sublines step up to a solid weight and near-ink color */
+     were not - sublines step up to a solid weight and near-ink color */
   .beat .beat-sub {
     font-size: clamp(1.08rem, 1.65vw, 1.3rem);
     font-weight: 400;
@@ -172,7 +172,7 @@
       radial-gradient(60% 34% at 50% 0%, rgba(108, 92, 255, 0.07), transparent 70%);
   }
 
-  /* ——— live mode ——— */
+  /* --- live mode --- */
   html.story-live #storyCanvas {
     display: block;
     position: fixed;
@@ -199,7 +199,7 @@
   html.story-live .beat.live { pointer-events: auto; }
 
   /* cinematic type: larger on the journey. V5.19 (owner: "text jumps
-     between 2 lines and 1") — the old letter-spacing TRANSITIONS
+     between 2 lines and 1") - the old letter-spacing TRANSITIONS
      changed line width mid-fade and REWRAPPED the headlines; tracking
      is now constant, nothing ever reflows. */
   html.story-live .beat .display-xl { font-size: clamp(3rem, 7.2vw, 6.2rem); }
@@ -209,12 +209,12 @@
     letter-spacing: 0.18em;
     transition: opacity 0.8s;
   }
-  /* white halo so ink type always reads over dust — the V5 formations are
+  /* white halo so ink type always reads over dust - the V5 formations are
      DENSE at their cores, so halos carry tight high-opacity inner layers */
   html.story-live .beat .beat-sub { text-shadow: 0 0 26px rgba(250, 250, 249, 1), 0 0 14px rgba(250, 250, 249, 1), 0 0 7px rgba(250, 250, 249, 1), 0 0 3px rgba(250, 250, 249, 1), 0 0 1px rgba(250, 250, 249, 1); }
   html.story-live .beat h1, html.story-live .beat h2 { text-shadow: 0 0 30px rgba(250, 250, 249, 0.95), 0 0 10px rgba(250, 250, 249, 0.9); }
   /* the gradient accent lines use background-clip:text with a transparent
-     fill — an inherited text-shadow paints OVER the clipped gradient and
+     fill - an inherited text-shadow paints OVER the clipped gradient and
      bleaches it. Halo them with drop-shadow (follows the rendered glyphs,
      stays behind them) instead. Three passes: violet-on-violet over a dense
      formation core needs the tight opaque layers (mobile QA finding). */
@@ -222,7 +222,7 @@
     text-shadow: none;
     filter: drop-shadow(0 0 2px rgba(250, 250, 249, 1)) drop-shadow(0 0 6px rgba(250, 250, 249, 1)) drop-shadow(0 0 18px rgba(250, 250, 249, 0.9));
   }
-  /* small print + header text need halos too — the finale star crosses both */
+  /* small print + header text need halos too - the finale star crosses both */
   html.story-live .beat-micro,
   html.story-live .beat-steps span { text-shadow: 0 0 14px rgba(250, 250, 249, 0.98), 0 0 6px rgba(250, 250, 249, 1), 0 0 3px rgba(250, 250, 249, 1), 0 0 1px rgba(250, 250, 249, 1); }
   html.story-live .main-nav a,
@@ -245,7 +245,7 @@
   }
   .story-hint svg { width: 22px; height: 22px; animation: hint-bob 2.2s var(--ease-out) infinite; }
 
-  /* soft white vignette over the 3D — airy, keeps edges calm */
+  /* soft white vignette over the 3D - airy, keeps edges calm */
   html.story-live .story-beats::after {
     content: '';
     position: absolute;
@@ -258,11 +258,11 @@
   .site-header { background: transparent; }
 
   /* V5.9 (user directive): in live mode the corner holds NO flat logo
-     mark — the star itself becomes the logo only when it docks. opacity
+     mark - the star itself becomes the logo only when it docks. opacity
      (not display) keeps the svg rect measurable as the dock target.
      Header-scoped: the footer brand keeps its mark. */
   html.story-live .site-header .logo-mark { opacity: 0; }
-  /* when the star lands, the header's frosted scroll pane hands over —
+  /* when the star lands, the header's frosted scroll pane hands over -
      without this the docked piece is buried behind the blur (the
      "star vanished in the header" bug: real bottom scroll carries
      .scrolled; ?over= pins never scrolled, so QA missed it) */
@@ -275,7 +275,7 @@
   }
 
   /* the footer (now carrying the contact email/phone) must rise OVER the
-     fixed canvas at the end of the scroll — static flow content paints
+     fixed canvas at the end of the scroll - static flow content paints
      UNDER a positioned z-index:0 canvas, and the WebGL context is opaque
      (alpha:false), so without this the footer is invisible and unclickable
      in live mode (QA 2026-07-15) */
@@ -283,7 +283,7 @@
 
   /* the finale copy sits directly on the star. V5.6: the star is now a
      SOLID opaque piece (not translucent dust), so every width gets a
-     soft near-white scrim — lighter on desktop, stronger on phones */
+     soft near-white scrim - lighter on desktop, stronger on phones */
   html.story-live .beat:last-of-type .beat-inner {
     background: radial-gradient(ellipse 78% 58% at 50% 45%, rgba(250, 250, 249, 0.55), rgba(250, 250, 249, 0) 72%);
   }
@@ -294,7 +294,7 @@
   }
 
   /* static tier: brand star accents above each capability beat (BRIEF rule 4;
-     data-URI inline SVG — no ids, so no duplicate-id risk) */
+     data-URI inline SVG - no ids, so no duplicate-id risk) */
   .beat-cap .beat-inner::before {
     content: '';
     display: block;
@@ -334,19 +334,19 @@
     html.story-live .story-hint { bottom: calc(86px + env(safe-area-inset-bottom, 0px)); }
     /* v81: the pre-dock mark is invisible but was still holding 36px
        of layout, nudging the centered wordmark off-axis (owner). It
-       leaves the flow — anchored just past the text's inline-start so
+       leaves the flow - anchored just past the text's inline-start so
        the dock target rect stays measurable exactly where it lands. */
     html.story-live .site-header .logo { position: relative; }
     html.story-live .site-header .logo-mark { position: absolute; inset-inline-start: -36px; }
   }
 
   /* ORBO MOBILE: the story as an app flow. Every beat composed as an
-     app SCREEN — the formation owns the upper part of the frame, the
+     app SCREEN - the formation owns the upper part of the frame, the
      words sit in the thumb zone above the tab bar. The entrance is a
-     300ms spring on .live (transform+opacity only — the V5.19
+     300ms spring on .live (transform+opacity only - the V5.19
      no-reflow law), driven by story.js toggling the class.
      v77 PAGER (owner: "the whole scroll experience does not suit the
-     phone — replace it"): phones do not scroll AT ALL — the document
+     phone - replace it"): phones do not scroll AT ALL - the document
      locks to one viewport, swipes turn chapters (story.js), and the
      footer arrives as a fixed sheet when the star docks. This also
      deletes the URL-bar resize jank outright. */
@@ -375,7 +375,7 @@
     html.story-live .beat.live { opacity: 1; transform: translateY(0); }
     /* thumb-zone buttons: real app tap targets (MOBILE-PLAN 2.4) */
     .beat-actions .btn { min-height: 52px; }
-    /* the docked star lands with a single success pulse — the app
+    /* the docked star lands with a single success pulse - the app
        completing (transform-only, plays once per dock) */
     html.story-live.star-docked .site-header .logo-mark { animation: dock-pulse 0.55s var(--ease-out) 1; }
   }
@@ -386,7 +386,7 @@
   }
 
   /* V5.21 mobile design pass (owner: "everything smaller, tidier,
-     adapted"): the story scales down as one system on phones — type,
+     adapted"): the story scales down as one system on phones - type,
      spacing, chips, buttons */
   @media (max-width: 640px) {
     .beat-actions .btn { width: 100%; }
@@ -406,7 +406,7 @@
   }
 
   /* v78 (owner: the process screen felt EMPTY on phones): the four
-     steps become an app-style checklist of cards — solid surfaces
+     steps become an app-style checklist of cards - solid surfaces
      over the dust, no halos needed. Placed after the 640px block so
      these win the cascade on small phones. */
   @media (max-width: 767px) {
@@ -605,7 +605,7 @@
         </svg>
         <span class="logo-text">ORBO<span class="logo-sep">·</span>SOLUTIONS</span>
       </a>
-      <p class="footer-tagline"><strong>אורבו סולושנס</strong> — סטודיו לבניית אתרים, פיתוח אפליקציות,<br>מערכות עסקיות ואוטומציית AI. מהרעיון ועד המציאות.</p>
+      <p class="footer-tagline"><strong>אורבו סולושנס</strong> - סטודיו לבניית אתרים, פיתוח אפליקציות,<br>מערכות עסקיות ואוטומציית AI. מהרעיון ועד המציאות.</p>
     </div>
     <nav class="footer-nav" aria-label="ניווט תחתון">
       <a href="index.html">בית</a>
@@ -624,7 +624,7 @@
   </div>
   <div class="container" style="padding-block: 6px 22px">
     <p style="font-size: 0.86rem; color: var(--ink-soft); max-width: 74em; line-height: 1.85; font-weight: 300; border-top: 1px solid var(--line); padding-top: 20px">
-      <strong>אורבו סולושנס (Orbo Solutions)</strong> היא סטודיו ישראלי לבניית אתרים ופיתוח תוכנה בהתאמה אישית: בניית אתרי תדמית פרימיום וחוויות תלת־ממד, פיתוח אפליקציות ווב ו־MVP לסטארטאפים, מערכות ניהול ו־CRM בהתאמה אישית, אוטומציה עסקית עם סוכני AI, קונפיגורטורים ומשחקים שיווקיים, הצלת קוד ומודרניזציה של מערכות קיימות — ותחזוקת אתרים שוטפת. הכול נכתב בקוד, בלי תבניות. אפשר להתרשם מהרמה עוד לפני שיחה ראשונה: ב<a href="gallery.html" style="color: var(--accent)">מוזיאון התלת־ממדי</a> שמשמש אותנו כתיק עבודות, ב<a href="lab/" style="color: var(--accent)">מעבדת ORBO LAB</a>, ובאתר החי שבנינו — <a href="https://bisomna.com" rel="noopener" style="color: var(--accent)" dir="ltr">bisomna.com</a>. עובדים עם עסקים וסטארטאפים בכל הארץ.
+      <strong>אורבו סולושנס (Orbo Solutions)</strong> היא סטודיו ישראלי לבניית אתרים ופיתוח תוכנה בהתאמה אישית: בניית אתרי תדמית פרימיום וחוויות תלת־ממד, פיתוח אפליקציות ווב ו־MVP לסטארטאפים, מערכות ניהול ו־CRM בהתאמה אישית, אוטומציה עסקית עם סוכני AI, קונפיגורטורים ומשחקים שיווקיים, הצלת קוד ומודרניזציה של מערכות קיימות - ותחזוקת אתרים שוטפת. הכול נכתב בקוד, בלי תבניות. אפשר להתרשם מהרמה עוד לפני שיחה ראשונה: ב<a href="gallery.html" style="color: var(--accent)">מוזיאון התלת־ממדי</a> שמשמש אותנו כתיק עבודות, ב<a href="lab/" style="color: var(--accent)">מעבדת ORBO LAB</a>, ובאתר החי שבנינו - <a href="https://bisomna.com" rel="noopener" style="color: var(--accent)" dir="ltr">bisomna.com</a>. עובדים עם עסקים וסטארטאפים בכל הארץ.
     </p>
   </div>
   <div class="container footer-bottom">

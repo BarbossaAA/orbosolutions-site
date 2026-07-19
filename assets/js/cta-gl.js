@@ -1,4 +1,4 @@
-/* LUMEN Studio — CTA band night field.
+/* LUMEN Studio - CTA band night field.
    Living version of the band's static radial glow: volumetric violet,
    drifting dust-stars, pointer bloom. Paints over .cta-band::before;
    on failure the canvas is simply removed and the CSS glow stands. */

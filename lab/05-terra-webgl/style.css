@@ -1,5 +1,5 @@
 /* ============================================================
-   TERRA — Landscape Research Studio
+   TERRA - Landscape Research Studio
    Bone panels over a deep earth canvas.
    ============================================================ */
 
@@ -49,13 +49,13 @@ button:focus-visible {
   outline-offset: 4px;
 }
 
-/* The dossier scrolls natively — re-enable touch panning while open. */
+/* The dossier scrolls natively - re-enable touch panning while open. */
 html.is-report {
   touch-action: auto;
 }
 
 /* While the dossier is open the slider chrome bows out.
-   (Containers only — GSAP tweens their children, never these.) */
+   (Containers only - GSAP tweens their children, never these.) */
 main,
 .site-head {
   transition: opacity 0.45s ease;
@@ -67,7 +67,7 @@ html.is-report .site-head {
   pointer-events: none;
 }
 
-/* Gate the UI until the intro runs — avoids a flash before GSAP takes over. */
+/* Gate the UI until the intro runs - avoids a flash before GSAP takes over. */
 body:not(.is-ready) :is(.site-head, .slide-ui, .counter, .rail, .hint, .report-cta) {
   visibility: hidden;
 }
@@ -660,7 +660,7 @@ body.is-dragging .cursor__label {
   pointer-events: auto;
 }
 
-/* Legibility wash — the WebGL stage also dims via its uReport uniform. */
+/* Legibility wash - the WebGL stage also dims via its uReport uniform. */
 .report::before {
   content: '';
   position: absolute;

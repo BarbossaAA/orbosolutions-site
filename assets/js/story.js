@@ -1,15 +1,15 @@
-/* LUMEN Studio — the scroll story, V5.1 (three.js).
+/* LUMEN Studio - the scroll story, V5.1 (three.js).
    The particles ARE the subject. Every hero visual is the SAME liquid
-   swarm poured into a new formation — free dust -> the LUMEN star ->
+   swarm poured into a new formation - free dust -> the LUMEN star ->
    a rushing river -> six brand icons (browser / phone / lattice /
    neural web / controller / lifebuoy) -> an orbit system -> four
    process gates -> the giant portal star, which forms as the final
    words arrive and HOLDS to the end of the scroll (V5.1 directive:
-   no burst, no second star — the story finishes ON the star).
+   no burst, no second star - the story finishes ON the star).
    Formations are procedural point-samplings of icon strokes; each leg of
    the journey morphs aFrom -> aTo (scrub-safe in both directions, holds
    at each side of a leg, wide per-mote stagger so motes travel as
-   INDIVIDUALS, not as one mass — V5.1 de-blob directive).
+   INDIVIDUALS, not as one mass - V5.1 de-blob directive).
    Liquid comes from the V4 GPGPU sim (offset+velocity ping-pong FBOs,
    underdamped spring + cursor splash) plus divergence-free curl noise in
    the velocity pass; V5.1 moves the curl energy into finer, seed-offset
@@ -29,12 +29,12 @@
    V5.2 (same-day user directive "glowing self-responsive individuals"):
    stronger colors (near-pure accents, tint no longer swallows them),
    brighter sprite nucleus + bigger points + per-mote glow twinkle, and
-   the cursor splash rebuilt per-mote (personal reach/gain/lag/swirl —
+   the cursor splash rebuilt per-mote (personal reach/gain/lag/swirl -
    everyone responds, each differently; no stamped circular dent). The
    mouse-parallax camera pan is cut to a whisper: hover response lives
    in the particles, not in the screen.
    V5.3 (2026-07-16 directive "individuals across the WHOLE scroll,
-   neon colors, sharp particles, sharper icons"): dustHome rebuilt —
+   neon colors, sharp particles, sharper icons"): dustHome rebuilt -
    personal departure + duration + curved detour per mote (no group
    wave anywhere in the journey); neon palette (electric cyan/orange/
    hot pink) + post-tone-curve re-saturation; SHARP sprite (crisp AA
@@ -43,9 +43,9 @@
    upscaled ~33% on HiDPI = blur); formed motes wobble/twinkle half
    as much so sculptures stand crisp.
    V5.4 (2026-07-16 directive "EVERY particle reactive to the mouse in
-   each and every moment — a reactive universe taking shapes, not a
+   each and every moment - a reactive universe taking shapes, not a
    reactive blob in the middle"): the cursor interaction is REBUILT as
-   a ray-brush — the pointer is a ray through the world, every mote
+   a ray-brush - the pointer is a ray through the world, every mote
    reacts by perpendicular distance to it with depth-scaled (angular)
    reach, so reactivity is uniform across the whole screen at every
    depth; a constant HOVER presence force works even when the mouse
@@ -54,7 +54,7 @@
    directive: "colors like before").
    QA: ?storyp=<p> pin, ?nofbo=1 fallback, ?gputier=<0|1|2> tier pin.
    Software GL (e.g. Edge --use-angle=swiftshader) classifies as tier 0;
-   modern headless Edge may use the REAL GPU — always pin gputier in
+   modern headless Edge may use the REAL GPU - always pin gputier in
    screenshot harnesses so shots are deterministic either way. */
 (function () {
   'use strict';
@@ -76,12 +76,12 @@
   var mobile = innerWidth < 768;
 
   /* ------------------------------------------------------------
-     GPU TIER — classify the machine once, BEFORE any budget is set,
+     GPU TIER - classify the machine once, BEFORE any budget is set,
      so the swarm AND the render resolution are sized to the GPU it
      will actually run on. 0 = software / very weak, 1 = weak
      integrated, 2 = capable. The governor still sheds down-only
      from whatever we pick here. ?gputier=<n> pins the tier (QA: pin
-     it in screenshot harnesses — software GL classifies as tier 0,
+     it in screenshot harnesses - software GL classifies as tier 0,
      hardware headless as tier 2).
      ------------------------------------------------------------ */
   var gpuTier = (function () {
@@ -98,7 +98,7 @@
     var cores = navigator.hardwareConcurrency || 8;
     if (/swiftshader|llvmpipe|softpipe|software rasterizer|microsoft basic/.test(str)) return 0;
     if (mem <= 2 || cores <= 2) return 0;
-    /* real Adreno strings read 'Adreno (TM) 640' — the separator between
+    /* real Adreno strings read 'Adreno (TM) 640' - the separator between
        the name and the model number must stay flexible */
     var dedicated = /nvidia|geforce|rtx|gtx|quadro|radeon|\brx\b|apple (m\d|gpu)|adreno[^0-9]*[67]\d\d|mali-g[67]\d/.test(str);
     var weakIntegrated = /intel[^]*\b(hd|uhd)\b|adreno[^0-9]*[1-5]\d\d\b|mali-[t4]|videocore|powervr/.test(str);
@@ -108,11 +108,11 @@
   })();
 
   /* render resolution by tier (V5.3 sharpness directive): the old flat
-     1.5 cap upscaled ~33% on HiDPI screens — every mote read as BLUR.
+     1.5 cap upscaled ~33% on HiDPI screens - every mote read as BLUR.
      Capable GPUs now render native up to DPR 2.0; the governor's DPR
      ladder starts from here and can shed it right back down. */
   /* V5.21 (owner: "not bright and sharp enough" on phones): fewer,
-     BIGGER, SHARPER motes — DPR back up for crispness, the budget
+     BIGGER, SHARPER motes - DPR back up for crispness, the budget
      paid for by killing phone smoke (fill-rate) and thinning counts */
   var DPR_CAP = mobile
     ? (gpuTier === 2 ? 1.75 : 1.3)
@@ -128,7 +128,7 @@
   var camera = new THREE.PerspectiveCamera(58, innerWidth / innerHeight, 0.1, 400);
 
   /* V5.4: palette REVERTED to the pre-V5.3 set (user 2026-07-16: "I want
-     the colors like before, I don't like the V5.3 colors") — the muted
+     the colors like before, I don't like the V5.3 colors") - the muted
      warm accents are the brand voice; the neon electric set is dead. */
   var INK = new THREE.Color(0x14121f), VIOLET = new THREE.Color(0x6c5cff),
       DEEP = new THREE.Color(0x5b3df0), PEACH = new THREE.Color(0xff8f4d),
@@ -143,12 +143,12 @@
      the load-time aspect (a rotation mid-story keeps the load-time staging). */
   var narrow = innerWidth / innerHeight < 0.8;
   /* ORBO MOBILE (M2): on PHONES every beat is composed like an app
-     screen — the formation owns the upper ~55%, the words own the
+     screen - the formation owns the upper ~55%, the words own the
      lower ~45% (index.html bottom-anchors the beat copy under 768).
      Icons pull near center (the camera weave arcs a full ±1.0 toward
      the icon side at beat centers, so ±1.2 projects almost centered)
      and grow a step now that the text column is out of their way.
-     appNarrow gates on BOTH flags — a portrait desktop/tablet window
+     appNarrow gates on BOTH flags - a portrait desktop/tablet window
      (narrow but not mobile) keeps the V5 staging untouched. */
   var appNarrow = mobile && narrow;
   /* v78 (owner: "the icons are CROOKED and too high"): dead-center,
@@ -161,7 +161,7 @@
 
   /* the visible half-frame at sculpture depth (~23u ahead of the camera;
      load-time aspect, same convention as the icon staging above; ×1.06
-     covers the ±1.1u camera weave) — the SKY half of the halo dust is
+     covers the ±1.1u camera weave) - the SKY half of the halo dust is
      scattered uniformly across this, so every screen column holds
      living motes for the ray-brush (V5.4 reactive-universe directive) */
   var SKY_T = Math.tan(camera.fov * Math.PI / 360) * 23;
@@ -169,7 +169,7 @@
   var SKY_HH = SKY_T * 1.06;
 
   /* ============================================================
-     SIM DETECTION — float render-target support (V4, unchanged)
+     SIM DETECTION - float render-target support (V4, unchanged)
      ============================================================ */
   var forceNoSim = /[?&]nofbo=1/.test(location.search);
 
@@ -200,7 +200,7 @@
     if (!type) return null;
     /* sim texture side by GPU tier: the swarm budget IS W*H.
        V5.21: phones run FEW, big, crisp motes (120² = 14.4k, 96² =
-       9.2k) — smoothness and clarity over mass */
+       9.2k) - smoothness and clarity over mass */
     var W = mobile
       ? (gpuTier >= 1 ? 120 : 96)
       : (gpuTier === 2 ? 256 : gpuTier === 1 ? 208 : 144);
@@ -217,7 +217,7 @@
   function gauss() { return (Math.random() + Math.random() + Math.random() - 1.5) * 0.667; }
 
   /* per-mote seeds + the color population. V5.2 (user directive:
-     "stronger colors, real individuals"): much less INK dilution — the
+     "stronger colors, real individuals"): much less INK dilution - the
      accents stay near-pure so every mote carries a saturated identity;
      a violet-ink core (40%) keeps contrast anchoring on the light bg */
   var aSeed = new Float32Array(N * 3);
@@ -227,9 +227,9 @@
     aSeed[di * 3 + 1] = Math.random();
     aSeed[di * 3 + 2] = Math.random();
     var r = Math.random(), c;
-    /* v78 (owner: "more color, more vibe, younger" — PHONES only):
+    /* v78 (owner: "more color, more vibe, younger" - PHONES only):
        the accent share rises 38% -> 55% there. Same muted brand hexes
-       (the palette law stands) — just more of the colorful citizens.
+       (the palette law stands) - just more of the colorful citizens.
        Desktop keeps the V5.4 population exactly. */
     if (r < (mobile ? 0.25 : 0.40)) c = mixColor(INK, VIOLET, 0.35 + Math.random() * 0.65);
     else if (r < (mobile ? 0.45 : 0.62)) c = mixColor(VIOLET, DEEP, Math.random());
@@ -240,7 +240,7 @@
   }
 
   /* ============================================================
-     FORMATIONS — every hero visual is a Float32Array(N*3) of world
+     FORMATIONS - every hero visual is a Float32Array(N*3) of world
      positions. Icon formations sample points along stroke polylines
      (the brand icon language); 1-in-8 motes are always "halo dust"
      scattered around the formation so sculptures breathe.
@@ -283,7 +283,7 @@
         /* V5.4 "reactive universe": halo dust is the STARFIELD. Half
            keeps the gaussian skirt (sculpture breathing); half scatters
            UNIFORMLY across the load-time frustum at icon depth so EVERY
-           screen column holds living motes — gauss() has hard ±1
+           screen column holds living motes - gauss() has hard ±1
            support, so skirt-only left dead bands at the frame edges
            (QA 2026-07-16) */
         if ((i & 15) === 7) {
@@ -319,13 +319,13 @@
     return out;
   }
 
-  /* the LUMEN star (edge sampling + inner rings — V4's sampler) */
+  /* the LUMEN star (edge sampling + inner rings - V4's sampler) */
   var STAR_V = [[16, 3], [18.6, 13.4], [29, 16], [18.6, 18.6], [16, 29], [13.4, 18.6], [3, 16], [13.4, 13.4]];
   function buildStar(x, y, z, s) {
     var out = new Float32Array(N * 3);
     for (var i = 0; i < N; i++) {
       if (isHalo(i)) {
-        /* star halo widened too (V5.4 starfield) — sky, not hug */
+        /* star halo widened too (V5.4 starfield) - sky, not hug */
         out[i * 3] = x + gauss() * s * 2.4;
         out[i * 3 + 1] = y + gauss() * s * 1.9;
         out[i * 3 + 2] = z + gauss() * s * 1.0;
@@ -343,8 +343,8 @@
     return out;
   }
 
-  /* V5.7 finale gather: EVERY mote — including the halo/sky dust that
-     breathes around every other formation — sits IN the piece. The leg
+  /* V5.7 finale gather: EVERY mote - including the halo/sky dust that
+     breathes around every other formation - sits IN the piece. The leg
      into this formation is the finale event: the whole visible universe
      streams together into the one made thing. */
   function buildGatherStar(x, y, z, s) {
@@ -354,13 +354,13 @@
       var a = STAR_V[e], b = STAR_V[(e + 1) % STAR_V.length];
       var t = Math.random();
       /* V5.8 AQUARIUM: area-uniform INTERIOR fill with a hard 12%
-         margin — no mote on or past the wall (the star polygon is
+         margin - no mote on or past the wall (the star polygon is
          star-shaped around its center, so inward-scaled boundary
          samples always stay inside). */
       var r = Math.sqrt(Math.random()) * 0.88;
       out[i * 3] = x + ((a[0] + (b[0] - a[0]) * t) - 16) / 13 * r * s;
       out[i * 3 + 1] = y + (16 - (a[1] + (b[1] - a[1]) * t)) / 13 * r * s;
-      /* V5.13 (user: "really INSIDE, 3D, containing them — not
+      /* V5.13 (user: "really INSIDE, 3D, containing them - not
          floating at the borders"): spread through the solid's whole
          thickness (extrude 1.1 + bevel 0.85 each side ≈ 2.8u) */
       out[i * 3 + 2] = z + jit(1.15);
@@ -439,8 +439,8 @@
      v78 (owner: "after 'orderly process' the screen is too EMPTY" on
      phones): the desktop corridor puts the beat camera (z≈-390)
      INSIDE the gate string, so a portrait frame saw one sparse ring
-     and dead middle. Portrait now gets a receding TUNNEL — four full
-     rings ahead of the camera, near-constant angular size — plus the
+     and dead middle. Portrait now gets a receding TUNNEL - four full
+     rings ahead of the camera, near-constant angular size - plus the
      road, so the frame reads full and deep. Desktop untouched. */
   function buildGates() {
     var gz = appNarrow ? [-404, -414.5, -426, -438] : [-366, -380, -394, -408];
@@ -470,7 +470,7 @@
     return out;
   }
 
-  /* --- brand icons (normalized ±1, y up — matching the site's SVG set) --- */
+  /* --- brand icons (normalized ±1, y up - matching the site's SVG set) --- */
   function iconBrowser() {
     return [
       [[-1, -0.72], [1, -0.72], [1, 0.72], [-1, 0.72], [-1, -0.72]],
@@ -489,7 +489,7 @@
       w([[-0.11, -0.80], [0.11, -0.80]], 2)
     ];
   }
-  /* systems: a clean 3×3 node grid — rows, columns, junction dots */
+  /* systems: a clean 3×3 node grid - rows, columns, junction dots */
   function iconLattice() {
     var xs = [-0.85, 0, 0.85], ys = [0.7, 0, -0.7];
     var segs = [];
@@ -534,7 +534,7 @@
   }
 
   /* chapter icon stations: z = camera position at that beat's center
-     + ~23 ahead (computed for the V5 camera path — the smoothstep leg
+     + ~23 ahead (computed for the V5 camera path - the smoothstep leg
      easing compresses the tail; V3/V4 lesson) */
   var FORMS = [
     { name: 'cloud0', pts: buildCloud(0, 0, -20, 13, 6.5, 16), tint: VIOLET },
@@ -552,16 +552,16 @@
        core rises back into the formation zone instead. */
     { name: 'orbit', pts: buildOrbit(0, appNarrow ? 1.2 : (narrow ? -2.5 : 0), -337), tint: VIOLET },
     { name: 'gates', pts: buildGates(), tint: CYAN },
-    /* the finale: forms as B10's words arrive and holds to p=1 —
+    /* the finale: forms as B10's words arrive and holds to p=1 -
        no burst / second star after it (V5.1 user directive) */
     { name: 'portal', pts: buildStar(0, 0.4, -444, 8.5), tint: VIOLET },
     /* V5.7: then the whole universe gathers onto it (same star, same
-       station — the swarm condenses, nothing new appears after) */
+       station - the swarm condenses, nothing new appears after) */
     { name: 'gather', pts: buildGatherStar(0, 0.4, -444, 8.5), tint: VIOLET }
   ];
 
   /* the journey: at each anchor p the swarm is fully formed; between
-     anchors it pours (holds ~26% at each side of a leg — see FORM_GLSL).
+     anchors it pours (holds ~26% at each side of a leg - see FORM_GLSL).
      Anchors sit on the V5 beat centers. */
   var ANCHORS = [
     { p: 0.000, f: 0 },   /* drifting dust at load            */
@@ -573,18 +573,18 @@
     { p: 0.4725, f: 6 },  /* 04 neural web                    */
     { p: 0.5525, f: 7 },  /* 05 controller                    */
     { p: 0.6325, f: 8 },  /* 06 lifebuoy                      */
-    { p: 0.7350, f: 9 },  /* orbit — the running business     */
+    { p: 0.7350, f: 9 },  /* orbit - the running business     */
     { p: 0.8400, f: 10 }, /* process gates                    */
-    { p: 0.9250, f: 11 }, /* the portal star — B10's arrival    */
+    { p: 0.9250, f: 11 }, /* the portal star - B10's arrival    */
     { p: 0.9650, f: 12 }  /* V5.7 in-gathering: every last mote
                              (halo sky included) streams onto
                              the star while it solidifies; legT
-                             clamps at 1 past it — HOLDS to end.
+                             clamps at 1 past it - HOLDS to end.
                              V5.8: pulled earlier with the solid */
   ];
 
   /* ============================================================
-     GEOMETRY — aFrom/aTo swap per leg (render path needs no vertex
+     GEOMETRY - aFrom/aTo swap per leg (render path needs no vertex
      textures, so the stateless fallback works everywhere)
      ============================================================ */
   var fromArr = new Float32Array(N * 3);
@@ -609,7 +609,7 @@
 
   /* shuffled index (V5.1): drawing order becomes a random permutation, so
      the governor can thin the swarm with setDrawRange and lose an EVEN
-     SPRINKLE from every formation — plain truncation would amputate
+     SPRINKLE from every formation - plain truncation would amputate
      i-indexed structure (the river's far half, whole orbit rings/gates).
      N=65536 needs 32-bit indices (WebGL2 native / OES_element_index_uint). */
   var canThin = false;
@@ -624,7 +624,7 @@
     canThin = true;
   }
 
-  /* uniforms shared by the render material AND the sim passes —
+  /* uniforms shared by the render material AND the sim passes -
      same value objects, so one write updates every shader */
   var U = {
     uTime: { value: 0 },
@@ -645,12 +645,12 @@
     uTintTo: { value: FORMS[ANCHORS[1].f].tint.clone() }
   };
 
-  /* the living home of a mote — must be byte-identical between sim and
+  /* the living home of a mote - must be byte-identical between sim and
      render. V5.3 (user directive "every particle on its own from the
      first scroll to the last"): the group-wave is GONE. Each mote owns
      its leg: a PERSONAL departure time (anywhere in the first ~45% of
      the leg), a PERSONAL travel duration, and a PERSONAL curved detour
-     off the straight line — no two motes share a schedule or a path.
+     off the straight line - no two motes share a schedule or a path.
      The formation is always complete by ~90% of the leg (beat anchors
      still meet a finished sculpture), and formed motes barely wobble
      (V5.3 crispness directive) while in-flight motes fly lively. */
@@ -676,7 +676,7 @@
     '}'
   ].join('\n');
 
-  /* divergence-free curl flow: analytic curl of a trig vector potential —
+  /* divergence-free curl flow: analytic curl of a trig vector potential -
      this is what makes the pour read as LIQUID instead of jelly */
   var CURL_GLSL = [
     'vec3 curlFlow(vec3 q, float t){',
@@ -687,12 +687,12 @@
     '}'
   ].join('\n');
 
-  /* V5.4 — THE CURSOR IS A RAY, NOT A POINT (user 2026-07-16: "every
-     particle reactive to the mouse in each and every moment — not a
+  /* V5.4 - THE CURSOR IS A RAY, NOT A POINT (user 2026-07-16: "every
+     particle reactive to the mouse in each and every moment - not a
      single millisecond that even one particle is not reactive; a
      reactive universe, not a blob in the middle").
      The old model unprojected the pointer onto ONE plane 26u ahead and
-     measured 3D distance to that point — anything at another depth
+     measured 3D distance to that point - anything at another depth
      (river tail, gates, halo sky, half the icons) was mathematically
      dead to the mouse, and the whole response was gated by pointer
      SPEED, so a resting mouse meant zero reactivity. Both are gone:
@@ -702,10 +702,10 @@
      the entire visible universe is live under the pointer. `hover` is
      a constant presence force (dimple + slow swirl while the pointer
      merely rests); `push` adds splash energy from pointer speed. The
-     V5.2 individuality survives: personal reach/gain/lag/swirl —
+     V5.2 individuality survives: personal reach/gain/lag/swirl -
      each mote answers on its own terms and springs back home.
      gH/gP are the personal hover/splash gains, gT the personal swirl
-     gain (signed by seed) — all folded in at the call site. */
+     gain (signed by seed) - all folded in at the call site. */
   var RAY_GLSL = [
     'vec3 rayForce(vec3 wp, vec3 seed, vec3 ro, vec3 rd, vec3 rdPrev, float hover, float push, float gH, float gP, float gT){',
     '  vec3 w = wp - ro;',
@@ -715,9 +715,9 @@
     '  vec3 pp2 = w - rdPrev * t2;',
     '  float lag = seed.y;',
     /* V5.5 (user: "brush 30% of what we have now"): tight personal
-       angular reach ~2.2..4.1deg — an intimate liquid poke, not a wide
+       angular reach ~2.2..4.1deg - an intimate liquid poke, not a wide
        gravity well. ORBO MOBILE (M3): a THUMB is wider than a cursor
-       and covers its own dimple — phones get ×1.35 reach. The desktop
+       and covers its own dimple - phones get ×1.35 reach. The desktop
        line stays byte-identical (hard law: desktop untouched). */
     mobile ? '  float ang = (0.039 + 0.033*seed.z) * 1.35;'
            : '  float ang = 0.039 + 0.033*seed.z;',
@@ -726,13 +726,13 @@
     '  float ff = mix(f1, f2, lag);',      /* slow reactors chase where the ray WAS */
     '  vec3 dir = normalize(mix(pp1, pp2, lag) + vec3(0.0001));',
     '  vec3 tang = normalize(cross(rd, pp1) + vec3(0.0001));',
-    /* V5.5: swirl slowed to a lazy shear (hover 0.5 -> 0.2) — the water
+    /* V5.5: swirl slowed to a lazy shear (hover 0.5 -> 0.2) - the water
        turns around the finger instead of orbiting it like a gravity blob */
     '  return dir * (ff * (hover * gH + push * gP)) + tang * (ff * (hover * 0.2 + push * 0.6) * gT);',
     '}'
   ].join('\n');
 
-  /* BAKED mote sprite (V5.1, runtime-baked — rule 2 still holds, no
+  /* BAKED mote sprite (V5.1, runtime-baked - rule 2 still holds, no
      external files): the old per-fragment length+smoothstep falloff is
      precomputed once into a 64px texture (one lookup per pixel instead
      of math), and a small bright NUCLEUS is baked in so every mote
@@ -747,7 +747,7 @@
         var dx = (x + 0.5) / S - 0.5, dy = (y + 0.5) / S - 0.5;
         var d = Math.sqrt(dx * dx + dy * dy);
         /* V5.3 SHARP sprite (user: "particles look blurry"): a crisp
-           anti-aliased disc — hard core, thin edge — plus only a whisper
+           anti-aliased disc - hard core, thin edge - plus only a whisper
            of neon halo. The old wide gaussian skirt was the blur. */
         var ct = Math.min(1, Math.max(0, (0.34 - d) / 0.10));
         var core = ct * ct * (3 - 2 * ct);
@@ -769,10 +769,10 @@
   })();
 
   /* ShaderMaterial skips three's output transform; the direct path (the
-     only path in V5 — no bloom without glass glints) applies the same
+     only path in V5 - no bloom without glass glints) applies the same
      tone curve + gamma the V4 composite used, so dust matches the
      tone-mapped world it used to live in. V5.1: that curve moved to the
-     VERTEX shader (color is flat across a point sprite — 65k evals
+     VERTEX shader (color is flat across a point sprite - 65k evals
      instead of millions), so the fragment is one baked-texture lookup. */
   var DUST_FRAG = [
     'uniform sampler2D tMote;',
@@ -788,27 +788,27 @@
      fog-matched decay. V5.2: the chapter tint no longer swallows the
      mote's own color when formed (individuals stay individuals), every
      mote glows on its OWN clock (per-seed twinkle frequency + phase),
-     and the size scatter widened — small sparks among big glows */
+     and the size scatter widened - small sparks among big glows */
   var VERT_TAIL = [
     '  vec3 tint = mix(uTintFrom, uTintTo, mm);',
     '  vec3 cc = mix(aCol, tint, 0.14 + 0.24*settle);',
     '  cc = cc / (0.55 + 0.45 * cc);',
-    /* v78 phones: a gentle post-tone re-saturation (1.18 — NOT the
+    /* v78 phones: a gentle post-tone re-saturation (1.18 - NOT the
        rejected V5.3 neon 1.5) lifts the vibe; desktop line exact */
     mobile
       ? '  vColor = pow(max(cc, vec3(0.0)), vec3(0.4545));\n  float rlum = dot(vColor, vec3(0.299, 0.587, 0.114));\n  vColor = clamp(mix(vec3(rlum), vColor, 1.18), 0.0, 1.0);'
       : '  vColor = pow(max(cc, vec3(0.0)), vec3(0.4545));',
     /* V5.11 (user directive): inside the hardening star the motes turn
-       WHITE — sparkling glass shards, not colored dust. v80 phones:
+       WHITE - sparkling glass shards, not colored dust. v80 phones:
        the STARDUST motes (the 18% that stay behind after the dock)
-       keep most of their own color — white dust is invisible on the
+       keep most of their own color - white dust is invisible on the
        pale finale grade, and colored flecks inside the glass feed the
        "more color" directive too. Desktop line byte-identical. */
     mobile
       ? '  vColor = mix(vColor, vec3(1.0), uSolid * 0.9 * (1.0 - step(0.82, aSeed.y) * 0.85));'
       : '  vColor = mix(vColor, vec3(1.0), uSolid * 0.9);',
     /* per-mote glow twinkle; HALVED once formed so sculpture strokes
-       hold steady (V5.3 crispness) while free dust sparkles hard —
+       hold steady (V5.3 crispness) while free dust sparkles hard -
        but INSIDE the solid the damping lifts again and a faster glint
        rides on top: glass catching light (V5.11) */
     /* v78 phones: livelier twinkle (young + fun); desktop line exact */
@@ -819,23 +819,23 @@
     '  tw += uSolid * 0.30 * sin(uTime*(2.2 + aSeed.z*2.6) + aSeed.x*6.283);',
     '  vA = (0.72 + 0.24*aSeed.z + settle*0.24) * tw;',
     '  vec4 mv = modelViewMatrix * vec4(p, 1.0);',
-    /* match FogExp2(0.010): exp(-(d*0.010)^2) — distant specks melt into
+    /* match FogExp2(0.010): exp(-(d*0.010)^2) - distant specks melt into
        the grade instead of popping at the far plane */
     '  vA *= exp(-0.0001 * mv.z * mv.z);',
-    /* V5.7 finale: the gathered swarm is the glass's living content —
+    /* V5.7 finale: the gathered swarm is the glass's living content -
        sealed inside like an aquarium. V5.12: it stays glowing the
        WHOLE flight (no mid-air switch) and dissolves only WITH the
        piece→mark crossfade (uHand), handing its light to the mark's
        baked core glint. v80 (owner: "after the star rises the
-       background is TOO EMPTY" — phones): ~18% of the motes stay
-       behind as faint white STARDUST — a quiet after-image of the
+       background is TOO EMPTY" - phones): ~18% of the motes stay
+       behind as faint white STARDUST - a quiet after-image of the
        star holding the frame; desktop line byte-identical. */
     mobile
       ? '  vA *= max((1.0 - uSolid * 0.50) * (1.0 - uHand), step(0.82, aSeed.y) * 0.55);'
       : '  vA *= (1.0 - uSolid * 0.50) * (1.0 - uHand);',
     /* clamp BOTH ways: sub-pixel points shimmer as blur (V5.3 floor),
        near motes never balloon (ceiling) */
-    /* point size rides uDockScale too — the sealed motes shrink with
+    /* point size rides uDockScale too - the sealed motes shrink with
        their aquarium instead of ballooning out of the tiny glass */
     mobile
       ? '  gl_PointSize = clamp(uSize * (30.0 / max(1.0, -mv.z)) * (0.45 + aSeed.x*1.1 + settle*0.4) * (0.85 + 0.15*tw) * mix(1.0, uDockScale * 6.0, uOver * (1.0 - step(0.82, aSeed.y))), 1.0, uSize * 2.7);'
@@ -851,7 +851,7 @@
       depthWrite: false,
       /* no depth READ either (QA 2026-07-16): the finale solid writes
          depth, and a depth-tested swarm was culled behind its front
-         face — the gathered body popped out in one frame and the
+         face - the gathered body popped out in one frame and the
          "living skin" never rendered. Dust draws after the mesh
          (renderOrder 1) and composites over it; the mesh keeps its own
          depth for correct facet self-occlusion. */
@@ -873,15 +873,15 @@
         'void main(){',
         '  float mm; float settle;',
         '  vec3 p = dustHome(aFrom, aTo, aSeed, uTime, uLegT, mm, settle);',
-        /* physics offset — SEALED as the aquarium closes (V5.8): inside
+        /* physics offset - SEALED as the aquarium closes (V5.8): inside
            the glass the swarm may only breathe via the small formation
            wobble; big spring/curl/brush excursions would cross the line */
         '  p += texture2D(tPos, aRef).xyz * (1.0 - uSolid * 0.85);',
-        /* V5.8.1: the aquarium TRAVELS — the same shrink+glide that docks
+        /* V5.8.1: the aquarium TRAVELS - the same shrink+glide that docks
            the glass onto the header logo carries every sealed mote with
            it (applied after all motion, so containment holds exactly).
            v80 phones: the stardust motes (same 18% mask as the alpha
-           keep) never board the flight — the piece sheds them as it
+           keep) never board the flight - the piece sheds them as it
            leaves and they hold the empty frame. */
         mobile
           ? '  p = mix(uDockPos + (p - vec3(0.0, 0.4, -444.0)) * uDockScale, p, step(0.82, aSeed.y));'
@@ -897,7 +897,7 @@
       depthWrite: false,
       /* no depth READ either (QA 2026-07-16): the finale solid writes
          depth, and a depth-tested swarm was culled behind its front
-         face — the gathered body popped out in one frame and the
+         face - the gathered body popped out in one frame and the
          "living skin" never rendered. Dust draws after the mesh
          (renderOrder 1) and composites over it; the mesh keeps its own
          depth for correct facet self-occlusion. */
@@ -924,10 +924,10 @@
         '  float mm; float settle;',
         '  vec3 p = dustHome(aFrom, aTo, aSeed, uTime, uLegT, mm, settle);',
         /* cursor liquid (stateless, no momentum): the ray-brush displaces
-           directly — a resting pointer holds a dimple, a fast pointer
+           directly - a resting pointer holds a dimple, a fast pointer
            splashes, and release snaps straight back home */
         '  p += rayForce(p, aSeed, uRayO, uRayD, uRayDPrev, uHover, uPush,',
-        /* ORBO MOBILE (M3): the brush must be FELT under the thumb —
+        /* ORBO MOBILE (M3): the brush must be FELT under the thumb -
            phone gains run hotter; desktop line byte-identical */
         mobile ? '                (1.1 + aSeed.x*1.6) * 1.8, (0.25 + aSeed.x*1.6) * 1.7, 0.2*(aSeed.z - 0.5))'
                : '                1.1 + aSeed.x*1.6, 0.25 + aSeed.x*1.6, 0.2*(aSeed.z - 0.5))',
@@ -947,7 +947,7 @@
   scene.add(dust);
 
   /* ============================================================
-     THE SIMULATION — V4's ping-pong FBO pair (offset + velocity),
+     THE SIMULATION - V4's ping-pong FBO pair (offset + velocity),
      now spring-chasing the MORPHING home and stirred by curl flow
      ============================================================ */
   var sim = null;
@@ -1022,19 +1022,19 @@
         '  vec3 vel = texture2D(tVel, vUv).xyz;',
         '  float mm; float settle;',
         '  vec3 home = dustHome(texture2D(tFrom, vUv).xyz, texture2D(tTo, vUv).xyz, seed, uTime, uLegT, mm, settle);',
-        /* spring toward zero offset — underdamped, so motes wobble back;
+        /* spring toward zero offset - underdamped, so motes wobble back;
            stiffer once formed so the sculpture re-knits crisply.
-           V5.2: the per-mote spread widened — some snap home, some drift
+           V5.2: the per-mote spread widened - some snap home, some drift
            long, so recovery reads as individuals, never one membrane */
         '  float k = 0.010 + 0.026*seed.x + settle*0.04;',
         '  vel -= off * (k * uDt);',
-        /* curl-noise flow — simmers when formed, surges mid-pour.
+        /* curl-noise flow - simmers when formed, surges mid-pour.
            V5.1 de-blob: the old dominant octave (wavelength ~57u, far
            wider than any formation) pushed every mote the same way, so
            the whole swarm sloshed as one blob. It now only breathes
            during transit (mass flow while pouring); the energy moved to
            finer octaves whose sample points are OFFSET PER-MOTE by the
-           seed — neighbours stop agreeing and each mote wanders alone. */
+           seed - neighbours stop agreeing and each mote wanders alone. */
         '  float transit = 1.0 - settle;',
         '  vec3 wp = home + off;',
         '  float famp = (0.007 + 0.030*transit) * (0.6 + 0.8*seed.y);',
@@ -1042,14 +1042,14 @@
         '  vel += curlFlow(wp*0.45 + seed*3.1, uTime*0.8) * (famp * 0.55 * uDt);',
         '  vel += curlFlow(wp*1.30 + seed*29.0, uTime*1.15) * (famp * 0.85 * uDt);',
         /* cursor ray-brush (V5.4): a constant HOVER force dimples and
-           slowly swirls whatever the pointer rests on — at any depth,
-           anywhere on screen — and pointer speed (uPush) adds splash
+           slowly swirls whatever the pointer rests on - at any depth,
+           anywhere on screen - and pointer speed (uPush) adds splash
            on top. The spring above pulls every displaced mote back to
            its formation: liquid that always heals. Personal gain/lag/
            swirl (V5.2) are inside rayForce. */
         /* hover gain sized so the RESTING dimple is unmistakable in open
            dust (~2u equilibrium vs the 0.010-0.036 free spring) and a
-           clear ~0.5-1u dent on formed strokes (QA 2026-07-16 — the
+           clear ~0.5-1u dent on formed strokes (QA 2026-07-16 - the
            first gain read as sub-perceptual in the field pins) */
         '  vel += rayForce(wp, seed, uRayO, uRayD, uRayDPrev, uHover, uPush,',
         /* ORBO MOBILE (M3): thumb-strength dimple + splash on phones;
@@ -1061,7 +1061,7 @@
         /* V5.5 liquid swirl: less than half the gain of the first cut */
         '                  (0.005 + 0.013*seed.z) * (seed.z - 0.5) * uDt);',
         /* damping ~0.94 (heavier once formed, so sculptures hold crisp;
-           V5.2: per-mote spread — some heal fast, some glide) */
+           V5.2: per-mote spread - some heal fast, some glide) */
         '  vel *= pow(0.935 + 0.02*seed.y - settle*0.05, uDt);',
         '  float vl = length(vel);',
         '  if (vl > 1.0) vel *= 1.0 / vl;',
@@ -1089,7 +1089,7 @@
     zeroSim();
     dustMat.uniforms.tPos.value = sim.posA.texture;
   }
-  /* sim state lives only on the GPU — re-zero it if the context returns */
+  /* sim state lives only on the GPU - re-zero it if the context returns */
   canvas.addEventListener('webglcontextrestored', function () { zeroSim(); });
 
   function runSim() {
@@ -1132,7 +1132,7 @@
   }
 
   /* ============================================================
-     SMOKE — soft tinted haze along the corridor (V4, retimed to the
+     SMOKE - soft tinted haze along the corridor (V4, retimed to the
      V5 stations)
      ============================================================ */
   var smokeTex = (function () {
@@ -1164,11 +1164,11 @@
     if (z > -316) return ROSE;     /* lifebuoy               */
     if (z > -352) return VIOLET;   /* orbit                  */
     if (z > -420) return CYAN;     /* gates                  */
-    return VIOLET;                 /* portal — the finale    */
+    return VIOLET;                 /* portal - the finale    */
   }
   var smokes = [];
   (function () {
-    /* V5.21: ZERO smoke on phones — each sprite is a near-fullscreen
+    /* V5.21: ZERO smoke on phones - each sprite is a near-fullscreen
        translucent quad, and that overdraw was most of the mobile
        fill-rate bill; the bg grade carries the atmosphere there */
     var count = mobile ? 0 : 22;
@@ -1193,7 +1193,7 @@
   /* ============================================================
      THE SOLIDIFYING STAR (V5.6, 2026-07-16 directive): on the final
      stretch of the scroll the particle star HARDENS into one solid
-     piece — the metaphor of an idea turned into reality. Driven
+     piece - the metaphor of an idea turned into reality. Driven
      entirely by scroll progress (sol = smoothstep(.955, .995, p)):
      scrub-safe in both directions, deterministic at ?storyp pins.
      The swarm fades to a breathing remainder (uSolid in VERT_TAIL)
@@ -1203,15 +1203,15 @@
      ============================================================ */
   var solidStar = (function () {
     /* V5.13 (user: "back to the previous star shape, aquarium style,
-       3D that really CONTAINS the particles — and the logo and the
+       3D that really CONTAINS the particles - and the logo and the
        star EXACTLY the same"): the extruded 8-point brand star again,
-       but as PURE GLASS — a fresnel shader: face-on the surface is a
+       but as PURE GLASS - a fresnel shader: face-on the surface is a
        near-clear breath of violet (see straight through to the white
        swarm living inside the real 3D thickness), and where the
        surface turns away (bevel ring + silhouette walls) it deepens
        into the SAME violet edge gradient the .logo-mark svgs stroke
        with. Face-on, this draws exactly the flat mark: violet edges,
-       see-through middle. Unlit, no env/PMREM — nothing to drift
+       see-through middle. Unlit, no env/PMREM - nothing to drift
        from the svg colors on any GPU. */
     var S = 8.5;
     var shape = new THREE.Shape();
@@ -1224,9 +1224,9 @@
       depth: 1.1, bevelEnabled: true,
       bevelThickness: 0.85, bevelSize: 0.8, bevelSegments: 4
     });
-    geo.center(); /* shape is XY-symmetric — this only centers depth */
+    geo.center(); /* shape is XY-symmetric - this only centers depth */
     /* the TRUE silhouette span (tips + bevel miter overshoot included)
-       — estimating it (20.2u) landed the glass slightly larger than
+       - estimating it (20.2u) landed the glass slightly larger than
        the mark and doubled the outline mid-crossfade (user QA) */
     geo.computeBoundingBox();
     var H = geo.boundingBox.max.y - geo.boundingBox.min.y;
@@ -1251,11 +1251,11 @@
         'varying vec3 vN; varying vec3 vV;',
         'void main(){',
         /* glass law: colors are FINAL sRGB values (ShaderMaterial
-           bypasses the output transform) — the svg stroke family
+           bypasses the output transform) - the svg stroke family
            #9d8bff → #5a46d6. uDockF thickens+saturates the walls as
            the piece SHRINKS: at hero size the fresnel edge spans many
            pixels, but at logo size it collapses to sub-pixel and
-           averages out pale — the mark's crisp 1.4px stroke would
+           averages out pale - the mark's crisp 1.4px stroke would
            read as a different color and wall thickness (user QA). */
         '  float t = uDockF;',
         '  float fr = pow(1.0 - abs(dot(normalize(vN), normalize(-vV))), mix(1.8, 1.0, t));',
@@ -1279,7 +1279,7 @@
   }
 
   /* V5.8 logo docking: the overscroll that raises the footer sends the
-     finished piece home — onto the header's star mark itself (V5.8.1
+     finished piece home - onto the header's star mark itself (V5.8.1
      user directive: "on top of the current logo, cover it, bring the
      particles with it"). The dock target and size are measured from
      the REAL logo <svg> rect and mapped to world at the star's ~17u
@@ -1289,7 +1289,7 @@
      the render shaders), so containment holds the whole way. */
   /* V5.14: the dock target is stored as the mark's NDC anchor + pixel
      size, and mapped to world THROUGH THE CURRENT CAMERA every frame
-     (see the frame loop) — the old fixed 17u mapping assumed the
+     (see the frame loop) - the old fixed 17u mapping assumed the
      finale camera had fully settled, but during a fast real scroll
      pSmooth (and so camera z) is still converging when the crossfade
      starts, which parked the glass LEFT of the mark (user QA). */
@@ -1309,8 +1309,8 @@
   computeDock();
 
   /* ============================================================
-     CHAPTER GRADES — bright whites, richer tint per chapter; the
-     finale HOLDS the portal violet (V5.1 — the loop is gone)
+     CHAPTER GRADES - bright whites, richer tint per chapter; the
+     finale HOLDS the portal violet (V5.1 - the loop is gone)
      ============================================================ */
   var STATIONS = [
     { p: 0.010, bg: 0xfafaf9 }, { p: 0.060, bg: 0xf1ecff }, { p: 0.140, bg: 0xedefff },
@@ -1318,7 +1318,7 @@
     { p: 0.4725, bg: 0xefe8ff }, { p: 0.5525, bg: 0xe7f3fc }, { p: 0.6325, bg: 0xfceef3 },
     { p: 0.7350, bg: 0xebf1fb }, { p: 0.8400, bg: 0xf1ecfa }, { p: 0.9250, bg: 0xf0e7ff },
     /* finale holds the portal violet, lifting slightly as the camera
-       noses in (CTA legibility) — no fade back to the opening white */
+       noses in (CTA legibility) - no fade back to the opening white */
     { p: 0.9980, bg: 0xf3edff }
   ];
   /* one linear grade everywhere. r160 converts the clear color at clear
@@ -1345,12 +1345,12 @@
   }
 
   /* ============================================================
-     CAMERA PATH + BEATS — stretched for the 1100vh track; keyframes
+     CAMERA PATH + BEATS - stretched for the 1100vh track; keyframes
      re-timed to the V5 beat centers, corridor depth unchanged
      ============================================================ */
   /* finale re-timed (V5.1): the camera reaches the QA'd ~23u framing
      exactly at the portal anchor (.925 -> z -421, star at -444), then
-     dollies in gently to -427 and SETTLES — it never flies past the
+     dollies in gently to -427 and SETTLES - it never flies past the
      star, because nothing exists behind it any more */
   var KP = [0, 0.10, 0.205, 0.66, 0.735, 0.875, 0.925, 1.0];
   var KZ = [7, -13, -150, -274, -314, -404, -421, -427];
@@ -1375,7 +1375,7 @@
   function updateBeats(p) {
     for (var i = 0; i < beats.length; i++) {
       var bt = beats[i];
-      var fade = 0.022; /* < the smallest dead gap (0.025) — beats never mix */
+      var fade = 0.022; /* < the smallest dead gap (0.025) - beats never mix */
       var o = 0;
       /* fade IN starts at the beat's own range (no pre-roll); only the
          opening beat keeps a lead so the hero is visible at load */
@@ -1389,7 +1389,7 @@
       if (q !== bt.state) {
         bt.state = q;
         /* ORBO MOBILE (M2): on phones the entrance is a CLASS-DRIVEN
-           spring (index.html: 300ms translateY+opacity on .live) — an
+           spring (index.html: 300ms translateY+opacity on .live) - an
            app screen arriving, not a scroll-scrubbed fade. Inline
            writes would override that CSS, so they are desktop-only.
            Scrub-safety survives: the class is still a pure function
@@ -1401,7 +1401,7 @@
         bt.el.classList.toggle('live', q > 0.5);
       }
     }
-    /* the swipe hint lives on the pager coordinate on phones — the
+    /* the swipe hint lives on the pager coordinate on phones - the
        ignition parks at p=.06, which the scroll formula read as
        "already under way" and killed the affordance for new visitors */
     if (hint) hint.style.opacity = paged
@@ -1409,7 +1409,7 @@
       : Math.max(0, 1 - p * 14);
   }
 
-  /* CHAPTER DOTS (ORBO MOBILE M2): 11 beats read as 7 app chapters —
+  /* CHAPTER DOTS (ORBO MOBILE M2): 11 beats read as 7 app chapters -
      opening / the way / capabilities in pairs / running+process /
      finale. One class write per chapter change. */
   var dotsWrap = document.querySelector('.story-dots');
@@ -1428,14 +1428,14 @@
   }
 
   /* ---------- go live ---------- */
-  /* version stamp — lets remote debugging confirm which engine build a
+  /* version stamp - lets remote debugging confirm which engine build a
      machine is actually running (stale-cache hunts, V5.19 lesson) */
   console.info('Orbo engine v80 | tier ' + gpuTier + (mobile ? ' mobile' : ' desktop') + (simInfo ? ' sim' : ' stateless'));
   document.documentElement.classList.add('story-live');
   document.documentElement.classList.add('story-light');
   var header = document.getElementById('siteHeader');
 
-  /* ?fps=1 — on-device diagnosis chip (v77). The FIRST question of any
+  /* ?fps=1 - on-device diagnosis chip (v77). The FIRST question of any
      "stuck on the phone" report is WHICH build and WHAT frame time;
      this makes the phone itself answer both (a stale cache shows up
      as an old v number right here). Param-gated, absent otherwise. */
@@ -1459,8 +1459,8 @@
   var overV = 0; /* rubber-band spring velocity (M3, phones only) */
 
   /* cursor -> a RAY through the world (V5.4). `hover` is PRESENCE: it
-     ramps to 1 while the pointer is over the page and holds there —
-     a resting mouse keeps a live dimple under it at all times — and
+     ramps to 1 while the pointer is over the page and holds there -
+     a resting mouse keeps a live dimple under it at all times - and
      ramps to 0 when the pointer leaves the window / the finger lifts.
      `push` stays the SPEED energy on top (splash while stirring). */
   var ndc = new THREE.Vector2(0, 0);
@@ -1477,7 +1477,7 @@
   document.documentElement.addEventListener('mouseleave', function () { hoverTarget = 0; });
   window.addEventListener('blur', function () { hoverTarget = 0; });
   /* touchDown gates the idle throttle; on phones the same gestures
-     also drive THE PAGER (v77) — the finger that turns the chapter is
+     also drive THE PAGER (v77) - the finger that turns the chapter is
      the finger that stirs it. Pager input is inert under QA pins. */
   var touchDown = false;
   var paged = mobile; /* the pager IS the phone input model */
@@ -1501,7 +1501,7 @@
     ndc.y = -(e.touches[0].clientY / innerHeight) * 2 + 1;
     hoverTarget = 1;
   }, { passive: true });
-  /* only the LAST finger leaving drops presence — a resting finger keeps
+  /* only the LAST finger leaving drops presence - a resting finger keeps
      its dimple even while other fingers tap/lift elsewhere (QA 2026-07-16) */
   window.addEventListener('touchend', function (e) {
     if (e.touches.length) return;
@@ -1515,13 +1515,13 @@
   });
 
   /* ============================================================
-     THE PAGER (v77 — owner directive: "the whole scroll experience
+     THE PAGER (v77 - owner directive: "the whole scroll experience
      does not suit the phone; replace it, a big change"). On phones
      the story is NOT scroll-driven at all any more: the document is
-     locked to one viewport and the journey is PAGED — one swipe =
+     locked to one viewport and the journey is PAGED - one swipe =
      one chapter, the particle pour IS the page transition, and a
      live drag scrubs the journey under the finger (which also
-     drives the ray-brush — the same gesture stirs what it turns).
+     drives the ray-brush - the same gesture stirs what it turns).
      This also deletes the phone's two worst jank sources outright:
      the URL-bar resize storm and main-thread scroll work.
 
@@ -1529,14 +1529,14 @@
        -1 → 0   the ignition (load: the cloud assembles into the star)
         0 → 11  the twelve chapters (PAGES[i] = the FORMED anchors)
        11 → 12  the dock (star lands in the header, footer sheet rises)
-     p = pagesAt(c) stays a pure function of the timeline — scrub-safe,
+     p = pagesAt(c) stays a pure function of the timeline - scrub-safe,
      and ?storyp/?over pins bypass the pager entirely (QA unchanged).
      Desktop keeps the V5 scroll model byte-for-byte. */
-  /* v78 (owner: "the star should fall into the logo SOONER — the end
+  /* v78 (owner: "the star should fall into the logo SOONER - the end
      drags"): the separate portal page is GONE. The last swipe pours
      gates -> portal -> gather -> solid in ONE gesture (the tween
      sweeps p .84 -> 1), and the dock fires automatically on arrival
-     (overRaw steps to 1 at the last page — the M3 spring animates the
+     (overRaw steps to 1 at the last page - the M3 spring animates the
      flight). The extra swipe past the end now only raises the footer
      sheet; swiping back still reverses everything. */
   var PAGES = [0.06, 0.14, 0.2325, 0.3125, 0.3925, 0.4725, 0.5525, 0.6325, 0.735, 0.84, 1.0];
@@ -1565,7 +1565,7 @@
     pgDrag.prevY = pgDrag.lastY; pgDrag.prevT = pgDrag.lastT;
     pgDrag.lastY = y; pgDrag.lastT = now;
     var c = pgDrag.cBase + (pgDrag.y0 - y) / innerHeight;  /* one viewport = one chapter; up = forward */
-    /* rubber past both ends — the star loosens toward the cloud below
+    /* rubber past both ends - the star loosens toward the cloud below
        page 0 and resists past the dock, and always springs back */
     if (c < 0) c = c * 0.35;
     if (c > PG_DOCK) c = PG_DOCK + (c - PG_DOCK) * 0.25;
@@ -1597,15 +1597,15 @@
   }
   /* the paged shell: the class locks the document to one viewport
      (index.html CSS) and the ignition tween assembles the opening
-     star as the app "opens". Pins keep the class — same CSS state as
-     production — but pin p directly (pager input stays inert). */
+     star as the app "opens". Pins keep the class - same CSS state as
+     production - but pin p directly (pager input stays inert). */
   var dockOpen = false;
   if (paged) {
     document.documentElement.classList.add('story-paged');
     if (pPin === null) pgGo(0, 1400, true, performance.now());
   }
 
-  /* cache the track height — reading offsetHeight every frame while also
+  /* cache the track height - reading offsetHeight every frame while also
      writing --sp (a layout-affecting property on the header) forces a
      synchronous reflow per frame. maxScroll caches the document end for
      the footer-overscroll docking (V5.8). */
@@ -1620,7 +1620,7 @@
     rt = setTimeout(function () {
       /* V5.20 (owner: "very stuck on the phone"): the mobile URL bar
          shows/hides DURING scroll and fires resize with a small
-         height-only delta — rebuilding the render pipeline for that
+         height-only delta - rebuilding the render pipeline for that
          janked every scroll direction change. Height-only wiggles
          refresh the scroll math ONLY; the full rebuild runs just for
          real resizes (rotation, window drag, width change). */
@@ -1629,7 +1629,7 @@
       if (hOnly) { relayout(); return; }
       camera.aspect = innerWidth / innerHeight;
       camera.updateProjectionMatrix();
-      /* refresh DPR too — dragging to another monitor / browser zoom changes
+      /* refresh DPR too - dragging to another monitor / browser zoom changes
          devicePixelRatio without a reload. Once the governor has stepped AT
          ALL, DPR may only go DOWN (the machine already proved itself slow;
          raising pixel load with the ladder exhausted would be unshedable) */
@@ -1646,8 +1646,8 @@
       computeDock();
     }, 150);
   });
-  /* V5.18 ("the last frame still sits where it always did" — owner's
-     real machine): layout can SHIFT AFTER load without firing resize —
+  /* V5.18 ("the last frame still sits where it always did" - owner's
+     real machine): layout can SHIFT AFTER load without firing resize -
      the webfont swap changes the footer/page height, so the cached
      maxScroll (the overscroll normalization!) and the logo rect go
      stale, and the dock chain aims at yesterday's layout. Re-measure
@@ -1663,18 +1663,18 @@
   if (window.ResizeObserver) new ResizeObserver(relayout).observe(document.body);
 
   /* perf governor (V5.1): finer down-only ladder, one step per slow
-     90-frame window — half the smoke, then DPR down in 0.25 steps to
+     90-frame window - half the smoke, then DPR down in 0.25 steps to
      1.0, then thin the swarm to 80% / 60% (shuffled index -> an even
      sprinkle disappears, no formation loses structure). Never steps up. */
   var gFrames = 0, gSum = 0, gMin = 999, gLevel = 0, lastT = 0, lastSp = -1, hdrDocked = false, lastLogoOp = -1;
   var gSteps = [function () {
-    /* halve the smoke by PAIRS (i & 2), not by (i % 2) — sprite SIDE is
+    /* halve the smoke by PAIRS (i & 2), not by (i % 2) - sprite SIDE is
        assigned by i % 2, so index parity would strip one whole side of
        the corridor's haze (QA 2026-07-15) */
     for (var i = 0; i < smokes.length; i++) if (i & 2) smokes[i].sp.visible = false;
   }];
   (function () {
-    /* rungs are built for the TIER CAP (not the load DPR — a 1x-display
+    /* rungs are built for the TIER CAP (not the load DPR - a 1x-display
        load must still own rungs in case a monitor drag raises DPR later)
        and each rung clamps to the CURRENT DPR, so a rung can only ever
        step DOWN; a rung that has nothing to shed returns false and
@@ -1699,7 +1699,7 @@
   function govern(dt) {
     gFrames++; gSum += dt;
     if (dt < gMin) gMin = dt;
-    /* v77: phones adapt in ~0.8s windows — a struggling device spent
+    /* v77: phones adapt in ~0.8s windows - a struggling device spent
        multiple 1.5-4s windows janking through the ladder before
        reaching its floor ("very stuck" opening minutes). Desktop
        keeps the V5 cadence exactly. */
@@ -1708,17 +1708,17 @@
     gFrames = 0; gSum = 0; gMin = 999;
     if (avg <= 26) return;
     /* a slow-vsync display (30/24Hz TV, projector) renders EVERY frame at
-       a uniform ~33/42ms — that is a locked cadence, not GPU overload
+       a uniform ~33/42ms - that is a locked cadence, not GPU overload
        (shedding quality could never lower it anyway). Overload shows a
        sub-28ms floor or spread between fast holds and slow pours; a
        locked display shows avg hugging its min. (QA 2026-07-15) */
     if (min >= 28 && avg < min * 1.2) return;
     /* a rung that had nothing to shed (DPR already below its target)
-       returns false — fall straight through to the next real rung */
+       returns false - fall straight through to the next real rung */
     while (gLevel < gSteps.length) {
       if (gSteps[gLevel++]() !== false) break;
     }
-    /* v77: severely over budget on a PHONE (sub-24fps) — shed a second
+    /* v77: severely over budget on a PHONE (sub-24fps) - shed a second
        rung in the same window instead of janking to the next one */
     if (mobile && avg > 42) {
       while (gLevel < gSteps.length) {
@@ -1729,11 +1729,11 @@
 
   var lookTarget = new THREE.Vector3();
   var dockV = new THREE.Vector3();
-  /* ORBO MOBILE (M5) idle throttle: when the phone is fully at rest —
+  /* ORBO MOBILE (M5) idle throttle: when the phone is fully at rest -
      scroll converged, no finger, no push energy, dock settled, magnet
-     parked — render every 2nd frame. Halves the GPU bill at rest;
+     parked - render every 2nd frame. Halves the GPU bill at rest;
      imperceptible (twinkle periods are >1s). The skipped frame's dt
-     rolls into the next one (dtn≈2 — the sim integrates it exactly);
+     rolls into the next one (dtn≈2 - the sim integrates it exactly);
      the governor is fed only on un-throttled frames so 33ms idle
      frames never read as overload. QA pins are never throttled. */
   var idleSettled = false, idleFlip = false;
@@ -1758,14 +1758,14 @@
     }
     var dtn = Math.min(2.0, Math.max(0.25, dt / 16.7));
     var time = t * 0.001;
-    /* v77: phones read the PAGER timeline, desktop reads the scroll —
+    /* v77: phones read the PAGER timeline, desktop reads the scroll -
        p stays a pure function of its driver either way */
     if (paged && pPin === null) pagerFrame(t);
     var p = pPin !== null ? pPin
       : paged ? pagesAt(pgC)
       : (trackH > 0 ? Math.min(1, Math.max(0, window.scrollY / trackH)) : 0);
     pSmooth += (p - pSmooth) * 0.085;
-    /* v78: after the finger lifts the view re-centers — a PARKED
+    /* v78: after the finger lifts the view re-centers - a PARKED
        touch offset kept the camera rotated and skewed the centered
        portrait icons ("crooked"). Desktop pointers are untouched. */
     if (mobile && hoverTarget === 0) { ndc.x *= Math.pow(0.97, dtn); ndc.y *= Math.pow(0.97, dtn); }
@@ -1775,11 +1775,11 @@
     gradeUpdate(pSmooth);
     applyLeg(pSmooth);
 
-    /* V5.6/V5.8 finale: the idea hardens into reality — a bit EARLIER
+    /* V5.6/V5.8 finale: the idea hardens into reality - a bit EARLIER
        now (user directive), and as translucent aquarium glass. Pure
-       function of scroll — scrub back and it dissolves again. */
+       function of scroll - scrub back and it dissolves again. */
     /* V5.12: the glass enters WITH the final sentence (B10 fade-in
-       completes ~.922; user asked twice for earlier — was .945/.928) */
+       completes ~.922; user asked twice for earlier - was .945/.928) */
     var sol = smoothstep01(0.915, 0.98, pSmooth);
     U.uSolid.value = sol;
     /* footer overscroll -> the piece docks as a small logo (V5.8);
@@ -1787,12 +1787,12 @@
     var overRaw = overPin !== null ? overPin
       : paged ? (pgC >= PG_LAST - 0.01 ? 1 : 0)
       : (trackH > 0 ? Math.min(1, Math.max(0, (window.scrollY - trackH) / Math.max(1, maxScroll - trackH))) : 0);
-    /* V5.18/19: the last stretch of the overscroll snaps to DONE — the
+    /* V5.18/19: the last stretch of the overscroll snaps to DONE - the
        handover must complete even if the measured document end is off
        by tens of px on some machine; the resting state is then the
        REAL header mark, which by definition cannot be misplaced */
     if (overRaw > 0.9) overRaw = 1;
-    /* ORBO MOBILE (M3): on phones the dock has a RUBBER BAND — an
+    /* ORBO MOBILE (M3): on phones the dock has a RUBBER BAND - an
        underdamped spring (ζ≈0.6, ~10% overshoot, settles ~1.2s) so
        the landing arrives with a springy little settle instead of a
        flat exponential. The dock/flatten/crossfade smoothsteps clamp
@@ -1809,18 +1809,18 @@
       overS += (overRaw - overS) * Math.min(1, 0.10 * dtn);
     }
 
-    /* camera FIRST (V5.15 — moved above the dock block so the dock
+    /* camera FIRST (V5.15 - moved above the dock block so the dock
        anchor is projected through THIS frame's matrices, not last
        frame's). calm-camera directive: the motion belongs to the
        PARTICLES, not the screen; V5.9/V5.12: ALL camera drift dies as
-       the star docks — a logo sits rock-still. */
+       the star docks - a logo sits rock-still. */
     var z = camZ(pSmooth);
     var sway = Math.sin(pSmooth * 14) * 0.5;
     var weave = 0;
-    /* v78: no weave on phones — the icons sit dead-center there and
+    /* v78: no weave on phones - the icons sit dead-center there and
        the arc read as a skew, not as framing */
     if (!appNarrow && pSmooth > 0.205 && pSmooth < 0.66) {
-      /* six gentle alternating arcs — one per capability icon side.
+      /* six gentle alternating arcs - one per capability icon side.
          Desktop arcs away from the icon (text keeps the frame); narrow
          aspects arc TOWARD it so the formation stays inside the frustum. */
       var ct = (pSmooth - 0.205) / 0.455 * 6;
@@ -1829,11 +1829,11 @@
       weave = wdir * (narrow ? 1.0 : 1.1) * Math.sin((ct % 1) * Math.PI);
     }
     /* V5.17 (owner: "return the star to the previous round"): the
-       V5.16 total freeze + sheen are reverted — gentle pointer
+       V5.16 total freeze + sheen are reverted - gentle pointer
        parallax lives through the finale again and dies only with the
        dock. The landing stays exact regardless: the V5.15 unproject
        maps the anchor through the FULL camera pose every frame. */
-    /* clamped: the M3 phone rubber-band lets overS overshoot 1 briefly —
+    /* clamped: the M3 phone rubber-band lets overS overshoot 1 briefly -
        calm must floor at 0, never flip sign (identity on desktop) */
     var calm = Math.max(0, 1 - overS);
     camera.position.set((sway * 0.4 + weave + mx * 1.0) * calm, (Math.sin(pSmooth * 9) * 0.35 - my * 0.75) * calm, z);
@@ -1846,9 +1846,9 @@
        glass. camera x/y included so the landing stays glued to the
        screen-fixed logo even under pointer parallax.
        V5.19 staging (owner's machine parks the glass mid-glide "too
-       far left" — its real scroll tops out short of the measured
+       far left" - its real scroll tops out short of the measured
        overscroll end, so deep-overS milestones never fire there):
-       the WHOLE landing now lives in the first ~60% of the region —
+       the WHOLE landing now lives in the first ~60% of the region -
        flight 0-45%, flatten 30-55%, mark crossfade 45-62%. Even a
        machine that only reaches 65% of the measured overscroll gets a
        COMPLETED handover, and the resting frame is the REAL header
@@ -1858,7 +1858,7 @@
     U.uOver.value = dock;
     /* V5.15 ("once and for all"): project the anchor through the FULL
        camera matrices. With a live pointer the camera is slightly
-       ROTATED (lookAt) during the crossfade — any straight-ahead
+       ROTATED (lookAt) during the crossfade - any straight-ahead
        mapping shifts the whole world 3-7px against the DOM mark
        (pointer-dependent, so headless pins never saw it). Unproject
        the mark's NDC into a ray and intersect the star's z=-444
@@ -1875,7 +1875,7 @@
     U.uDockPos.value.set(dtx, dty, -444);
     U.uDockScale.value = dockScale;
     /* V5.9: the flat mark is CSS-hidden for the whole live story (the
-       corner carries no logo until the star docks — user directive).
+       corner carries no logo until the star docks - user directive).
        Past half-flight the header's frosted scroll pane hands over
        instead, so the landing star is not buried behind its blur.
        Hysteresis keeps the class steady at the threshold. */
@@ -1894,7 +1894,7 @@
       }
     }
     /* V5.10: on the last stretch of the flight the living piece hands
-       over to the page's REAL flat mark — they now look identical, so
+       over to the page's REAL flat mark - they now look identical, so
        the resting state on index is literally the same svg logo as
        every other page (the circle closes). The inline opacity write
        intentionally overrides the story-live CSS hide at the dock;
@@ -1916,20 +1916,20 @@
       solidStar.op.value = sol * (1 - handoff);
       solidStar.df.value = dock;
       var sc = (0.92 + 0.08 * sol) * dockScale;
-      /* V5.13: the glass FLATTENS as it docks — a fronto-parallel flat
+      /* V5.13: the glass FLATTENS as it docks - a fronto-parallel flat
          plate projects as a pure scale (zero depth parallax), so the
          landed outline overlays the mark EXACTLY. At full thickness an
          object ±1.4u deep sitting ~9u off the camera axis smears its
-         front/back outlines ±13px apart (measured, v514 pixel scan) —
+         front/back outlines ±13px apart (measured, v514 pixel scan) -
          that was the stubborn "double outline". */
       solidStar.mesh.scale.set(sc, sc, sc * (1 - flat) + 0.003 * flat);
       solidStar.mesh.position.x = dtx;
       solidStar.mesh.position.y = dty;
-      /* forming, it still breathes with the world; solid, it settles —
+      /* forming, it still breathes with the world; solid, it settles -
          but stays alive: the glass pane leans gently toward the
-         pointer (hover-gated — pins stay deterministic), and a drift
+         pointer (hover-gated - pins stay deterministic), and a drift
          too slow to see keeps it breathing. Docking straightens
-         everything — the logo lands square and rock-still. */
+         everything - the logo lands square and rock-still. */
       solidStar.mesh.rotation.z = (1 - sol) * (0.10 + Math.sin(time * 0.4) * 0.03) * (1 - dock);
       solidStar.mesh.rotation.y = (0.14 + Math.sin(time * 0.12) * 0.05 + mx * 0.36 * hover) * (1 - dock);
       solidStar.mesh.rotation.x = (-0.10 + my * 0.28 * hover) * (1 - dock);
@@ -1937,13 +1937,13 @@
 
     /* pointer speed -> push impulse; decay heals the liquid closed.
        normalized by dtn so the splash feels the same at 60/120/165 Hz.
-       ORBO MOBILE (M3): a fast flick must leave a VISIBLE wake — the
+       ORBO MOBILE (M3): a fast flick must leave a VISIBLE wake - the
        phone impulse runs hotter and caps higher (desktop values exact) */
     var speed = Math.hypot(ndc.x - lastNdc.x, ndc.y - lastNdc.y);
     lastNdc.copy(ndc);
     push += Math.min(mobile ? 1.6 : 1.2, (speed / dtn) * 28) * (mobile ? 0.62 : 0.4) * dtn;
     push *= Math.pow(0.92, dtn);
-    /* presence ramps smoothly — arrival blooms in, leaving heals out */
+    /* presence ramps smoothly - arrival blooms in, leaving heals out */
     hover += (hoverTarget - hover) * Math.min(1, 0.10 * dtn);
     /* the pointer RAY (V5.4): origin at the camera, direction through
        the pointer; the lagged prev-ray gives slow reactors something
@@ -1958,7 +1958,7 @@
     U.uTime.value = time;
     U.uDt.value = dtn;
 
-    /* V5.1: smoke is ATMOSPHERE, not an actor — drift cut to a shimmer
+    /* V5.1: smoke is ATMOSPHERE, not an actor - drift cut to a shimmer
        so the big soft sprites never read as moving blobs */
     for (var si = 0; si < smokes.length; si++) {
       var sk = smokes[si];
@@ -1972,7 +1972,7 @@
 
     updateBeats(pSmooth);
     if (mobile) updateDots(pSmooth);
-    /* write --sp only when the displayed value actually changes — it feeds a
+    /* write --sp only when the displayed value actually changes - it feeds a
        width calc on the header, so an unconditional write costs a reflow */
     var spq = Math.round(pSmooth * 500);
     if (header && spq !== lastSp) {
@@ -1981,7 +1981,7 @@
     }
     /* M5: decide the NEXT frame's throttle from this frame's settled
        state (phones only, never at QA pins). v77: the pager must be
-       fully at rest — no drag, no tween in flight. */
+       fully at rest - no drag, no tween in flight. */
     idleSettled = mobile && pPin === null && overPin === null &&
       !touchDown && !pgDrag && !pgTween &&
       Math.abs(p - pSmooth) < 1e-4 &&
@@ -1991,7 +1991,7 @@
     if (!wasIdle) govern(dt);
   }
   /* warm the finale material at load (QA 2026-07-16): otherwise it
-     compiles synchronously on the FIRST frame it becomes visible — a
+     compiles synchronously on the FIRST frame it becomes visible - a
      hitch at the story's emotional peak. The pane is opacity 0, so
      this draws nothing visible; pins stay untouched. */
   solidStar.mesh.visible = true;

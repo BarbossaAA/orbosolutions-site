@@ -1,5 +1,5 @@
 /*
- * TERRA — data.js
+ * TERRA - data.js
  * Editorial content for the five field studies.
  * `report` feeds the full-screen field-report dossier:
  * three count-up stats, a closing quote and the contour
@@ -13,9 +13,9 @@ export const PROJECTS = [
     name: 'Dune',
     lines: ['Erg Chebbi', 'Drift Atlas'],
     year: '2021',
-    coords: '31.15°N — 4.01°W',
+    coords: '31.15°N - 4.01°W',
     medium: 'Aerial LiDAR',
-    desc: 'Fourteen months tracking the slow migration of star dunes across the Moroccan erg — sand read as an archive of wind.',
+    desc: 'Fourteen months tracking the slow migration of star dunes across the Moroccan erg - sand read as an archive of wind.',
     accent: '#C89B5E',
     report: {
       interval: '8 m',
@@ -25,7 +25,7 @@ export const PROJECTS = [
         { label: 'Maximum relief', value: 158, suffix: 'm' }
       ],
       quote: 'A dune is not a form. It is sand caught in the act of remembering the wind.',
-      cite: 'Field notebook — day 212'
+      cite: 'Field notebook - day 212'
     }
   },
   {
@@ -34,7 +34,7 @@ export const PROJECTS = [
     name: 'Moss',
     lines: ['Boreal', 'Understory Index'],
     year: '2022',
-    coords: '66.33°N — 29.54°E',
+    coords: '66.33°N - 29.54°E',
     medium: 'Multispectral survey',
     desc: 'A canopy-down census of moss and lichen cover in old-growth taiga, mapped one hectare at a time.',
     accent: '#8FA36A',
@@ -46,7 +46,7 @@ export const PROJECTS = [
         { label: 'Ground cover', value: 91, suffix: '%' }
       ],
       quote: 'Every hectare here is an argument that slowness can still win ground.',
-      cite: 'Survey log — Kuusamo station'
+      cite: 'Survey log - Kuusamo station'
     }
   },
   {
@@ -55,7 +55,7 @@ export const PROJECTS = [
     name: 'Clay',
     lines: ['Painted Hills', 'Strata Record'],
     year: '2023',
-    coords: '44.66°N — 120.27°W',
+    coords: '44.66°N - 120.27°W',
     medium: 'Stratigraphic imaging',
     desc: 'Thirty-three million years of climate written in banded laterite, read from six hundred feet above the Oregon high desert.',
     accent: '#C4744A',
@@ -67,7 +67,7 @@ export const PROJECTS = [
         { label: 'Section height', value: 192, suffix: 'm' }
       ],
       quote: 'Climate is a rumour on the surface. The hills wrote it down and kept the ledger.',
-      cite: 'Strata Record — plate 09'
+      cite: 'Strata Record - plate 09'
     }
   },
   {
@@ -76,7 +76,7 @@ export const PROJECTS = [
     name: 'Glacier',
     lines: ['Vatnajökull', 'Melt Ledger'],
     year: '2024',
-    coords: '64.42°N — 16.80°W',
+    coords: '64.42°N - 16.80°W',
     medium: 'Radar altimetry',
     desc: 'An annual accounting of Europe’s largest ice cap, where every survey line returns thinner than the last.',
     accent: '#9FC2D2',
@@ -88,7 +88,7 @@ export const PROJECTS = [
         { label: 'Ice cap area', value: 7700, suffix: 'km²' }
       ],
       quote: 'The ledger balances every spring. It is the ice that pays.',
-      cite: 'Melt Ledger — 2024 audit'
+      cite: 'Melt Ledger - 2024 audit'
     }
   },
   {
@@ -97,7 +97,7 @@ export const PROJECTS = [
     name: 'Basalt',
     lines: ['Stúðlagil', 'Column Field'],
     year: '2025',
-    coords: '65.16°N — 15.30°W',
+    coords: '65.16°N - 15.30°W',
     medium: 'Photogrammetry',
     desc: 'Hexagonal jointing in a drained river canyon: geometry the earth arrived at without instruction.',
     accent: '#A19A8F',
@@ -109,7 +109,7 @@ export const PROJECTS = [
         { label: 'Tallest column', value: 24, suffix: 'm' }
       ],
       quote: 'No one taught the rock geometry. It cooled, and geometry was what remained.',
-      cite: 'Column Field — closing note'
+      cite: 'Column Field - closing note'
     }
   }
 ];

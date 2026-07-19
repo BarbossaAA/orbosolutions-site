@@ -1,9 +1,9 @@
 /* ============================================================
-   FLUX — shaders.js
+   FLUX - shaders.js
    Eight hand-written GLSL ES 3.00 fragment programs.
    Shared uniform contract: u_time / u_mouse / u_resolution.
    008 FLOW adds a ping-pong feedback contract: u_prev / u_dt /
-   u_mouseVel / u_inject. These strings ARE the content — they
+   u_mouseVel / u_inject. These strings ARE the content - they
    are compiled live and displayed verbatim in the inspector.
    ============================================================ */
 
@@ -15,7 +15,7 @@ void main(){ gl_Position = vec4(a_pos, 0.0, 1.0); }
 /* ------------------------------------------------------------ */
 
 const MORPH = `#version 300 es
-// 001 MORPH — raymarched signed distance field
+// 001 MORPH - raymarched signed distance field
 // sphere -> box -> torus with soft shadows and a fresnel rim
 precision highp float;
 
@@ -133,7 +133,7 @@ void main(){
 /* ------------------------------------------------------------ */
 
 const INK = `#version 300 es
-// 002 INK — fbm domain warping, monochrome
+// 002 INK - fbm domain warping, monochrome
 // p -> fbm(p + fbm(p + fbm(p))) : the field feeds itself
 precision highp float;
 
@@ -194,7 +194,7 @@ void main(){
 /* ------------------------------------------------------------ */
 
 const JULIA = `#version 300 es
-// 003 JULIA — escape-time fractal with orbit traps
+// 003 JULIA - escape-time fractal with orbit traps
 // z -> z^2 + c while c orbits the seahorse valley
 precision highp float;
 
@@ -245,7 +245,7 @@ void main(){
 /* ------------------------------------------------------------ */
 
 const BLOOM = `#version 300 es
-// 004 BLOOM — metaball field with additive glow
+// 004 BLOOM - metaball field with additive glow
 // nine drifting balls, one hard isoline, your pointer is the tenth
 precision highp float;
 
@@ -285,7 +285,7 @@ void main(){
 /* ------------------------------------------------------------ */
 
 const AURORA = `#version 300 es
-// 005 AURORA — layered sine and noise curtains
+// 005 AURORA - layered sine and noise curtains
 // an aurora observed in infrared: red at the root, white at the tip
 precision highp float;
 
@@ -358,7 +358,7 @@ void main(){
 /* ------------------------------------------------------------ */
 
 const CELLS = `#version 300 es
-// 006 CELLS — animated voronoi with true border distance
+// 006 CELLS - animated voronoi with true border distance
 // second pass measures distance to the cell wall, not the seed
 precision highp float;
 
@@ -424,7 +424,7 @@ void main(){
 /* ------------------------------------------------------------ */
 
 const PORTAL = `#version 300 es
-// 007 PORTAL — kaleidoscopic tunnel flight
+// 007 PORTAL - kaleidoscopic tunnel flight
 // the plane folds into seven mirrored sectors; the camera never stops
 precision highp float;
 
@@ -529,7 +529,7 @@ void main(){
 /* ------------------------------------------------------------ */
 
 const FLOW_SIM = `#version 300 es
-// 008 FLOW — feedback pass (ping-pong: reads the last frame,
+// 008 FLOW - feedback pass (ping-pong: reads the last frame,
 // writes the next). Advect upstream, decay, inject at the pointer.
 precision highp float;
 
@@ -600,7 +600,7 @@ void main(){
 `;
 
 const FLOW_VIEW = `#version 300 es
-// 008 FLOW — view pass (screens the feedback state to the display)
+// 008 FLOW - view pass (screens the feedback state to the display)
 precision highp float;
 
 uniform sampler2D u_state;
@@ -623,7 +623,7 @@ void main(){
 /* ------------------------------------------------------------ */
 
 /* Tile-mode variants: the grid runs the raymarchers with fewer
-   steps — at ~0.6 DPR tile size the difference is invisible.
+   steps - at ~0.6 DPR tile size the difference is invisible.
    def.src (displayed in the inspector and compiled fullscreen)
    is the full-step original. */
 const capSteps = (src, pairs) => pairs.reduce((s, [from, to]) => s.replace(from, to), src);
@@ -643,7 +643,7 @@ export const SHADERS = [
     id: '002',
     name: 'INK',
     tech: 'FBM DOMAIN WARP',
-    desc: 'Three stacked layers of fractional Brownian motion feed their output back into their own coordinates — domain warping. The field is thresholded into hard monochrome so it reads as ink dispersing in water, perpetually folding into itself. A single red vein traces one contour of the flow. The pointer drags the warp.',
+    desc: 'Three stacked layers of fractional Brownian motion feed their output back into their own coordinates - domain warping. The field is thresholded into hard monochrome so it reads as ink dispersing in water, perpetually folding into itself. A single red vein traces one contour of the flow. The pointer drags the warp.',
     src: INK,
   },
   {
@@ -657,14 +657,14 @@ export const SHADERS = [
     id: '004',
     name: 'BLOOM',
     tech: 'METABALL FIELD · ADDITIVE GLOW',
-    desc: 'Nine weightless metaballs sum their inverse-square fields into one scalar. A hard threshold carves the white cores, a thin isoline rings the exact surface, and everything below it becomes a red additive halo. Your pointer contributes the tenth ball — push into the swarm and it fuses with you.',
+    desc: 'Nine weightless metaballs sum their inverse-square fields into one scalar. A hard threshold carves the white cores, a thin isoline rings the exact surface, and everything below it becomes a red additive halo. Your pointer contributes the tenth ball - push into the swarm and it fuses with you.',
     src: BLOOM,
   },
   {
     id: '005',
     name: 'AURORA',
     tech: 'LAYERED NOISE CURTAINS',
-    desc: 'Five transparent curtains of sine-displaced noise, each at its own depth and drift speed, integrated additively from root to tip over a sparse field of twinkling stars. The palette runs hot — an aurora observed in infrared, red at the base and burning out to white. Move horizontally to change the wind.',
+    desc: 'Five transparent curtains of sine-displaced noise, each at its own depth and drift speed, integrated additively from root to tip over a sparse field of twinkling stars. The palette runs hot - an aurora observed in infrared, red at the base and burning out to white. Move horizontally to change the wind.',
     src: AURORA,
   },
   {
@@ -678,7 +678,7 @@ export const SHADERS = [
     id: '007',
     name: 'PORTAL',
     tech: 'KALEIDOSCOPIC RAYMARCH · TUNNEL',
-    desc: 'A raymarched flight down an endless tunnel whose cross-section is folded into seven mirrored sectors — a kaleidoscope in polar space. Windows are punched through the wall on a repeating lattice and their frames carry the neon; glow is integrated along every ray, so the haze is real light, not a post effect. The camera rides a drifting curve and never stops. Hover overdrives the clock: attention is throttle. The pointer steers the gaze.',
+    desc: 'A raymarched flight down an endless tunnel whose cross-section is folded into seven mirrored sectors - a kaleidoscope in polar space. Windows are punched through the wall on a repeating lattice and their frames carry the neon; glow is integrated along every ray, so the haze is real light, not a post effect. The camera rides a drifting curve and never stops. Hover overdrives the clock: attention is throttle. The pointer steers the gaze.',
     src: PORTAL,
     tileSrc: PORTAL_TILE,
   },
@@ -686,7 +686,7 @@ export const SHADERS = [
     id: '008',
     name: 'FLOW',
     tech: 'PING-PONG FBO FEEDBACK',
-    desc: 'The only program here that remembers. Two framebuffers trade places every frame: one is read as the previous state while the other is written as the next — advected upstream along a curl-noise field, diffused, decayed, and re-injected wherever you pour. Press and drag to paint ink into the loop; your pointer velocity bends the current and charges the ink red. Left alone, a ghost emitter wanders the field. State is RGBA16F when the GPU allows it, RGBA8 otherwise.',
+    desc: 'The only program here that remembers. Two framebuffers trade places every frame: one is read as the previous state while the other is written as the next - advected upstream along a curl-noise field, diffused, decayed, and re-injected wherever you pour. Press and drag to paint ink into the loop; your pointer velocity bends the current and charges the ink red. Left alone, a ghost emitter wanders the field. State is RGBA16F when the GPU allows it, RGBA8 otherwise.',
     src: (FLOW_SIM.trim() + '\n\n' + FLOW_VIEW.trim() + '\n'),
     feedback: true,
     simSrc: FLOW_SIM,

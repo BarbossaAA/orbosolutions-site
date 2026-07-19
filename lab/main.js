@@ -1,5 +1,5 @@
 /* ==========================================================================
-   5 SITES PROJECT — hub launcher v2
+   5 SITES PROJECT - hub launcher v2
    Entrance choreography + custom cursor + live WebGL2 row thumbnails +
    ScrambleText tag hover. Degrades cleanly: if GSAP is missing the page
    renders static; if WebGL2 is missing the thumbnails never appear; with
@@ -73,7 +73,7 @@
   }
 
   /* ------------------------------------------------------------------
-     Custom cursor — fine pointers only, never with reduced motion.
+     Custom cursor - fine pointers only, never with reduced motion.
      One requestAnimationFrame loop; no canvas on this page.
      ------------------------------------------------------------------ */
 
@@ -148,7 +148,7 @@
   }
 
   /* ------------------------------------------------------------------
-     Tag scramble — ScrambleTextPlugin decodes each row's tech tags on
+     Tag scramble - ScrambleTextPlugin decodes each row's tech tags on
      hover. Skipped without GSAP, without the plugin, or with reduced
      motion; tags then simply stay as plain text.
      ------------------------------------------------------------------ */
@@ -174,7 +174,7 @@
                 overwrite: 'auto',
                 scrambleText: {
                   text: originals[k],
-                  chars: '01#/+X*=', // no <> — ScrambleText writes innerHTML
+                  chars: '01#/+X*=', // no <> - ScrambleText writes innerHTML
                   speed: 0.6
                 }
               });
@@ -186,7 +186,7 @@
   }
 
   /* ------------------------------------------------------------------
-     Live WebGL2 thumbnails — one tiny bespoke fragment shader per row,
+     Live WebGL2 thumbnails - one tiny bespoke fragment shader per row,
      each on its own 200x120 canvas (DPR 1), all driven by ONE shared
      rAF loop. A thumbnail animates only while its row is hovered or
      during an initial 2s attract loop; otherwise it freezes on its
@@ -204,7 +204,7 @@
     var W = 200;
     var H = 120;
 
-    // Fullscreen triangle from gl_VertexID — no buffers, no attributes.
+    // Fullscreen triangle from gl_VertexID - no buffers, no attributes.
     var VERT = [
       '#version 300 es',
       'void main(){',
@@ -226,7 +226,7 @@
 
     var FRAGS = {
 
-      // AURORA — drifting lime aurora bands
+      // AURORA - drifting lime aurora bands
       aurora: HEAD + [
         'void main(){',
         '  vec2 uv = gl_FragCoord.xy / u_res;',
@@ -247,7 +247,7 @@
         '}'
       ].join('\n'),
 
-      // NEBULA — slowly rotating spiral of glowing dots (pure shader)
+      // NEBULA - slowly rotating spiral of glowing dots (pure shader)
       nebula: HEAD + [
         'void main(){',
         '  vec2 q = (gl_FragCoord.xy - 0.5 * u_res) / u_res.y;',
@@ -271,7 +271,7 @@
         '}'
       ].join('\n'),
 
-      // PRISM — refractive prism gradient sweep
+      // PRISM - refractive prism gradient sweep
       prism: HEAD + [
         'float sdTri(vec2 p, float r){',
         '  const float k = 1.7320508;',
@@ -299,7 +299,7 @@
         '}'
       ].join('\n'),
 
-      // FLUX — raymarch-ish tunnel rings
+      // FLUX - raymarch-ish tunnel rings
       flux: HEAD + [
         'void main(){',
         '  vec2 q = (gl_FragCoord.xy - 0.5 * u_res) / u_res.y;',
@@ -319,7 +319,7 @@
         '}'
       ].join('\n'),
 
-      // TERRA — layered dune bands with grain
+      // TERRA - layered dune bands with grain
       terra: HEAD + [
         'void main(){',
         '  vec2 uv = gl_FragCoord.xy / u_res;',

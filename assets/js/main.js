@@ -1,4 +1,4 @@
-/* LUMEN Studio — shared interactions */
+/* LUMEN Studio - shared interactions */
 (function () {
   'use strict';
 
@@ -51,7 +51,7 @@
 
   /* ORBO MOBILE shell: the tab bar ducks away while scrolling down and
      returns on scroll-up or after a short idle (standard app pattern).
-     Attached ONLY under 768px — desktop gets no listener at all. */
+     Attached ONLY under 768px - desktop gets no listener at all. */
   var tabBar = document.querySelector('.tab-bar');
   if (tabBar && window.matchMedia('(max-width: 767px)').matches) {
     var tbLastY = window.scrollY, tbIdle = null, tbHidden = false;

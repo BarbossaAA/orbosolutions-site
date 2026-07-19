@@ -1,5 +1,5 @@
 /* ============================================================
-   NEBULA — main.js
+   NEBULA - main.js
    Renderer + bloom + grade chain, volumetric fog layer,
    GSAP-scrubbed camera voyage on Lenis smooth scroll,
    mouse gravity warp, shooting stars, staged loader,
@@ -199,9 +199,9 @@ async function boot() {
 
   /* bloom runs its whole mip chain at HALF resolution: it is a blur,
      the difference is invisible, the fillrate saving is large.
-     (setSize is overridden BEFORE addPass — both addPass and
+     (setSize is overridden BEFORE addPass - both addPass and
      composer.setSize push full pixel dims into the pass.) */
-  /* threshold 0.5: only genuinely hot pixels bloom — with 0.0 the whole
+  /* threshold 0.5: only genuinely hot pixels bloom - with 0.0 the whole
      frame glowed and the scene read as washed-out bright */
   const bloom = new UnrealBloomPass(new THREE.Vector2(W, H), 1.15, 0.9, 0.5);
   const bloomSetSize = bloom.setSize.bind(bloom);
@@ -299,7 +299,7 @@ async function boot() {
     { p: [12.6, 3.1, 11.4], t: [3.4, 0.2, -2.6], bloom: 1.1 },   /* 02 diving along the arms */
     { p: [9.8, 1.7, -0.2], t: [7.4, 0.5, -4.8], bloom: 1.05 },   /* 03 drifting through the nursery */
     { p: [2.4, 1.5, 2.7], t: [0.0, 0.15, 0.0], bloom: 0.28 },    /* 04 core approach: bloom EASES DOWN
-                                                                    hard — the additive stack near the
+                                                                    hard - the additive stack near the
                                                                     bulge is hot enough on its own */
     { p: [-4.6, 3.4, 24.5], t: [-1.5, 9.5, -16.0], bloom: 1.0 }, /* 05 pulled back, tilted up */
   ];

@@ -1,4 +1,4 @@
-/* LUMEN Studio — shared WebGL runtime.
+/* LUMEN Studio - shared WebGL runtime.
    One rAF loop, one pointer listener, per-instance IO pause, FPS governor,
    context-loss fade. mount() returns null on ANY failure so callers fall back. */
 (function () {

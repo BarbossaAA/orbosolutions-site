@@ -1,8 +1,8 @@
 /* ============================================================
-   AURORA(R) — aurora-gl.js
+   AURORA(R) - aurora-gl.js
    Raw WebGL2 aurora-curtain backdrop. Zero dependencies.
    One fragment shader (layered fbm), one rAF, low-res render
-   upscaled by CSS (it's a soft glow — resolution is wasted on it).
+   upscaled by CSS (it's a soft glow - resolution is wasted on it).
    Public API: window.AURORA_GL.setVelocity(v)  <- fed by Lenis.
    Respects prefers-reduced-motion: renders a single still frame.
    ============================================================ */

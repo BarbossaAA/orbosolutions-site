@@ -1,10 +1,10 @@
 /*
- * TERRA — textures.js
+ * TERRA - textures.js
  * Procedural 768x768 "aerial landscape" textures.
  * Each project renders a height field (fBm + domain warp) at 512^2,
  * then a full-resolution colour pass applies a palette ramp, directional
  * relief shading, optional contour lines, grain and layered canvas
- * gradients. Everything is deterministic (seeded) — no image assets.
+ * gradients. Everything is deterministic (seeded) - no image assets.
  *
  * 768 (not 1024): the texture is cover-fit fullscreen, so at DPR<=1.5 it
  * is magnified ~2.8-3.8x either way (pure linear-filter upscale, soft
@@ -104,7 +104,7 @@ function idleYield() {
 
 const RECIPES = {
 
-  /* DUNE — long diagonal sand ridges, warm amber ramp, hard relief. */
+  /* DUNE - long diagonal sand ridges, warm amber ramp, hard relief. */
   dune: {
     lut: makeLut([
       [0, '#2e2113'], [0.22, '#5c4223'], [0.45, '#94663a'],
@@ -127,7 +127,7 @@ const RECIPES = {
     color(h, out) { lutRead(this.lut, clamp01(h), out); }
   },
 
-  /* MOSS — terraced blotch fields with dark water channels. */
+  /* MOSS - terraced blotch fields with dark water channels. */
   moss: {
     lut: makeLut([
       [0, '#0a120c'], [0.22, '#162413'], [0.45, '#263a1a'],
@@ -154,7 +154,7 @@ const RECIPES = {
     color(h, out) { lutRead(this.lut, clamp01(h), out); }
   },
 
-  /* CLAY — warped horizontal strata cycling through a terracotta ramp. */
+  /* CLAY - warped horizontal strata cycling through a terracotta ramp. */
   clay: {
     lut: makeLut([
       [0, '#6b3322'], [0.16, '#9c492b'], [0.34, '#c1763f'],
@@ -184,7 +184,7 @@ const RECIPES = {
     }
   },
 
-  /* GLACIER — ridged crevasse field, ice-blue ramp, topo contours. */
+  /* GLACIER - ridged crevasse field, ice-blue ramp, topo contours. */
   glacier: {
     lut: makeLut([
       [0, '#132b38'], [0.25, '#28536a'], [0.48, '#4e83a2'],
@@ -207,7 +207,7 @@ const RECIPES = {
     color(h, out) {
       lutRead(this.lut, clamp01(h), out);
       if (h > 0.82) {
-        // Crevasse shadow — deep blue in the ridge cores.
+        // Crevasse shadow - deep blue in the ridge cores.
         const k = Math.min(1, (h - 0.82) / 0.18) * 0.7;
         out[0] += (16 - out[0]) * k;
         out[1] += (34 - out[1]) * k;
@@ -216,7 +216,7 @@ const RECIPES = {
     }
   },
 
-  /* BASALT — posterised charcoal plates with thin ash joint lines. */
+  /* BASALT - posterised charcoal plates with thin ash joint lines. */
   basalt: {
     lut: makeLut([
       [0, '#080807'], [0.3, '#171614'], [0.55, '#2a2825'],
@@ -285,7 +285,7 @@ export async function generateProjectCanvas(id, onProgress = () => {}, { idle = 
   const totalChunks = HF / H_CHUNK + SIZE / C_CHUNK;
   let done = 0;
 
-  /* Pass 1 — height field at 512^2 */
+  /* Pass 1 - height field at 512^2 */
   for (let y0 = 0; y0 < HF; y0 += H_CHUNK) {
     for (let y = y0; y < y0 + H_CHUNK; y++) {
       const v = y / (HF - 1);
@@ -299,7 +299,7 @@ export async function generateProjectCanvas(id, onProgress = () => {}, { idle = 
     await pause();
   }
 
-  /* Pass 1b — precomputed gradient grids for the relief light.
+  /* Pass 1b - precomputed gradient grids for the relief light.
      One central difference per cell here replaces four extra bilinear
      height samples per OUTPUT pixel in the colour pass (~40% of it).
      The 3/(span) scale matches the old eps = 1.5 texel sampling span,
@@ -322,7 +322,7 @@ export async function generateProjectCanvas(id, onProgress = () => {}, { idle = 
   }
   await pause();
 
-  /* Pass 2 — colour, relief light, contours and grain at 768^2 */
+  /* Pass 2 - colour, relief light, contours and grain at 768^2 */
   const img = ctx.createImageData(SIZE, SIZE);
   const data = img.data;
   const ldx = recipe.lightDir[0];
@@ -376,7 +376,7 @@ export async function generateProjectCanvas(id, onProgress = () => {}, { idle = 
 
   ctx.putImageData(img, 0, 0);
 
-  /* Pass 3 — layered gradients: atmospheric glow + depth falloff. */
+  /* Pass 3 - layered gradients: atmospheric glow + depth falloff. */
   const gx = recipe.glow.pos[0] * SIZE;
   const gy = recipe.glow.pos[1] * SIZE;
   const radial = ctx.createRadialGradient(gx, gy, SIZE * 0.05, gx, gy, SIZE * 0.95);
@@ -395,7 +395,7 @@ export async function generateProjectCanvas(id, onProgress = () => {}, { idle = 
 
   ctx.globalCompositeOperation = 'source-over';
 
-  /* Pass 4 — derived height products from the same field.
+  /* Pass 4 - derived height products from the same field.
      (a) 512^2 grayscale height canvas for shader parallax.
      (b) 160^2 normalised float grid for the report mini-map contours. */
   let mn = Infinity;

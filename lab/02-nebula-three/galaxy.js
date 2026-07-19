@@ -1,5 +1,5 @@
 /* ============================================================
-   NEBULA — galaxy.js
+   NEBULA - galaxy.js
    Procedural star geometry: spiral galaxy, stellar nursery
    cluster, and deep-field backdrop. One shared point shader
    (size attenuation, differential rotation, twinkle).

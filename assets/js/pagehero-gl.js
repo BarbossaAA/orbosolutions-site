@@ -1,4 +1,4 @@
-/* LUMEN Studio — inner-page hero aurora strip (services, contact).
+/* LUMEN Studio - inner-page hero aurora strip (services, contact).
    Hero light-field language at lower intensity: single warp level, no lens
    ring, no dot grid. Fallback: canvas removed, .page-hero::before stands. */
 (function () {
@@ -64,7 +64,7 @@
   for (var i = 0; i < canvases.length; i++) {
     (function (canvas) {
       /* narrow screens: the strip reads near-flat and the opaque canvas would
-         hide the CSS tints — let the static gradient tier carry mobile */
+         hide the CSS tints - let the static gradient tier carry mobile */
       if (innerWidth < 768) {
         if (canvas.parentElement) canvas.parentElement.removeChild(canvas);
         return;

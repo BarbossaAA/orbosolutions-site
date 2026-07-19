@@ -1,4 +1,4 @@
-/* PRISM — React 18 + React Three Fiber, no JSX (htm bound to createElement).
+/* PRISM - React 18 + React Three Fiber, no JSX (htm bound to createElement).
    v2: RoomEnvironment PMREM reflections, Lenis+ScrollTrigger scroll story,
    particle dust, preset pulse FX, per-preset ambience. */
 
@@ -459,7 +459,7 @@ function Halo({ reduced }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Scene: preset pulse — a thin ring blown outward on preset switch     */
+/* Scene: preset pulse - a thin ring blown outward on preset switch     */
 /* ------------------------------------------------------------------ */
 
 function PulseRing({ reduced }) {
@@ -505,7 +505,7 @@ function PulseRing({ reduced }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Scene: micro-dust — sparse depth-faded points drifting in the room   */
+/* Scene: micro-dust - sparse depth-faded points drifting in the room   */
 /* ------------------------------------------------------------------ */
 
 /* 300 sparse depth-faded points read identically to 450 (they overlap-fade
@@ -634,7 +634,7 @@ function PointerLight() {
 }
 
 /* ------------------------------------------------------------------ */
-/* Scene: rig — intro settle, idle spin, drag orbit, story keyframes    */
+/* Scene: rig - intro settle, idle spin, drag orbit, story keyframes    */
 /* ------------------------------------------------------------------ */
 
 function Rig({ reduced, children }) {
@@ -843,7 +843,7 @@ function Story({ preset, onPreset, reduced }) {
   return html`<main className="story" id="story">
 
     <section className="sec sec-hero" id="top">
-      <p className="eyebrow"><span className="eyebrow-dot"></span>Real-time material lab — public beta</p>
+      <p className="eyebrow"><span className="eyebrow-dot"></span>Real-time material lab - public beta</p>
       <h1 className="hl">
         <span className="line"><span className="line-in">Matter,</span></span>
         <span className="line"><span className="line-in">made to <em>order.</em></span></span>
@@ -856,17 +856,17 @@ function Story({ preset, onPreset, reduced }) {
       </p>
       <div className="scroll-cue" aria-hidden="true">
         <span className="cue-line"></span>
-        <span>Scroll — the lab is open</span>
+        <span>Scroll - the lab is open</span>
       </div>
     </section>
 
     <section className="sec sec-lab" id="materials" aria-label="Material lab">
-      <p className="eyebrow" data-reveal><span className="eyebrow-dot"></span>01 — Material lab</p>
+      <p className="eyebrow" data-reveal><span className="eyebrow-dot"></span>01 - Material lab</p>
       <h2 className="hl hl-2" data-reveal style=${{ "--d": "0.06s" }}>
         Four bodies,<br /> one <em>shader.</em>
       </h2>
       <div className="presets" role="group" aria-label="Material presets" data-reveal style=${{ "--d": "0.14s" }}>
-        <span className="presets-label">Presets — 04 <em>keys 1–4</em></span>
+        <span className="presets-label">Presets - 04 <em>keys 1-4</em></span>
         <div className="chips">
           ${PRESET_ORDER.map(
             (key, i) => html`<button
@@ -904,14 +904,14 @@ function Story({ preset, onPreset, reduced }) {
     </section>
 
     <section className="sec sec-macro" id="pipeline" aria-label="Macro detail and pipeline">
-      <p className="eyebrow" data-reveal><span className="eyebrow-dot"></span>02 — Macro detail</p>
+      <p className="eyebrow" data-reveal><span className="eyebrow-dot"></span>02 - Macro detail</p>
       <h2 className="hl hl-2" data-reveal style=${{ "--d": "0.06s" }}>
         Down to the <em>microfacet.</em>
       </h2>
       <p className="copy" data-reveal style=${{ "--d": "0.14s" }}>
         Push in and the surface holds. PRISM evaluates the full physical BRDF every
-        frame — energy-conserving speculars, true thin-film interference, refraction
-        with real wall thickness — so the macro shot you art-direct here is the exact
+        frame - energy-conserving speculars, true thin-film interference, refraction
+        with real wall thickness - so the macro shot you art-direct here is the exact
         response your engine reproduces.
       </p>
       <ul className="stats" data-reveal style=${{ "--d": "0.22s" }}>
@@ -931,7 +931,7 @@ function Story({ preset, onPreset, reduced }) {
     </section>
 
     <section className="sec sec-cta" id="beta" aria-label="Get the beta">
-      <p className="eyebrow" data-reveal><span className="eyebrow-dot"></span>03 — Public beta</p>
+      <p className="eyebrow" data-reveal><span className="eyebrow-dot"></span>03 - Public beta</p>
       <h2 className="hl hl-2" data-reveal style=${{ "--d": "0.06s" }}>
         Ship the surface,<br /> not a <em>screenshot.</em>
       </h2>
@@ -951,8 +951,8 @@ function Story({ preset, onPreset, reduced }) {
 
 function Foot() {
   return html`<footer className="foot">
-    <span>© 2026 Prism Labs — rendered live, nothing prebaked</span>
-    <span className="foot-hint">Scroll to explore · Drag to orbit · Keys 1–4</span>
+    <span>© 2026 Prism Labs - rendered live, nothing prebaked</span>
+    <span className="foot-hint">Scroll to explore · Drag to orbit · Keys 1-4</span>
   </footer>`;
 }
 

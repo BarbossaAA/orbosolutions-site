@@ -1,6 +1,6 @@
-/* ORBO — the museum, seventh cut: the jewel box.
-   One compact, warm, luminous hall — a stadium-shaped room with no
-   corners and no columns — built from materials that read as real:
+/* ORBO - the museum, seventh cut: the jewel box.
+   One compact, warm, luminous hall - a stadium-shaped room with no
+   corners and no columns - built from materials that read as real:
    honed stone tiles with veining and grout, troweled limewash walls,
    bronze rails and frames, dark linen panels behind every piece.
    Above, an oval skylight and clerestory windows open onto a glittering
@@ -9,7 +9,7 @@
    and the atrium star. Small footprint, high finish, light on the GPU:
    no shadow maps, no fog, few lights, low geometry.
    Desktop: pointer-lock + WASD. Touch: joystick + drag-look + tap.
-   No assets — everything is drawn in code. */
+   No assets - everything is drawn in code. */
 (function () {
   'use strict';
 
@@ -37,7 +37,7 @@
 
   if (isTouch) {
     var ek = document.getElementById('enterKeys');
-    if (ek) ek.innerHTML = '<span><b>ג׳ויסטיק</b> בצד — תנועה</span><span><b>גרירה</b> — להסתכל</span><span><b>הקשה</b> על מוצג — פרטים</span>';
+    if (ek) ek.innerHTML = '<span><b>ג׳ויסטיק</b> בצד - תנועה</span><span><b>גרירה</b> - להסתכל</span><span><b>הקשה</b> על מוצג - פרטים</span>';
   }
 
   if (document.fonts && document.fonts.load) {
@@ -62,7 +62,7 @@
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.06;
 
-  /* no opaque background — the twin star shells cover every direction,
+  /* no opaque background - the twin star shells cover every direction,
      so the view is identical, but cleared pixels stay transparent */
   var scene = new THREE.Scene();
 
@@ -123,7 +123,7 @@
   /* ---------- material suites: stone, limewash, linen, bronze ---------- */
 
   /* honed stone tiles: warm large-format slabs, veined, with grout lines.
-     the megapixel of fbm used to block load for ~0.5s — now an instant
+     the megapixel of fbm used to block load for ~0.5s - now an instant
      stand-in (base tone + grout) ships first and the veined surface is
      computed in row bands between frames, done long before the visitor
      clicks through the entry overlay. */
@@ -190,7 +190,7 @@
     for (var y = 0; y < S; y++) {
       for (var x = 0; x < S; x++) {
         var u = x / S, v = y / S;
-        /* strokes stretched horizontally — a trowel's memory */
+        /* strokes stretched horizontally - a trowel's memory */
         var p = fbm(u * 3.2, v * 9, 4);
         var drift = fbm(u * 1.1 + 7, v * 1.1, 3);
         var base = 40 + p * 13 + drift * 9 - v * 7;   /* gently darker downward */
@@ -232,7 +232,7 @@
   function starsTexture(count, sizeMax, glints) {
     var W = 1024, H = 512;
     var c = ctx2d(W, H);
-    /* not black — a deep blue night with faint breath */
+    /* not black - a deep blue night with faint breath */
     var bg = c.createLinearGradient(0, 0, 0, H);
     bg.addColorStop(0, '#0a0918');
     bg.addColorStop(0.5, '#0d0b1d');
@@ -390,7 +390,7 @@
     return t;
   }
 
-  /* museum label: a wide warm-white card that hangs UNDER each piece —
+  /* museum label: a wide warm-white card that hangs UNDER each piece -
      bronze station numeral, title, wing line, what it proves, and a
      short curator's description. under the art there is always room,
      so no label can ever be swallowed by a neighboring panel again. */
@@ -508,14 +508,14 @@
       c.fillText('ברוכים הבאים', W / 2, 292, W - 140);
       c.fillStyle = '#3d3950';
       c.font = '500 44px ' + FONT;
-      c.fillText('במקום תיק עבודות — בנינו מקום.', W / 2, 392, W - 160);
+      c.fillText('במקום תיק עבודות - בנינו מקום.', W / 2, 392, W - 160);
       c.fillText('כל מה שסביבכם נוצר אצלנו, בקוד.', W / 2, 458, W - 160);
       c.fillStyle = 'rgba(154, 123, 82, 0.65)';
       c.fillRect(W / 2 - 60, 512, 120, 3);
       c.fillStyle = '#5A5668';
       c.font = '400 33px ' + FONT;
-      c.fillText('במרכז — ארבע עמדות של מה אנחנו בונים.', W / 2, 578, W - 150);
-      c.fillText('על הקירות — תחנות 01–14. לחצו על כל מוצג לפרטים.', W / 2, 632, W - 150);
+      c.fillText('במרכז - ארבע עמדות של מה אנחנו בונים.', W / 2, 578, W - 150);
+      c.fillText('על הקירות - תחנות 01-14. לחצו על כל מוצג לפרטים.', W / 2, 632, W - 150);
     };
     redraw();
     var t = asTexture(c.canvas);
@@ -566,7 +566,7 @@
         y += Math.sin(a) * 3;
         c.lineTo(x, y);
       }
-      /* bright enough to read across the hall — the piece used to vanish
+      /* bright enough to read across the hall - the piece used to vanish
          into the linen from a few meters away */
       c.strokeStyle = col + (0.14 + Math.random() * 0.16) + ')';
       c.lineWidth = 1.1;
@@ -651,7 +651,7 @@
 
   /* ---------- static-geometry collectors ----------
      every fixed bronze bar, frame, belt, collar and housing lands in a
-     bucket and is baked into ONE mesh per material — the hall's ~120
+     bucket and is baked into ONE mesh per material - the hall's ~120
      pieces of hardware cost five draw calls instead of five score. */
   var staticParts = { bronze: [], dark: [], warm: [], linen: [], stone: [] };
   var _collectEuler = new THREE.Euler();
@@ -692,7 +692,7 @@
     });
   }
 
-  /* one seamless stadium floor — a single shape, nothing to fight over */
+  /* one seamless stadium floor - a single shape, nothing to fight over */
   (function () {
     var sh = new THREE.Shape();
     sh.absarc(0, -ROOM.straight, ROOM.hw, Math.PI, Math.PI * 2, false);
@@ -770,7 +770,7 @@
   })();
 
   /* the entry: a great double door of brushed night-metal in a bronze
-     frame, a violet light breathing in its seam — a door worth a museum */
+     frame, a violet light breathing in its seam - a door worth a museum */
   function doorSuite() {
     var W = 512, H = 704;
     var col = ctx2d(W, H), bmp = ctx2d(W, H);
@@ -931,7 +931,7 @@
     benches.push({ x: bz[0], z: bz[1], hx: 0.5, hz: 1.2 });
   });
 
-  /* ground mist: three thin veils drifting just above the stone —
+  /* ground mist: three thin veils drifting just above the stone -
      cold, mystic, and low enough to leave the veined floor readable */
   var fogLayers = [];
   (function () {
@@ -973,7 +973,7 @@
   playerHalo.position.y = 0.014;
   scene.add(playerHalo);
 
-  /* ---------- holograms (saturated — they read in daylight) ---------- */
+  /* ---------- holograms (saturated - they read in daylight) ---------- */
   var holoLineMat = function (color) {
     return new THREE.LineBasicMaterial({ color: color, transparent: true, opacity: 0.88, blending: THREE.AdditiveBlending, depthWrite: false });
   };
@@ -1064,8 +1064,8 @@
   }
 
   /* ---------- the atrium star: the ORBO mark itself, floating ----------
-     built straight off the site logo — the eight-vertex star with the
-     #9d8bff -> #5a46d6 gradient, a bright core, a soft halo — raised to
+     built straight off the site logo - the eight-vertex star with the
+     #9d8bff -> #5a46d6 gradient, a bright core, a soft halo - raised to
      three dimensions: two crossed star planes, gradient edge tubes,
      precessing halo rings and an orbiting dust of particles. */
   function makeBrandStar(scale) {
@@ -1210,11 +1210,11 @@
   var coneTex = coneTexture();
   var pedestalDefs = [
     { id: 'cap-web', holo: 'globe', x: -3.3, z: -2.5, label: 'אתרים וחוויות', tag: 'מה אנחנו בונים', accent: '#1F8FD8',
-      body: 'אתרים שמרגישים כמו מקום, לא כמו דף. האולם שאתם עומדים בו עכשיו נבנה באותם כלים בדיוק — ורץ בדפדפן, בלי להתקין כלום. הקייס המלא תלוי על הקיר הסמוך: BISOMNA, תחנה 05.', link: 'services.html', linkText: 'לעמוד השירותים' },
+      body: 'אתרים שמרגישים כמו מקום, לא כמו דף. האולם שאתם עומדים בו עכשיו נבנה באותם כלים בדיוק - ורץ בדפדפן, בלי להתקין כלום. הקייס המלא תלוי על הקיר הסמוך: BISOMNA, תחנה 05.', link: 'services.html', linkText: 'לעמוד השירותים' },
     { id: 'cap-sys', holo: 'device', x: 3.3, z: -2.5, label: 'אפליקציות ומערכות', tag: 'מה אנחנו בונים', accent: '#0FA88C',
       body: 'מהרעיון ועד מוצר שרץ בענן: אפליקציות, מערכות ניהול וכלים פנימיים שנתפרים בדיוק לצורת העבודה של העסק. ההדגמה על הקיר הסמוך: חדר הבקרה, תחנה 10.', link: 'services.html', linkText: 'לעמוד השירותים' },
     { id: 'cap-ai', holo: 'neural', x: -3.3, z: 2.5, label: 'AI ואוטומציה', tag: 'מה אנחנו בונים', accent: '#6C5CFF',
-      body: 'תהליכים שקורים מעצמם: מיון פניות, טיוטות מסמכים, חיבורים בין מערכות — עם בקרה אנושית בנקודות שחשוב. ההדגמה על הקיר הסמוך: העוזר שלא ישן, תחנה 03.', link: 'services.html', linkText: 'לעמוד השירותים' },
+      body: 'תהליכים שקורים מעצמם: מיון פניות, טיוטות מסמכים, חיבורים בין מערכות - עם בקרה אנושית בנקודות שחשוב. ההדגמה על הקיר הסמוך: העוזר שלא ישן, תחנה 03.', link: 'services.html', linkText: 'לעמוד השירותים' },
     { id: 'cap-play', holo: 'game', x: 3.3, z: 2.5, label: 'משחקים וחוויות', tag: 'מה אנחנו בונים', accent: '#E8722E',
       body: 'הדרך הכי טובה להבין מוצר היא לשחק בו: סימולטורים, קונפיגורטורים וחוויות אינטראקטיביות שהופכות סקרנות להחלטה. ההדגמה על הקיר הסמוך: המגרש, תחנה 12.', link: 'services.html', linkText: 'לעמוד השירותים' }
   ];
@@ -1259,7 +1259,7 @@
     pickables.push(hit);
   });
 
-  /* the atrium star floats beneath the strip of stars — the brand mark itself */
+  /* the atrium star floats beneath the strip of stars - the brand mark itself */
   var atriumStar = makeBrandStar(2.6);
   atriumStar.position.set(0, 4.5, 0);
   scene.add(atriumStar);
@@ -1268,7 +1268,7 @@
   atriumHit.position.copy(atriumStar.position);
   atriumHit.userData.art = {
     title: 'ORBO', tag: 'הסטודיו', _holo: atriumStar, _glow: null, self: true,
-    body: 'הסמל של אורבו, פרוש בתלת־ממד וצף מתחת לפס הכוכבים. כל מה שסביבכם — האולם, השמיים, ההולוגרמות והציורים החיים — נבנה כאן, בקוד, בלי אף קובץ מוכן. ככה נראית אצלנו גישה לפרויקט.',
+    body: 'הסמל של אורבו, פרוש בתלת־ממד וצף מתחת לפס הכוכבים. כל מה שסביבכם - האולם, השמיים, ההולוגרמות והציורים החיים - נבנה כאן, בקוד, בלי אף קובץ מוכן. ככה נראית אצלנו גישה לפרויקט.',
     link: 'studio.html', linkText: 'להכיר אותנו'
   };
   scene.add(atriumHit);
@@ -1307,7 +1307,7 @@
   var nearLL = curvePos(1, -68), nearRR = curvePos(1, 68);
 
   /* ---------- case displays: rich product-screen compositions ----------
-     six deliberate 1024x640 drawings — real-looking screens, not posters.
+     six deliberate 1024x640 drawings - real-looking screens, not posters.
      registered here and rendered off the critical path via deferredArt. */
   function drawCaseBisomna(c) {
     function rr(x, y, w, h, r) { c.beginPath(); if (c.roundRect) { c.roundRect(x, y, w, h, r); } else { c.rect(x, y, w, h); } }
@@ -2204,7 +2204,7 @@
   /* ---------- the displays LIVE ----------
      every case display carries a transparent overlay plane where its
      dynamic life plays: a chart cursor sweeping real data, pipeline
-     dots flowing, thrusters flickering — the screens read as working
+     dots flowing, thrusters flickering - the screens read as working
      products, not stills. plus one pulsing, unmissable CTA each. */
   var liveDisplays = [];
   function rrp(c, x, y, w, h, r) {
@@ -2275,7 +2275,7 @@
       c.fill();
       c.fillStyle = 'rgba(58, 208, 175, 0.7)';
       c.fillRect(886, 472 + row * 35, 3, 29);
-      /* one KPI refreshes at a time — soft pulse line under it */
+      /* one KPI refreshes at a time - soft pulse line under it */
       var kpi = Math.floor(t * 0.8) % 4;
       c.fillStyle = 'rgba(58, 208, 175, ' + (0.2 + 0.3 * Math.sin(t * 4)).toFixed(3) + ')';
       rrp(c, 50 + kpi * 224, 158, 160, 3, 1.5);
@@ -2401,45 +2401,45 @@
 
   /* the collection, curated as a walk: stations 01-14 counterclockwise
      from the door. each straight-wall zone belongs to the pedestal wing
-     it faces — websites NW, systems NE, AI SW, games SE — and carries
+     it faces - websites NW, systems NE, AI SW, games SE - and carries
      that wing's accent. the rich "case displays" (disp:) are drawn at
      1024x640 by the display functions above. */
   var ART = [
-    /* near curve, left of the door — the walk begins */
+    /* near curve, left of the door - the walk begins */
     { id: 'prism', num: '01', desc: 'שבירת אור חיה על גאומטריה מסתובבת, מצוירת בזמן אמת', px: nearL.px, pz: nearL.pz, ry: nearL.ry, live: 'prism', title: 'PRISM', tag: 'ציור חי · המעבדה', demo: 'מדגים: תלת־ממד חי בדפדפן', accent: '#7A5CFF', link: 'lab/03-prism-r3f/',
-      body: 'אלומת אור נשברת דרך גאומטריה ומתפצלת לספקטרום — נצבע מחדש עשרות פעמים בשנייה, ממש עכשיו. ככה נראה תלת־ממד שרץ בדפדפן בלי להתקין כלום; בגרסה המלאה מפסלים כרום, זכוכית, הולוגרמה וחימר — חיים.' },
+      body: 'אלומת אור נשברת דרך גאומטריה ומתפצלת לספקטרום - נצבע מחדש עשרות פעמים בשנייה, ממש עכשיו. ככה נראה תלת־ממד שרץ בדפדפן בלי להתקין כלום; בגרסה המלאה מפסלים כרום, זכוכית, הולוגרמה וחימר - חיים.' },
     { id: 'aurora', num: '02', desc: 'סרטי אור נצבעים על הקנבס הזה עשרות פעמים בשנייה', px: nearLL.px, pz: nearLL.pz, ry: nearLL.ry, live: 'aurora', title: 'AURORA', tag: 'ציור חי · המעבדה', demo: 'מדגים: אנימציה ותנועה באתר', accent: '#86B32B', link: 'lab/01-aurora-gsap/',
-      body: 'סרטי אור שנעים בזרם, נצבעים בזמן אמת על הקיר הזה. בגרסה המלאה — אתר סטודיו שלם שכולו כוריאוגרפיית גלילה. תנועה כזאת אפשר לשלב גם באתר שלכם, בלי קובצי וידאו כבדים.' },
-    /* left straight wall — AI wing (south), websites wing (north) */
+      body: 'סרטי אור שנעים בזרם, נצבעים בזמן אמת על הקיר הזה. בגרסה המלאה - אתר סטודיו שלם שכולו כוריאוגרפיית גלילה. תנועה כזאת אפשר לשלב גם באתר שלכם, בלי קובצי וידאו כבדים.' },
+    /* left straight wall - AI wing (south), websites wing (north) */
     { id: 'ai', num: '03', desc: 'מסלול של פנייה עסקית: מיון חכם, טיוטה, ואישור אנושי בסוף', px: -(ROOM.hw - 0.06), pz: 4.6, ry: Math.PI / 2, disp: 'ai', wide: true, title: 'העוזר שלא ישן', tag: 'תצוגת יכולת · AI', demo: 'מדגים: AI ואוטומציה לעסק', accent: '#6C5CFF', contact: true,
-      body: 'ככה נראית אוטומציה חכמה בעסק אמיתי: פנייה נכנסת, ממוינת לפי תוכן, מקבלת טיוטת מענה — ואדם מאשר בסוף. המערכת ערה כל הלילה; ההחלטות נשארות אצלכם. רוצים תהליך כזה אצלכם? דברו איתנו.' },
+      body: 'ככה נראית אוטומציה חכמה בעסק אמיתי: פנייה נכנסת, ממוינת לפי תוכן, מקבלת טיוטת מענה - ואדם מאשר בסוף. המערכת ערה כל הלילה; ההחלטות נשארות אצלכם. רוצים תהליך כזה אצלכם? דברו איתנו.' },
     { id: 'anatomy', num: '04', desc: 'ארבע השכבות שמהן בנוי כל אתר שיוצא מהסטודיו', px: -(ROOM.hw - 0.06), pz: 0, ry: Math.PI / 2, disp: 'anatomy', wide: true, title: 'אנטומיה של אתר', tag: 'תצוגת יכולת · אתרים', demo: 'מדגים: איך נבנה אתר אצלנו', accent: '#1F8FD8', link: 'services.html', linkText: 'מה עוד אנחנו בונים',
-      body: 'ממה עשוי אתר שמרגיש כמו מקום? ארבע שכבות: תוכן שנכתב ללקוח, עיצוב עם שפה אחת, תנועה שמפיחה חיים, וקוד שמחזיק הכול יציב ומהיר. אצלנו כולן נבנות באותו שולחן — ולכן הן נפגשות מדויק.' },
-    { id: 'bisomna', num: '05', desc: 'אתר המסחר של מיזם שינה ישראלי — הקייס המרכזי שלנו', px: -(ROOM.hw - 0.06), pz: -4.6, ry: Math.PI / 2, disp: 'bisomna', wide: true, title: 'BISOMNA', tag: 'הקייס המרכזי · באוויר', demo: 'מדגים: אתר תדמית ומסחר', accent: '#1F8FD8', link: 'https://bisomna.com', linkText: 'לאתר החי',
-      body: 'הקייס המרכזי שלנו: מיזם שינה ישראלי שנכנס עם רעיון ויצא עם בית שלם — שישה־עשר עמודים, וידאו שנע עם הגלילה, תצוגת מוצר שנפתחת לשכבות וחנות. והכול טס גם בנייד. רוצים סטנדרט כזה? דברו איתנו.' },
+      body: 'ממה עשוי אתר שמרגיש כמו מקום? ארבע שכבות: תוכן שנכתב ללקוח, עיצוב עם שפה אחת, תנועה שמפיחה חיים, וקוד שמחזיק הכול יציב ומהיר. אצלנו כולן נבנות באותו שולחן - ולכן הן נפגשות מדויק.' },
+    { id: 'bisomna', num: '05', desc: 'אתר המסחר של מיזם שינה ישראלי - הקייס המרכזי שלנו', px: -(ROOM.hw - 0.06), pz: -4.6, ry: Math.PI / 2, disp: 'bisomna', wide: true, title: 'BISOMNA', tag: 'הקייס המרכזי · באוויר', demo: 'מדגים: אתר תדמית ומסחר', accent: '#1F8FD8', link: 'https://bisomna.com', linkText: 'לאתר החי',
+      body: 'הקייס המרכזי שלנו: מיזם שינה ישראלי שנכנס עם רעיון ויצא עם בית שלם - שישה־עשר עמודים, וידאו שנע עם הגלילה, תצוגת מוצר שנפתחת לשכבות וחנות. והכול טס גם בנייד. רוצים סטנדרט כזה? דברו איתנו.' },
     /* far curve: our own home, two living paintings, the finale, a mosaic */
     { id: 'orbo', num: '06', desc: 'דף הבית שלנו: מסע חלקיקים שנבנה כולו בקוד', px: farLL.px, pz: farLL.pz, ry: farLL.ry, disp: 'orbo', title: 'orbosolutions.com', tag: 'הבית שלנו', demo: 'מדגים: אתר כחוויית מסע', accent: '#6C5CFF', link: 'index.html', self: true,
-      body: 'דף הבית שלנו הוא מסע: גוללים, והמצלמה עפה דרך עולם חלקיקים שמתגבש לצורות — בלי אף קובץ גרפיקה. כשהבית שלך בנוי ככה, הוא גם תיק העבודות.' },
-    { id: 'nebula', num: '07', desc: 'גלקסיה פרוצדורלית — שישים אלף שמשות במסע גלילה', px: farL.px, pz: farL.pz, ry: farL.ry, live: 'nebula', title: 'NEBULA', tag: 'ציור חי · המעבדה', demo: 'מדגים: גרפיקה בזמן אמת', accent: '#1F8FD8', link: 'lab/02-nebula-three/',
-      body: 'גלקסיה שמסתחררת לאט, מחושבת חיה מול עיניכם. בגרסה המלאה — מסע גלילה בין שישים אלף שמשות, עד לב הגלקסיה.' },
+      body: 'דף הבית שלנו הוא מסע: גוללים, והמצלמה עפה דרך עולם חלקיקים שמתגבש לצורות - בלי אף קובץ גרפיקה. כשהבית שלך בנוי ככה, הוא גם תיק העבודות.' },
+    { id: 'nebula', num: '07', desc: 'גלקסיה פרוצדורלית - שישים אלף שמשות במסע גלילה', px: farL.px, pz: farL.pz, ry: farL.ry, live: 'nebula', title: 'NEBULA', tag: 'ציור חי · המעבדה', demo: 'מדגים: גרפיקה בזמן אמת', accent: '#1F8FD8', link: 'lab/02-nebula-three/',
+      body: 'גלקסיה שמסתחררת לאט, מחושבת חיה מול עיניכם. בגרסה המלאה - מסע גלילה בין שישים אלף שמשות, עד לב הגלקסיה.' },
     { id: 'star', px: 0, pz: -(ROOM.straight + CURVE_R), ry: 0, title: 'ORBO', tag: 'הסטודיו', style: 'dark', big: true, sub: 'רעיונות יש לכולם. אנחנו הופכים אותם למציאות.', accent: '#6C5CFF',
-      body: 'תודה שביקרתם. אם משהו כאן הדליק לכם רעיון — נשמח לשמוע עליו.', contact: true },
+      body: 'תודה שביקרתם. אם משהו כאן הדליק לכם רעיון - נשמח לשמוע עליו.', contact: true },
     { id: 'terra', num: '08', desc: 'נופים מחושבים מרעש טהור: חול, טחב, חימר, קרח ואבן', px: farR.px, pz: farR.pz, ry: farR.ry, live: 'terra', title: 'TERRA', tag: 'ציור חי · המעבדה', demo: 'מדגים: עולמות מקוד טהור', accent: '#C9A05C', link: 'lab/05-terra-webgl/',
-      body: 'רכסי הרים שמחושבים מרעש מתמטי טהור, תחת שמש נמוכה. בגרסה המלאה — חמישה מחקרי נוף: חול, טחב, חימר, קרח ואבן.' },
+      body: 'רכסי הרים שמחושבים מרעש מתמטי טהור, תחת שמש נמוכה. בגרסה המלאה - חמישה מחקרי נוף: חול, טחב, חימר, קרח ואבן.' },
     { id: 'mosaic', num: '09', desc: 'פסיפס וורונוי שנולד מחדש בכל כניסה למוזיאון', px: farRR.px, pz: farRR.pz, ry: farRR.ry, live: 'mosaic', title: 'MOSAIC', tag: 'אמנות גנרטיבית', demo: 'מדגים: אלגוריתם כמעצב', accent: '#6C5CFF',
       body: 'פסיפס שנבנה מחלוקת המרחב בין ארבעים ושש נקודות אקראיות. כל כניסה למוזיאון מייצרת פסיפס שלא היה קיים מעולם.' },
-    /* right straight wall — systems wing (north), games wing (south) */
-    { id: 'crm', num: '10', desc: 'לוח בקרה עסקי חי — כך נראית מערכת שנתפרת לעסק', px: ROOM.hw - 0.06, pz: -4.6, ry: -Math.PI / 2, disp: 'crm', wide: true, title: 'חדר הבקרה', tag: 'תצוגת יכולת · מערכות', demo: 'מדגים: מערכות ניהול ו־BI', accent: '#0FA88C', contact: true,
-      body: 'חדר הבקרה של עסק: לוח מחוונים שמראה בדיוק מה שחשוב הבוקר, לקוחות, גרפים וטבלאות שמתעדכנים לבד. בלי אקסלים אבודים ובלי ״רגע, אבדוק ואחזור אליך״. כל עסק מקבל חדר בקרה משלו — דברו איתנו.' },
+    /* right straight wall - systems wing (north), games wing (south) */
+    { id: 'crm', num: '10', desc: 'לוח בקרה עסקי חי - כך נראית מערכת שנתפרת לעסק', px: ROOM.hw - 0.06, pz: -4.6, ry: -Math.PI / 2, disp: 'crm', wide: true, title: 'חדר הבקרה', tag: 'תצוגת יכולת · מערכות', demo: 'מדגים: מערכות ניהול ו־BI', accent: '#0FA88C', contact: true,
+      body: 'חדר הבקרה של עסק: לוח מחוונים שמראה בדיוק מה שחשוב הבוקר, לקוחות, גרפים וטבלאות שמתעדכנים לבד. בלי אקסלים אבודים ובלי ״רגע, אבדוק ואחזור אליך״. כל עסק מקבל חדר בקרה משלו - דברו איתנו.' },
     { id: 'genesis', num: '11', desc: 'שלוש מאות קווים בשדה זרימה מתמטי, חושבו בכניסתכם', px: ROOM.hw - 0.06, pz: 0, ry: -Math.PI / 2, live: 'genesis', title: 'GENESIS', tag: 'אמנות גנרטיבית', demo: 'מדגים: אמנות מקוד', accent: '#0FA88C',
-      body: 'שלוש מאות קווים ששוחררו לשדה זרימה מתמטי. אף אחד לא צייר את היצירה הזאת — היא חושבה, קו אחרי קו, ברגע שנכנסתם.' },
-    { id: 'game', num: '12', desc: 'קונפיגורטור אינטראקטיבי — מוצר שמרכיבים תוך כדי משחק', px: ROOM.hw - 0.06, pz: 4.6, ry: -Math.PI / 2, disp: 'game', wide: true, title: 'המגרש', tag: 'תצוגת יכולת · משחקים', demo: 'מדגים: משחקים וקונפיגורטורים', accent: '#E8722E', contact: true,
-      body: 'הדרך הכי מהירה להבין מוצר היא לשחק בו: קונפיגורטור שמרכיב מוצר בלייב, סימולטור שמלמד תהליך, משחק שמשאיר מבקרים עוד דקה. אינטראקציה הופכת סקרנות להחלטה — בואו נבנה אחת לשלכם.' },
-    /* near curve, right of the door — the walk ends */
+      body: 'שלוש מאות קווים ששוחררו לשדה זרימה מתמטי. אף אחד לא צייר את היצירה הזאת - היא חושבה, קו אחרי קו, ברגע שנכנסתם.' },
+    { id: 'game', num: '12', desc: 'קונפיגורטור אינטראקטיבי - מוצר שמרכיבים תוך כדי משחק', px: ROOM.hw - 0.06, pz: 4.6, ry: -Math.PI / 2, disp: 'game', wide: true, title: 'המגרש', tag: 'תצוגת יכולת · משחקים', demo: 'מדגים: משחקים וקונפיגורטורים', accent: '#E8722E', contact: true,
+      body: 'הדרך הכי מהירה להבין מוצר היא לשחק בו: קונפיגורטור שמרכיב מוצר בלייב, סימולטור שמלמד תהליך, משחק שמשאיר מבקרים עוד דקה. אינטראקציה הופכת סקרנות להחלטה - בואו נבנה אחת לשלכם.' },
+    /* near curve, right of the door - the walk ends */
     { id: 'flux', num: '13', desc: 'שמונה תוכניות שיידר, ביניהן נוזל שנצבע עם הסמן', px: nearRR.px, pz: nearRR.pz, ry: nearRR.ry, live: 'flux', title: 'FLUX', tag: 'ציור חי · המעבדה', demo: 'מדגים: שיידרים על ה־GPU', accent: '#E0402F', link: 'lab/04-flux-shaders/',
-      body: 'שדות צבע שזורמים לפי כללים מתמטיים, ישר מול המעבד הגרפי. בגרסה המלאה — שמונה יצירות, כולל נוזל שמציירים בו עם הסמן.' },
+      body: 'שדות צבע שזורמים לפי כללים מתמטיים, ישר מול המעבד הגרפי. בגרסה המלאה - שמונה יצירות, כולל נוזל שמציירים בו עם הסמן.' },
     { id: 'fractal', num: '14', desc: 'קבוצת ז׳וליה: נוסחה אחת קצרה, אינסוף עולמות', px: nearR.px, pz: nearR.pz, ry: nearR.ry, live: 'julia', title: 'JULIA', tag: 'אמנות גנרטיבית', demo: 'מדגים: מתמטיקה חיה', accent: '#7A5CFF',
-      body: 'קבוצת ז׳וליה — נוסחה אחת קצרה שמכילה אינסוף. חושבה פיקסל־פיקסל בכניסתכם. לפעמים הקסם הוא פשוט מתמטיקה עם טעם טוב.' }
+      body: 'קבוצת ז׳וליה - נוסחה אחת קצרה שמכילה אינסוף. חושבה פיקסל־פיקסל בכניסתכם. לפעמים הקסם הוא פשוט מתמטיקה עם טעם טוב.' }
   ];
 
   var glowTexNeutral = radialTexture('rgba(255, 255, 255, 0.7)', 'rgba(255, 255, 255, 0)');
@@ -2462,7 +2462,7 @@
 
     /* the dark linen panel the piece hangs on */
     collectM('linen', new THREE.BoxGeometry(W + 1.0, H + 1.0, 0.05), partAt(0, AY, 0.028));
-    /* bronze border around the panel — four clean bars */
+    /* bronze border around the panel - four clean bars */
     var PW = W + 1.0, PH = H + 1.0, bt = 0.035;
     [[0, AY + PH / 2, PW + bt * 2, bt], [0, AY - PH / 2, PW + bt * 2, bt]].forEach(function (bb) {
       collectM('bronze', new THREE.BoxGeometry(bb[2], bb[3], 0.03), partAt(bb[0], bb[1], 0.05));
@@ -2490,7 +2490,7 @@
 
     var tex, liveState = null;
     if (art.live && window.ORBO_LAB) {
-      var aw = 512, ah = 320;   /* uploaded to the GPU while walking — keep it light */
+      var aw = 512, ah = 320;   /* uploaded to the GPU while walking - keep it light */
       var artC = ctx2d(aw, ah);
       var texC = ctx2d(aw, ah);
       liveState = { kind: art.live, art: artC, tex: texC, w: aw, h: ah, t: Math.random() * 60, seed: ORBO_LAB.makeSeed(art.live, aw, ah) };
@@ -2554,12 +2554,12 @@
         new THREE.PlaneGeometry(0.66, 0.34),
         new THREE.MeshBasicMaterial({ map: plaqueTexture(art) })
       );
-      /* under the artwork, on the linen — like a real museum mount card */
+      /* under the artwork, on the linen - like a real museum mount card */
       plq.position.set(0, art.wide ? 1.06 : 1.14, 0.062);
       group.add(plq);
     }
 
-    /* where this piece's warm spot would sit — the shared pool below
+    /* where this piece's warm spot would sit - the shared pool below
        parks the real lights on the nearest pieces only */
     var sWorld = new THREE.Vector3(0, ROOM.h - 0.35, 1.7).applyEuler(group.rotation).add(group.position);
     var tWorld = new THREE.Vector3(0, AY, 0).applyEuler(group.rotation).add(group.position);
@@ -2587,7 +2587,7 @@
       leg.multiply(new THREE.Matrix4().makeTranslation(lx[0], 0.44, 0.06));
       collectM('dark', new THREE.CylinderGeometry(0.028, 0.034, 0.88, 8), leg);
     });
-    /* the ivory board itself — gently backlit so it reads at night */
+    /* the ivory board itself - gently backlit so it reads at night */
     var introTex = introTexture();
     var board = new THREE.Mesh(
       new THREE.PlaneGeometry(1.5, 1.05),
@@ -2608,7 +2608,7 @@
     hit.rotation.y = face;
     hit.userData.art = {
       title: 'ברוכים הבאים', tag: 'המוזיאון של אורבו', self: true,
-      body: 'במקום תיק עבודות — בנינו מקום. כל מה שסביבכם נוצר אצלנו בקוד: האולם, השמיים, הכוכב, והציורים שנצבעים ממש עכשיו בזמן שאתם מסתכלים. ארבע העמדות במרכז מציגות מה אנחנו בונים, ועל הקירות תחנות 01–14 עם קייסים ותצוגות יכולת. לחיצה על כל מוצג פותחת הסבר. סיור נעים.',
+      body: 'במקום תיק עבודות - בנינו מקום. כל מה שסביבכם נוצר אצלנו בקוד: האולם, השמיים, הכוכב, והציורים שנצבעים ממש עכשיו בזמן שאתם מסתכלים. ארבע העמדות במרכז מציגות מה אנחנו בונים, ועל הקירות תחנות 01-14 עם קייסים ותצוגות יכולת. לחיצה על כל מוצג פותחת הסבר. סיור נעים.',
       link: null
     };
     scene.add(hit);
@@ -2618,7 +2618,7 @@
 
   /* a fixed pool of six spots serves whichever pieces are nearest.
      the light COUNT never changes, so the standard materials keep one
-     compiled program — and six spots cost roughly half of eleven on
+     compiled program - and six spots cost roughly half of eleven on
      every lit pixel. beyond ~9m a spot's falloff is spent anyway. */
   var spotPool = [];
   if (!isTouch) {
@@ -2649,7 +2649,7 @@
     }
   }
 
-  /* everything static is now collected — bake it down to one mesh per
+  /* everything static is now collected - bake it down to one mesh per
      material, and let the heavy one-time art renders stream in */
   bakeStatic();
   runDeferredArt();
@@ -2781,9 +2781,9 @@
       crosshair.classList.add('hot');
       if (window.ORBO_SOUND) ORBO_SOUND.sfx('hover');
       if (art._live && art._live.embedActive) {
-        showHint('זה האתר האמיתי, רץ בתוך המסך — לחצו כדי לגלוש בו');
+        showHint('זה האתר האמיתי, רץ בתוך המסך - לחצו כדי לגלוש בו');
       } else {
-        showHint(isTouch ? 'הקישו לפרטים' : '״' + art.title + '״ — לחצו לפרטים');
+        showHint(isTouch ? 'הקישו לפרטים' : '״' + art.title + '״ - לחצו לפרטים');
       }
     } else {
       crosshair.classList.remove('hot');
@@ -2860,7 +2860,7 @@
     }
     requestLock();
     setTimeout(function () {
-      showHint(isTouch ? 'ג׳ויסטיק בצד — תנועה · גרירה — להסתכל' : 'W A S D — תנועה · עכבר — להסתכל', 4200);
+      showHint(isTouch ? 'ג׳ויסטיק בצד - תנועה · גרירה - להסתכל' : 'W A S D - תנועה · עכבר - להסתכל', 4200);
     }, reduced ? 300 : 2200);
   });
 
@@ -2945,7 +2945,7 @@
   /* ---------- living paintings ----------
      a painted frame is a full canvas redraw plus a GPU texture upload,
      so ration them hard: every 3rd frame, only pieces actually inside
-     the view frustum and within 12m, and of those the two nearest —
+     the view frustum and within 12m, and of those the two nearest -
      plus a rotation so nothing ever freezes. every painting watches
      the visitor: the gaze point on the canvas feeds mx/my. */
   var liveTick = 0;
@@ -3099,7 +3099,7 @@
   /* museum-local live painters (kinds ORBO_LAB doesn't know):
      the generative pieces, reborn as slow-breathing living works */
   var LOCAL_LIVE = {
-    /* MOSAIC — FLUX's living voronoi: seeds orbit inside their cells,
+    /* MOSAIC - FLUX's living voronoi: seeds orbit inside their cells,
        true-width walls, walls ignite under the gaze. GPU when we have
        it; the CPU recolor below is the fallback. */
     mosaic: function (s) {
@@ -3152,7 +3152,7 @@
       }
       c.putImageData(C.img, 0, 0);
     },
-    /* GENESIS — the field keeps growing: old strokes sink into the
+    /* GENESIS - the field keeps growing: old strokes sink into the
        linen while fresh lines spring from wherever you look */
     genesis: function (s) {
       var w = s.w, h = s.h, c = s.ctx;
@@ -3183,7 +3183,7 @@
         c.stroke();
       }
     },
-    /* JULIA — FLUX's orbit-trap julia: c orbits the seahorse valley so
+    /* JULIA - FLUX's orbit-trap julia: c orbits the seahorse valley so
        the whole set MORPHS, filaments glow, the gaze nudges c. GPU when
        we have it; the cached CPU recolor below is the fallback. */
     julia: function (s) {
@@ -3311,7 +3311,7 @@
     if (near1) paintOne(near1, dt * 3 * (1 + Math.max(0, 1 - d1 / 9) * 1.25));
     if (near2) paintOne(near2, dt * 3 * (1 + Math.max(0, 1 - d2 / 9) * 1.25));
     /* two more paintings refresh in rotation every tick, so EVERY canvas
-       in the hall visibly lives — a museum where nothing moves is a
+       in the hall visibly lives - a museum where nothing moves is a
        museum of posters */
     var rotated = 0;
     for (var k = 0; k < liveArts.length && rotated < 2; k++) {
@@ -3324,7 +3324,7 @@
     }
   }
   /* warm-up: run each living canvas to a fully developed image behind the
-     entry overlay — FLUX needs dozens of frames to accumulate its trails,
+     entry overlay - FLUX needs dozens of frames to accumulate its trails,
      the others settle in a few */
   liveArts.forEach(function (L, i) {
     setTimeout(function () {
@@ -3474,7 +3474,7 @@
     document.body.classList.add('browsing');
     screenExit.hidden = false;
     if (locked && document.exitPointerLock) document.exitPointerLock();
-    showHint('אתם בתוך האתר האמיתי — גלשו חופשי. ESC או הכפתור למעלה מחזירים לסיור', 5200);
+    showHint('אתם בתוך האתר האמיתי - גלשו חופשי. ESC או הכפתור למעלה מחזירים לסיור', 5200);
   }
   function exitBrowse(relock) {
     browsing = false;
@@ -3625,7 +3625,7 @@
     }
   }, 600);
 
-  /* QA handle — read-only peek at the world, plus a manual tick so
+  /* QA handle - read-only peek at the world, plus a manual tick so
      probes can drive frames even while the tab reports hidden */
   window.__GALLERY = {
     renderer: renderer, scene: scene, camera: camera,

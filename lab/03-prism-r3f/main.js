@@ -1,4 +1,4 @@
-/* PRISM — bootstrap. Guards WebGL support and module loading, shows a styled
+/* PRISM - bootstrap. Guards WebGL support and module loading, shows a styled
    fallback if anything fails before React can mount. */
 
 const rootEl = document.getElementById("root");

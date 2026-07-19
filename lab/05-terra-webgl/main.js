@@ -1,5 +1,5 @@
 /*
- * TERRA — main.js
+ * TERRA - main.js
  * Loader, slider state machine, input (wheel / drag / keys),
  * DOM choreography, custom cursor, height-parallax mouse feed
  * and the field-report overlay wiring. One rAF loop drives the
@@ -39,8 +39,8 @@ const els = {
 
 let stage = null;
 let report = null;
-let textures = [];         // [{ tex, height }] — sparse; slides fill in from idle time
-let mapFields = [];        // [{ field, size }] — same noise field as the textures
+let textures = [];         // [{ tex, height }] - sparse; slides fill in from idle time
+let mapFields = [];        // [{ field, size }] - same noise field as the textures
 let placeholderSlot = null; // tiny neutral slot for not-yet-generated slides
 let slotBIndex = -1;       // which slide currently occupies shader slot B
 let index = 0;
@@ -50,7 +50,7 @@ let prevP = 0;
 let vel = 0;
 let hintDimmed = false;
 
-/* Wheel gating — one gesture, one slide. */
+/* Wheel gating - one gesture, one slide. */
 let wheelArmed = true;
 let wheelAcc = 0;
 let lastWheel = 0;
@@ -70,7 +70,7 @@ let onScreen = true;
 /* SplitText bookkeeping for the slide title */
 let titleSplit = null;
 let titleInTween = null;
-let introTl = null;        // intro timeline — completed + killed on an early swipe
+let introTl = null;        // intro timeline - completed + killed on an early swipe
 
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 const pad2 = (n) => String(n).padStart(2, '0');
@@ -87,7 +87,7 @@ async function boot() {
   document.documentElement.style.setProperty('--accent', PROJECTS[0].accent);
 
   // Fonts load in parallel with texture generation. display=swap means
-  // text never blocks on them — this short race only steadies SplitText
+  // text never blocks on them - this short race only steadies SplitText
   // metrics for the intro; it does not gate first paint on the network.
   const fontsReady = Promise.race([document.fonts.ready, delay(800)]);
 
@@ -98,7 +98,7 @@ async function boot() {
   }
 
   if (stage) {
-    // Slide 1 only — the loader reflects first-slide readiness. The other
+    // Slide 1 only - the loader reflects first-slide readiness. The other
     // four fields generate in idle time while the user is already looking.
     placeholderSlot = stage.makePlaceholder();
     const first = PROJECTS[0];
@@ -151,7 +151,7 @@ function setLoad(fraction, name, i) {
   els.loaderPct.textContent = pad2(pct);
   els.loaderFill.style.transform = `scaleX(${fraction})`;
   if (name) {
-    els.loaderNote.textContent = `Rendering ${name.toUpperCase()} field — ${pad2(i + 1)}/${pad2(N)}`;
+    els.loaderNote.textContent = `Rendering ${name.toUpperCase()} field - ${pad2(i + 1)}/${pad2(N)}`;
   }
 }
 
@@ -199,7 +199,7 @@ function onTextureReady(i) {
 /* -------------------------------------------------------------- dom */
 
 function buildSlideDom(project) {
-  els.eyebrow.textContent = `No. ${project.no} — ${project.name}`;
+  els.eyebrow.textContent = `No. ${project.no} - ${project.name}`;
   els.title.innerHTML = project.lines
     .map((line, i) =>
       `<span class="t-line"><span class="t-line__in${i === 1 ? ' is-italic' : ''}">${line}</span></span>`)
@@ -255,7 +255,7 @@ function playDomSwap(next, dir = 1) {
 
   // Input unlocks at ~1.35s but the intro tail (desc/counter/CTA/rail/hint)
   // runs until ~3.5s. On an early swipe, jump the intro to its end state and
-  // kill it BEFORE creating any swap tweens — otherwise its pending from/
+  // kill it BEFORE creating any swap tweens - otherwise its pending from/
   // fromTo tweens fire later and stomp this swap (e.g. the rail-fill fromTo
   // would snap the progress rail back to slide 1's fill, and the hint
   // fade-in would override dimHint()).
@@ -296,7 +296,7 @@ function playDomSwap(next, dir = 1) {
   }, 0)
     // overwrite:'auto' kills any still-running in-tweens on these elements
     // from a previous rapid swap. (Intro tweens are handled by the introTl
-    // complete+kill at the top of playDomSwap — overwrite alone can't reach
+    // complete+kill at the top of playDomSwap - overwrite alone can't reach
     // intro tail tweens that haven't started yet.)
     .to([els.eyebrow, els.meta, els.desc], { y: -12, opacity: 0, duration: 0.4, ease: 'power2.in', overwrite: 'auto' }, 0.02)
     .add(() => {
@@ -367,7 +367,7 @@ function finishTransition(next) {
     stage.uniforms.uTexA.value = slot.tex;
     stage.uniforms.uHeightA.value = slot.height;
     // If the texture landed mid-transition its B-slot shimmer may still
-    // be fading — carry that fade over to A so there is no pop.
+    // be fading - carry that fade over to A so there is no pop.
     const pb = stage.uniforms.uPlaceholderB.value;
     gsap.killTweensOf(stage.uniforms.uPlaceholderB);
     if (ready && pb > 0.001) {
@@ -593,7 +593,7 @@ function startLoop() {
     const dt = Math.min(50, now - lastT) / 1000;
     lastT = now;
 
-    // Coalesced drag input — at most one drag update per frame.
+    // Coalesced drag input - at most one drag update per frame.
     if (drag && dragDirty) { dragDirty = false; processDrag(); }
 
     // Velocity: smoothed dp/dt, decays to zero after each tween.
@@ -663,7 +663,7 @@ function intro() {
     .to(els.loader, { yPercent: -100, duration: 0.85, ease: 'power4.inOut', delay: 0.15 })
     .set(els.loader, { display: 'none' })
     .from(els.canvas, { opacity: 0, scale: 1.06, duration: 1.3, ease: 'power2.out' }, '-=0.5')
-    // Unlock input as soon as the landscape is on screen — the rest of
+    // Unlock input as soon as the landscape is on screen - the rest of
     // the intro is chrome settling in and should not block interaction.
     .add(() => { if (state === 'loading') state = 'idle'; }, 1.35)
     .from('.site-head > *', { y: -18, opacity: 0, duration: 0.7, stagger: 0.08, ease: 'power3.out' }, '-=1.0')

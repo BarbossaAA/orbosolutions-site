@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>FLUX — Fragment Shader Observatory</title>
-  <meta name="description" content="FLUX: eight live GLSL fragment programs rendered in raw WebGL2, including a ping-pong framebuffer feedback instrument you paint with the pointer. No textures, no video — arithmetic only.">
+  <title>FLUX - Fragment Shader Observatory</title>
+  <meta name="description" content="FLUX: eight live GLSL fragment programs rendered in raw WebGL2, including a ping-pong framebuffer feedback instrument you paint with the pointer. No textures, no video - arithmetic only.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='black'/><rect x='11' y='11' width='42' height='42' fill='none' stroke='%23FF3B30' stroke-width='4'/><rect x='27' y='27' width='10' height='10' fill='white'/></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -50,14 +50,14 @@
     browser declined to provide one. Hardware acceleration may be disabled, or the browser
     may be out of date. Any current Chrome, Edge, Firefox or Safari will run the observatory.</p>
     <div class="fallback-list">
-      <p>001 MORPH — RAYMARCHED SDF · SOFT SHADOWS</p>
-      <p>002 INK — FBM DOMAIN WARP</p>
-      <p>003 JULIA — ESCAPE-TIME FRACTAL · ORBIT TRAP</p>
-      <p>004 BLOOM — METABALL FIELD · ADDITIVE GLOW</p>
-      <p>005 AURORA — LAYERED NOISE CURTAINS</p>
-      <p>006 CELLS — VORONOI · BORDER DISTANCE</p>
-      <p>007 PORTAL — KALEIDOSCOPIC RAYMARCH · TUNNEL</p>
-      <p>008 FLOW — PING-PONG FBO FEEDBACK</p>
+      <p>001 MORPH - RAYMARCHED SDF · SOFT SHADOWS</p>
+      <p>002 INK - FBM DOMAIN WARP</p>
+      <p>003 JULIA - ESCAPE-TIME FRACTAL · ORBIT TRAP</p>
+      <p>004 BLOOM - METABALL FIELD · ADDITIVE GLOW</p>
+      <p>005 AURORA - LAYERED NOISE CURTAINS</p>
+      <p>006 CELLS - VORONOI · BORDER DISTANCE</p>
+      <p>007 PORTAL - KALEIDOSCOPIC RAYMARCH · TUNNEL</p>
+      <p>008 FLOW - PING-PONG FBO FEEDBACK</p>
     </div>
   </div>
 
@@ -77,10 +77,10 @@
   </header>
 
   <section class="hero">
-    <p class="tag">UNIT 04 / 05 — LIVE INSTRUMENT</p>
+    <p class="tag">UNIT 04 / 05 - LIVE INSTRUMENT</p>
     <h1>EIGHT FRAGMENT PROGRAMS,<br>COMPUTED AS YOU WATCH.</h1>
     <p class="hero-body">Every tile below is a hand-written GLSL fragment shader running in raw
-    WebGL2 — no rendering libraries, no textures, no video files. Hover a tile to overdrive its
+    WebGL2 - no rendering libraries, no textures, no video files. Hover a tile to overdrive its
     clock. Click one to inspect it at full resolution, source included. Specimen 008 is the only
     one that remembers: press and drag to pour ink into its feedback loop.</p>
     <p class="hero-meta">SPECIMENS 008 &nbsp;·&nbsp; UNIFORMS u_time / u_mouse / u_resolution / u_prev &nbsp;·&nbsp; GL DEPENDENCIES 000</p>
@@ -96,25 +96,25 @@
         <h3>PROTOCOL</h3>
         <p>One shared animation clock drives every visible tile. Offscreen programs are halted
         by an intersection observer. Tiles render at reduced density; the full-resolution pass
-        is reserved for the inspector. A frame-time governor watches the rolling average — if it
+        is reserved for the inspector. A frame-time governor watches the rolling average - if it
         sustains above 22 ms, tile density steps down until it recovers (HUD reads Q AUTO).</p>
       </div>
       <div>
         <h3>INPUT</h3>
         <p>The pointer streams into every program as u_mouse, smoothed by exponential decay.
-        Hovering a tile overdrives its local clock to ×2.2. 008 FLOW is played, not watched —
-        press and drag to pour ink; your velocity bends the current. Keys 1–8 jump straight to
+        Hovering a tile overdrives its local clock to ×2.2. 008 FLOW is played, not watched -
+        press and drag to pour ink; your velocity bends the current. Keys 1-8 jump straight to
         a program; ESC returns to the grid.</p>
       </div>
       <div>
         <h3>SYSTEM</h3>
-        <p>The render core is raw WebGL2 and hand-written GLSL ES 3.00 — zero libraries, zero
+        <p>The render core is raw WebGL2 and hand-written GLSL ES 3.00 - zero libraries, zero
         textures, zero build step. Interface motion alone is delegated to GSAP and Lenis.
         If it is drawn, it is arithmetic.</p>
       </div>
     </div>
     <div class="foot-bar">
-      <span>FLUX — UNIT 04 / 05</span>
+      <span>FLUX - UNIT 04 / 05</span>
       <span class="foot-motion"><span id="foot-note">MOTION: FULL</span><button id="motion-btn" type="button" hidden>ENABLE MOTION</button></span>
       <span>2026 · RENDERED LOCALLY BY YOUR GPU</span>
     </div>
@@ -139,7 +139,7 @@
     </div>
     <div class="modal-fault" aria-hidden="true">
       <b>ERR</b>
-      <span>PROGRAM FAULT — SEE CONSOLE FOR THE COMPILE LOG</span>
+      <span>PROGRAM FAULT - SEE CONSOLE FOR THE COMPILE LOG</span>
     </div>
     <aside id="source-panel" aria-label="GLSL source code">
       <div class="source-head">

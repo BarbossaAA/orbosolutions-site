@@ -1,5 +1,5 @@
 /* ============================================================
-   FLUX — Fragment Shader Observatory
+   FLUX - Fragment Shader Observatory
    pure black / white / #FF3B30 / 1px #333 / JetBrains Mono
    ============================================================ */
 
@@ -274,7 +274,7 @@ html.has-cursor .tile { cursor: none; }
 .tile:hover::before, .tile:hover::after,
 .tile:focus-visible::before, .tile:focus-visible::after { opacity: 1; }
 
-/* staggered reveal — CSS path (fallback when GSAP is absent) */
+/* staggered reveal - CSS path (fallback when GSAP is absent) */
 body.booting .tile { opacity: 0; transform: translateY(14px); }
 body.revealed .tile {
   opacity: 1;
@@ -290,7 +290,7 @@ body.gsap .tile {
   transition-delay: 0s;
 }
 
-/* 008 FLOW — painting must beat scrolling on touch */
+/* 008 FLOW - painting must beat scrolling on touch */
 .tile--flow { touch-action: none; }
 
 /* compile-error state */

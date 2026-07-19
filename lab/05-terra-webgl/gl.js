@@ -1,5 +1,5 @@
 /*
- * TERRA — gl.js
+ * TERRA - gl.js
  * Fullscreen Three.js plane with a custom distortion / RGB-shift
  * transition shader, height-map parallax, an in-shader film pass
  * (grain, vignette, radial chromatic aberration), transition and
@@ -74,7 +74,7 @@ const FRAGMENT = /* glsl */`
     return v * 1.0714;
   }
 
-  // 2-octave fBm for the 1.4% idle UV drift — invisible difference there.
+  // 2-octave fBm for the 1.4% idle UV drift - invisible difference there.
   float fbm2(vec2 p) {
     float v = 0.5 * vnoise(p);
     p = p * 2.03 + vec2(19.7, 7.3);
@@ -127,7 +127,7 @@ const FRAGMENT = /* glsl */`
     ) - 0.5;
     uv += drift * 0.014 * uIdle * (1.0 - env * 0.6);
 
-    // Height parallax — the cursor tilts each landscape by its own relief.
+    // Height parallax - the cursor tilts each landscape by its own relief.
     vec2 par = (uMouse - 0.5) * uParallax;
     float hA = texture2D(uHeightA, uv).r;
     float hB = texture2D(uHeightB, uv).r;
@@ -157,7 +157,7 @@ const FRAGMENT = /* glsl */`
     colA = mix(colA, shimmerCol(uvA, flow), uPlaceholderA);
     colB = mix(colB, shimmerCol(uvB, flow), uPlaceholderB);
 
-    // Displaced mix — the noise field tears the wipe edge organically.
+    // Displaced mix - the noise field tears the wipe edge organically.
     float m = smoothstep(0.12, 0.88, p + (flow - 0.5) * 0.5 * env);
     vec3 color = mix(colA, colB, m);
 

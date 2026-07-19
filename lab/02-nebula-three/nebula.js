@@ -1,5 +1,5 @@
 /* ============================================================
-   NEBULA — nebula.js
+   NEBULA - nebula.js
    Volumetric fog layer (cheap raymarched fbm rendered to a
    low-res target, composited additively behind the stars)
    and the shooting-star streak pool. All procedural.

@@ -1,4 +1,4 @@
-/* LUMEN Studio — scroll bus.
+/* LUMEN Studio - scroll bus.
    Writes --p (per [data-scene]), --hp (.hero exit falloff), --sp (header
    progress) from ONE rAF loop with cached rects. Reduced motion: terminal
    states, no loop, no listeners. */

@@ -1,12 +1,12 @@
-/* ORBO — the museum's sound. Two layers, all procedural WebAudio:
-   1. AMBIENCE — the site's own generative score (the breathing sus2
+/* ORBO - the museum's sound. Two layers, all procedural WebAudio:
+   1. AMBIENCE - the site's own generative score (the breathing sus2
       pad, air, sub-bass line and pentatonic motif from audio.js),
       auto-started by the enter gesture. A HUD chip mutes it; the
       choice persists separately from the main site's toggle.
-   2. SFX — MMORPG-grade interface chimes: cold crystalline bell tones
+   2. SFX - MMORPG-grade interface chimes: cold crystalline bell tones
       (sine partials + a whisper of noise) through a soft feedback
       delay, so every interaction rings like glass in a stone hall.
-   No files, no libraries — the hall stays cold, mystic and clean. */
+   No files, no libraries - the hall stays cold, mystic and clean. */
 (function () {
   'use strict';
 
@@ -241,7 +241,7 @@
       bell(1318.5, 0.72, 1.2, 0.05);
       bell(1760, 0.94, 1.6, 0.045);
     },
-    /* a screen unlocking — the real site waking in its frame */
+    /* a screen unlocking - the real site waking in its frame */
     browse: function () { bell(523.25, 0, 0.4, 0.09); bell(783.99, 0.08, 0.45, 0.08); bell(1174.7, 0.16, 0.8, 0.07); },
     browseExit: function () { bell(1174.7, 0, 0.3, 0.06); bell(783.99, 0.07, 0.35, 0.06); bell(523.25, 0.14, 0.6, 0.07); }
   };

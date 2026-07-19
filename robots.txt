@@ -1,4 +1,4 @@
-# Orbo Solutions — orbosolutions.com
+# Orbo Solutions - orbosolutions.com
 # Everyone is welcome. AI crawlers explicitly included.
 
 User-agent: *

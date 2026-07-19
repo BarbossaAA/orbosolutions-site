@@ -1,16 +1,16 @@
 /* ============================================================
-   Orbo Solutions — Design System
-   Clean · Light · Premium — Hebrew RTL
+   Orbo Solutions - Design System
+   Clean · Light · Premium - Hebrew RTL
    ============================================================ */
 
 /* ---------- Tokens ---------- */
 :root {
-  /* v3 — white studio system */
+  /* v3 - white studio system */
   --bg: #FAFAF9;
   --surface: #FFFFFF;
   --ink: #14121F;
   --ink-soft: #5A5668;
-  --ink-faint: #716C86; /* ≥4.5:1 on white/ivory — WCAG AA for small text */
+  --ink-faint: #716C86; /* ≥4.5:1 on white/ivory - WCAG AA for small text */
   --line: rgba(20, 18, 31, 0.08);
   --line-strong: rgba(20, 18, 31, 0.14);
 
@@ -21,9 +21,9 @@
   --tint-blue: #E7F0FF;
   --grad-accent: linear-gradient(135deg, #6C5CFF 0%, #9D6BFF 100%);
 
-  /* V5.18 type system (owner: "more professional, sleeker — look at
+  /* V5.18 type system (owner: "more professional, sleeker - look at
      awwwards sites of the year"): ONE variable neo-grotesque for the
-     whole site — Noto Sans Hebrew 300..900 — and the hierarchy is
+     whole site - Noto Sans Hebrew 300..900 - and the hierarchy is
      built from WEIGHT CONTRAST alone (850 tight display vs 350 airy
      leads), the signature of current award sites. Rubik/Assistant
      (V5.16) and Frank Ruhl/Heebo before them are dead. */
@@ -636,7 +636,7 @@ h1, h2, h3 { font-weight: 750; line-height: 1.16; letter-spacing: -0.015em; }
   overflow: hidden;
   box-shadow: var(--shadow-lg);
 }
-/* the reveal contributes opacity only — never a competing transform */
+/* the reveal contributes opacity only - never a competing transform */
 .cta-band.reveal,
 .cta-band.reveal.in {
   transform: scale(calc(0.955 + min(var(--p, 1) * 2, 1) * 0.045));
@@ -656,7 +656,7 @@ h1, h2, h3 { font-weight: 750; line-height: 1.16; letter-spacing: -0.015em; }
 .cta-band h2 { margin-bottom: 18px; }
 .cta-band .cta-line { color: rgba(255, 255, 255, 0.72); font-size: 1.15rem; font-weight: 300; margin-bottom: 38px; }
 .cta-band .btn-primary { box-shadow: 0 18px 50px -8px rgba(108, 92, 255, 0.6); }
-/* brighter gradient text on the dark band — the default accent is too dark on ink */
+/* brighter gradient text on the dark band - the default accent is too dark on ink */
 .cta-band .accent-text {
   background: linear-gradient(135deg, #9D8CFF 0%, #C9AFFF 100%);
   -webkit-background-clip: text;
@@ -868,7 +868,7 @@ h1, h2, h3 { font-weight: 750; line-height: 1.16; letter-spacing: -0.015em; }
 }
 
 /* ============================================================
-   Lightfield upgrade — shared pieces
+   Lightfield upgrade - shared pieces
    ============================================================ */
 
 /* GL canvases fade to the CSS tier on permanent context loss */
@@ -917,7 +917,7 @@ h1, h2, h3 { font-weight: 750; line-height: 1.16; letter-spacing: -0.015em; }
 @keyframes icon-draw { from { stroke-dashoffset: 60; } to { stroke-dashoffset: 0; } }
 .world-card:hover .world-icon svg * { stroke-dasharray: 60; animation: icon-draw 0.6s var(--ease-out); }
 
-/* --- FAQ answer entrance (animation — details content can't transition open) --- */
+/* --- FAQ answer entrance (animation - details content can't transition open) --- */
 @keyframes faqIn { from { opacity: 0; transform: translateY(-6px); } }
 .faq-item[open] .faq-answer { animation: faqIn 0.45s var(--ease-out); }
 
@@ -968,9 +968,9 @@ body::after {
 }
 
 /* ============================================================
-   ORBO MOBILE — app shell (phones only; desktop untouchable).
+   ORBO MOBILE - app shell (phones only; desktop untouchable).
    The phone composes as a native app: a minimal 52px top bar
-   (logo only) and a floating glass tab bar under the thumb —
+   (logo only) and a floating glass tab bar under the thumb -
    home / services / contact + the ambience toggle. Everything
    lives inside the 767px media (story.js's `mobile` = <768).
    ============================================================ */
@@ -981,12 +981,12 @@ body::after {
 
   /* minimal top bar: the logo alone; nav + audio moved to the tab bar.
      Safe-area padding so a notch never eats the wordmark (the dock
-     target is measured live from the logo rect — computeDock follows). */
+     target is measured live from the logo rect - computeDock follows). */
   .site-header {
     padding-top: env(safe-area-inset-top, 0px);
     height: calc(var(--header-h) + env(safe-area-inset-top, 0px));
   }
-  /* v81 (owner): the brand sits CENTERED in the top bar — every
+  /* v81 (owner): the brand sits CENTERED in the top bar - every
      header-actions child is already hidden on phones, so the whole
      container retires and the logo centers as a unit. The dock
      target follows automatically (computeDock measures the live
@@ -1058,10 +1058,10 @@ body::after {
   .site-footer { padding-bottom: calc(var(--tabbar-h) + 28px + env(safe-area-inset-bottom, 0px)); }
 
   /* ORBO MOBILE v79 (owner: "the rest of the pages at the same level
-     as home"): inner pages read as app screens — compact heroes
+     as home"): inner pages read as app screens - compact heroes
      tuned to the 52px top bar, tighter section rhythm, and an
      app-style page ENTRANCE (transform+opacity only; the story page
-     is excluded — a transform on main would re-anchor its fixed
+     is excluded - a transform on main would re-anchor its fixed
      canvas). */
   .page-hero {
     padding-top: calc(var(--header-h) + env(safe-area-inset-top, 0px) + 26px);
@@ -1074,7 +1074,7 @@ body::after {
   main:not(.story) { animation: page-in 0.4s var(--ease-out); }
 
   /* ORBO MOBILE (M4): the footer collapses into a compact "about +
-     contact chips" block — the tab bar already owns navigation */
+     contact chips" block - the tab bar already owns navigation */
   .site-footer { padding-top: 40px; }
   .footer-inner { grid-template-columns: 1fr; gap: 20px; padding-bottom: 30px; }
   .footer-nav { display: none; }

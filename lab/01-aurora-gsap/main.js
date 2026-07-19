@@ -1,5 +1,5 @@
 /* ============================================================
-   AURORA(R) — main.js
+   AURORA(R) - main.js
    GSAP 3.13 (ScrollTrigger + SplitText + ScrambleText + DrawSVG
    + CustomEase + Flip) + Lenis 1.3.4 + aurora-gl.js (WebGL2 backdrop)
    No build step. Everything animated lives here.
@@ -197,7 +197,7 @@
     onUpdate: () => { if (countEl) countEl.textContent = pad(counter.value, 3); }
   });
 
-  /* fonts get 0.8s max — display=swap means text renders regardless,
+  /* fonts get 0.8s max - display=swap means text renders regardless,
      and the intro must never gate interaction on the network */
   const fontsReady = Promise.race([
     (document.fonts && document.fonts.ready) || Promise.resolve(),
@@ -384,27 +384,27 @@
       Nocturne: {
         client: 'Maison Nocturne',
         scope: 'Art direction, e-commerce, motion',
-        desc: 'A darkened runway for a Paris fashion house — velvet blacks, silver type and a checkout that moves like a catwalk.'
+        desc: 'A darkened runway for a Paris fashion house - velvet blacks, silver type and a checkout that moves like a catwalk.'
       },
       Helios: {
         client: 'Helios Energy',
         scope: 'Product design, WebGL, design system',
-        desc: 'A clean-energy platform that treats sunlight as an interface — live irradiance data drawn as slow, warm gradients.'
+        desc: 'A clean-energy platform that treats sunlight as an interface - live irradiance data drawn as slow, warm gradients.'
       },
       Pulse: {
         client: 'Pulse Festival',
         scope: 'Campaign site, identity, ticketing',
-        desc: 'Three days, ninety artists, one heartbeat — a campaign site that syncs its palette to 128 BPM.'
+        desc: 'Three days, ninety artists, one heartbeat - a campaign site that syncs its palette to 128 BPM.'
       },
       Meridian: {
         client: 'Meridian Journal',
         scope: 'Editorial design, CMS, photo direction',
-        desc: 'A travel editorial that scrolls like a long-haul flight — slow, panoramic and impossible to skim.'
+        desc: 'A travel editorial that scrolls like a long-haul flight - slow, panoramic and impossible to skim.'
       },
       Obsidian: {
         client: 'Obsidian Architects',
         scope: 'Portfolio, 3D, brand system',
-        desc: 'A monolithic portfolio for brutalist architects — concrete greys, razor grids and light used like material.'
+        desc: 'A monolithic portfolio for brutalist architects - concrete greys, razor grids and light used like material.'
       }
     };
 
@@ -696,7 +696,7 @@
       .to('.panel-dark', { yPercent: -100, duration: 0.55 }, 0.1)
       .to('.panel-lime', { yPercent: -100, duration: 0.5 }, 0.2)
       .add(() => {
-        /* release everything as soon as the wipe starts — never gate input */
+        /* release everything as soon as the wipe starts - never gate input */
         const pre = $('.preloader');
         if (pre) pre.style.pointerEvents = 'none';
         docEl.classList.remove('is-loading');

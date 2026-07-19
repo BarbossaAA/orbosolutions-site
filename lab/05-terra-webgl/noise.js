@@ -1,5 +1,5 @@
 /*
- * TERRA — noise.js
+ * TERRA - noise.js
  * Small deterministic 2D value-noise + fBm used to synthesise
  * the procedural landscape textures. No dependencies.
  */

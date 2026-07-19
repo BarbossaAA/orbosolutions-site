@@ -1,4 +1,4 @@
-/* LUMEN Studio — services page: chip-nav scroll-spy + cascade, ambient SVG
+/* LUMEN Studio - services page: chip-nav scroll-spy + cascade, ambient SVG
    two-rate parallax. No-JS: sticky bar is plain anchors, SVGs are static. */
 (function () {
   'use strict';
@@ -29,7 +29,7 @@
   }
   cacheFloatAt();
   if (nav && hero) {
-    /* wayfinding, not motion — runs under reduced motion too */
+    /* wayfinding, not motion - runs under reduced motion too */
     var floating = false;
     var hidden = false;
     window.addEventListener('scroll', function () {

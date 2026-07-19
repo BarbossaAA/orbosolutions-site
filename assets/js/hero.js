@@ -1,4 +1,4 @@
-/* LUMEN Studio — hero aurora canvas (light, soft, slow) */
+/* LUMEN Studio - hero aurora canvas (light, soft, slow) */
 (function () {
   'use strict';
 

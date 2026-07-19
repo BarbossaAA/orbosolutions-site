@@ -1,4 +1,4 @@
-/* ORBO — lab preview engine.
+/* ORBO - lab preview engine.
    Five tiny 2D-canvas scenes (aurora ribbons, particle galaxy, refracting
    prism, flow field, terrain ridges). All procedural, no assets.
    Exposed as window.ORBO_LAB so two surfaces share one engine:
@@ -10,7 +10,7 @@
 (function () {
   'use strict';
 
-  /* value noise — cheap, good enough for ribbons/ridges/fields */
+  /* value noise - cheap, good enough for ribbons/ridges/fields */
   function n2(x, y) {
     var n = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453;
     return n - Math.floor(n);
@@ -42,12 +42,12 @@
   }
 
   /* each draw takes a state {ctx, w, h, t, seed} and optionally
-     {mx, my} — a normalized pointer/gaze position (0..1) the painting
+     {mx, my} - a normalized pointer/gaze position (0..1) the painting
      leans toward. defaults keep the old autonomous motion. */
   function px2(s) { return s.mx === undefined ? 0.5 : s.mx; }
   function py2(s) { return s.my === undefined ? 0.5 : s.my; }
   var draw = {
-    /* AURORA — three luminous ribbons breathing across the frame;
+    /* AURORA - three luminous ribbons breathing across the frame;
        they drift toward the pointer and bow around it */
     aurora: function (s) {
       var c = s.ctx, w = s.w, h = s.h, t = s.t;
@@ -80,7 +80,7 @@
       c.globalCompositeOperation = 'source-over';
     },
 
-    /* NEBULA — a slowly rotating spiral of glowing points; the galaxy
+    /* NEBULA - a slowly rotating spiral of glowing points; the galaxy
        drifts toward the pointer and stars near it flare */
     nebula: function (s) {
       var c = s.ctx, w = s.w, h = s.h, t = s.t;
@@ -114,7 +114,7 @@
       c.globalCompositeOperation = 'source-over';
     },
 
-    /* PRISM — a refracting triangle splitting a beam into spectra;
+    /* PRISM - a refracting triangle splitting a beam into spectra;
        the prism turns with the pointer, the spectrum follows */
     prism: function (s) {
       var c = s.ctx, w = s.w, h = s.h, t = s.t;
@@ -164,7 +164,7 @@
       c.stroke();
     },
 
-    /* FLUX — particles surfing a curling noise field, fading trails;
+    /* FLUX - particles surfing a curling noise field, fading trails;
        the pointer stirs a whirlpool into the field */
     flux: function (s) {
       var c = s.ctx, w = s.w, h = s.h, t = s.t;
@@ -200,7 +200,7 @@
       c.globalCompositeOperation = 'source-over';
     },
 
-    /* TERRA — layered procedural ridgelines drifting under a low sun;
+    /* TERRA - layered procedural ridgelines drifting under a low sun;
        the sun follows the pointer across the sky */
     terra: function (s) {
       var c = s.ctx, w = s.w, h = s.h, t = s.t;
@@ -257,7 +257,7 @@
 
     var s = { canvas: canvas, ctx: ctx, kind: kind, visible: false, w: 0, h: 0, t: Math.random() * 100, seed: [], mx: 0.5, my: 0.5, _tx: 0.5, _ty: 0.5 };
 
-    /* the paintings answer the pointer — hover a card and it leans in */
+    /* the paintings answer the pointer - hover a card and it leans in */
     var host = canvas.closest('.lab-card') || canvas;
     host.addEventListener('mousemove', function (e) {
       var r = canvas.getBoundingClientRect();

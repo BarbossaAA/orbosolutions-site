@@ -1,4 +1,4 @@
-/* Orbo Solutions — background ambience toggle (original procedural WebAudio).
+/* Orbo Solutions - background ambience toggle (original procedural WebAudio).
    A quiet studio pad: five detuned oscillator voices breathing on slow LFOs,
    a wash of band-passed noise for air, everything under a gentle lowpass and
    compressor. No external assets. Autoplay policy respected: sound starts
@@ -24,7 +24,7 @@
 
   var ctx = null, master = null, on = false, offT = null;
 
-  /* the procedural pad — everything below connects into `out` */
+  /* the procedural pad - everything below connects into `out` */
   function buildSource(out) {
     var t0 = ctx.currentTime;
     function lfo(freq, depth, target, base) {
@@ -40,7 +40,7 @@
       return o;
     }
     /* five voices on an airy sus2 stack (A2 E3 A3 B3 E4), each a
-       detuned pair — the moving bass LINE below replaces the old
+       detuned pair - the moving bass LINE below replaces the old
        static sub drone */
     var freqs = [110, 164.81, 220, 246.94, 329.63];
     var gains = [0.24, 0.19, 0.14, 0.10, 0.07];
@@ -81,7 +81,7 @@
     lfo(0.043, 0.013, ng.gain, 0.021);
     noise.connect(bp); bp.connect(ng); ng.connect(out);
     noise.start(t0);
-    /* two distant shimmers breathing in alternation — starlight */
+    /* two distant shimmers breathing in alternation - starlight */
     var shf = [659.26, 987.77];
     for (var s = 0; s < 2; s++) {
       var sh = ctx.createOscillator();
@@ -96,7 +96,7 @@
        pentatonic motif, scheduled ahead on the audio clock. The bass
        is one continuous sine gliding between root notes; each step
        swells in and sighs out. Melody notes are short-lived sines
-       with soft attacks — a motif, not a lead. */
+       with soft attacks - a motif, not a lead. */
     var BASS = [55, 55, 43.65, 49];               /* A1 A1 F1 G1 */
     var MEL = [220, 261.63, 329.63, 392, 440, 392, 329.63, 261.63]; /* Am pent */
     var bassOsc = ctx.createOscillator();
@@ -184,7 +184,7 @@
   if (saved === '1') {
     btns.forEach(function (b) { b.setAttribute('aria-pressed', 'true'); });
     on = true;
-    /* pointerup (not pointerdown) — pointerdown does not carry user
+    /* pointerup (not pointerdown) - pointerdown does not carry user
        activation on iOS Safari, and resume() would be rejected there.
        An aborted gesture on the toggle keeps the arm alive: the toggle's
        own click handler decides, and only a real start disarms. */
