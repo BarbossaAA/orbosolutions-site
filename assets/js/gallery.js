@@ -769,14 +769,128 @@
     });
   })();
 
-  /* the entry: a bronze-arched door on the near curve, brand sign above */
+  /* the entry: a great double door of brushed night-metal in a bronze
+     frame, a violet light breathing in its seam — a door worth a museum */
+  function doorSuite() {
+    var W = 512, H = 704;
+    var col = ctx2d(W, H), bmp = ctx2d(W, H);
+    /* base: cold dark metal, lit faintly from above */
+    var g = col.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#2b2440');
+    g.addColorStop(0.35, '#201a31');
+    g.addColorStop(1, '#141020');
+    col.fillStyle = g;
+    col.fillRect(0, 0, W, H);
+    /* vertical brushing */
+    for (var i = 0; i < 340; i++) {
+      var bx = Math.random() * W;
+      var by = Math.random() * H;
+      var bl = 40 + Math.random() * 180;
+      col.strokeStyle = 'rgba(' + (Math.random() < 0.5 ? '255,255,255' : '120,110,170') + ',' + (0.012 + Math.random() * 0.03).toFixed(3) + ')';
+      col.lineWidth = 1;
+      col.beginPath();
+      col.moveTo(bx, by);
+      col.lineTo(bx, by + bl);
+      col.stroke();
+    }
+    bmp.fillStyle = 'rgb(128,128,128)';
+    bmp.fillRect(0, 0, W, H);
+    /* two leaves, each with two recessed panels */
+    function panel(x, y, w2, h2) {
+      col.strokeStyle = 'rgba(0, 0, 0, 0.55)';
+      col.lineWidth = 5;
+      col.strokeRect(x, y, w2, h2);
+      col.strokeStyle = 'rgba(201, 168, 110, 0.5)';
+      col.lineWidth = 1.6;
+      col.strokeRect(x + 4, y + 4, w2 - 8, h2 - 8);
+      var pg = col.createLinearGradient(0, y, 0, y + h2);
+      pg.addColorStop(0, 'rgba(255, 255, 255, 0.045)');
+      pg.addColorStop(1, 'rgba(0, 0, 0, 0.16)');
+      col.fillStyle = pg;
+      col.fillRect(x + 6, y + 6, w2 - 12, h2 - 12);
+      bmp.fillStyle = 'rgb(70,70,70)';
+      bmp.fillRect(x, y, w2, h2);
+      bmp.fillStyle = 'rgb(150,150,150)';
+      bmp.fillRect(x + 6, y + 6, w2 - 12, h2 - 12);
+    }
+    [[26], [W / 2 + 14]].forEach(function (lx) {
+      panel(lx[0], 40, W / 2 - 40, 300);
+      panel(lx[0], 372, W / 2 - 40, 292);
+    });
+    /* the luminous seam between the leaves */
+    var sg = col.createLinearGradient(W / 2 - 7, 0, W / 2 + 7, 0);
+    sg.addColorStop(0, 'rgba(108, 92, 255, 0)');
+    sg.addColorStop(0.5, 'rgba(160, 140, 255, 0.85)');
+    sg.addColorStop(1, 'rgba(108, 92, 255, 0)');
+    col.fillStyle = sg;
+    col.fillRect(W / 2 - 7, 14, 14, H - 28);
+    /* bronze handle bars flanking the seam */
+    [[W / 2 - 34], [W / 2 + 26]].forEach(function (hx) {
+      var hg = col.createLinearGradient(hx[0], 0, hx[0] + 9, 0);
+      hg.addColorStop(0, '#8a6d46');
+      hg.addColorStop(0.5, '#d9b87e');
+      hg.addColorStop(1, '#6b5233');
+      col.fillStyle = hg;
+      if (col.roundRect) {
+        col.beginPath();
+        col.roundRect(hx[0], 280, 9, 150, 4.5);
+        col.fill();
+      } else {
+        col.fillRect(hx[0], 280, 9, 150);
+      }
+      bmp.fillStyle = 'rgb(230,230,230)';
+      bmp.fillRect(hx[0], 280, 9, 150);
+    });
+    /* corner studs */
+    [[40, 54], [W / 2 - 28, 54], [W / 2 + 28, 54], [W - 40, 54], [40, H - 54], [W / 2 - 28, H - 54], [W / 2 + 28, H - 54], [W - 40, H - 54]].forEach(function (sxy) {
+      var rg2 = col.createRadialGradient(sxy[0] - 1, sxy[1] - 1, 0, sxy[0], sxy[1], 6);
+      rg2.addColorStop(0, '#cfa972');
+      rg2.addColorStop(1, '#4a3a24');
+      col.fillStyle = rg2;
+      col.beginPath();
+      col.arc(sxy[0], sxy[1], 5, 0, 6.284);
+      col.fill();
+      bmp.fillStyle = 'rgb(255,255,255)';
+      bmp.beginPath();
+      bmp.arc(sxy[0], sxy[1], 5, 0, 6.284);
+      bmp.fill();
+    });
+    return { map: asTexture(col.canvas), bump: asTexture(bmp.canvas, true) };
+  }
+  var doorGlowMat = null;
   (function () {
     var doorR = 6.95;
-    var door = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 3.6), new THREE.MeshStandardMaterial({ color: 0x241d2e, roughness: 0.5, metalness: 0.3 }));
-    door.position.set(0, 1.8, ROOM.straight + doorR);
+    var doorZ = ROOM.straight + doorR;
+    var ds = doorSuite();
+    var door = new THREE.Mesh(
+      new THREE.PlaneGeometry(2.6, 3.6),
+      new THREE.MeshStandardMaterial({ map: ds.map, bumpMap: ds.bump, bumpScale: 0.9, roughness: 0.42, metalness: 0.62, envMapIntensity: 1.35 })
+    );
+    door.position.set(0, 1.8, doorZ);
     door.rotation.y = Math.PI;
     scene.add(door);
-    collect('bronze', new THREE.TorusGeometry(1.32, 0.07, 8, 24, Math.PI), 0, 3.6, ROOM.straight + doorR - 0.02, 0, Math.PI, 0);
+    /* bronze frame: jambs + lintel */
+    collect('bronze', new THREE.BoxGeometry(0.14, 3.76, 0.16), -1.37, 1.88, doorZ - 0.01);
+    collect('bronze', new THREE.BoxGeometry(0.14, 3.76, 0.16), 1.37, 1.88, doorZ - 0.01);
+    collect('bronze', new THREE.BoxGeometry(2.96, 0.15, 0.16), 0, 3.72, doorZ - 0.01);
+    /* the seam breathes violet into the hall */
+    doorGlowMat = new THREE.MeshBasicMaterial({
+      map: radialTexture('rgba(150, 130, 255, 0.5)', 'rgba(150, 130, 255, 0)'),
+      transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false
+    });
+    var seamGlow = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 3.4), doorGlowMat);
+    seamGlow.position.set(0, 1.8, doorZ - 0.05);
+    seamGlow.rotation.y = Math.PI;
+    scene.add(seamGlow);
+    /* a warm wash pooling on the threshold */
+    var pool = new THREE.Mesh(
+      new THREE.PlaneGeometry(3.4, 2.2),
+      new THREE.MeshBasicMaterial({ map: radialTexture('rgba(255, 214, 160, 0.22)', 'rgba(255, 214, 160, 0)'), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false })
+    );
+    pool.rotation.x = -Math.PI / 2;
+    pool.position.set(0, 0.016, doorZ - 1.1);
+    scene.add(pool);
+    collect('bronze', new THREE.TorusGeometry(1.32, 0.07, 8, 24, Math.PI), 0, 3.6, doorZ - 0.02, 0, Math.PI, 0);
     var sign = new THREE.Mesh(
       new THREE.PlaneGeometry(4.6, 1.15),
       new THREE.MeshBasicMaterial({ map: brandTexture(), transparent: true, depthWrite: false })
@@ -817,22 +931,37 @@
     benches.push({ x: bz[0], z: bz[1], hx: 0.5, hz: 1.2 });
   });
 
-  /* dust motes catching the lamplight */
-  var dust = null;
+  /* ground mist: three thin veils drifting just above the stone —
+     cold, mystic, and low enough to leave the veined floor readable */
+  var fogLayers = [];
   (function () {
-    var N = 160;
-    var pos0 = new Float32Array(N * 3);
-    for (var i = 0; i < N; i++) {
-      pos0[i * 3] = (Math.random() - 0.5) * 13;
-      pos0[i * 3 + 1] = Math.random() * (ROOM.h - 1) + 0.4;
-      pos0[i * 3 + 2] = (Math.random() - 0.5) * 26;
+    function mistTexture() {
+      var S = 512;
+      var c = ctx2d(S, S);
+      c.clearRect(0, 0, S, S);
+      for (var i = 0; i < 15; i++) {
+        var x = Math.random() * S, y = Math.random() * S, r = 70 + Math.random() * 130;
+        var g = c.createRadialGradient(x, y, 0, x, y, r);
+        g.addColorStop(0, 'rgba(185, 195, 255, ' + (0.05 + Math.random() * 0.06).toFixed(3) + ')');
+        g.addColorStop(1, 'rgba(185, 195, 255, 0)');
+        c.fillStyle = g;
+        c.fillRect(0, 0, S, S);
+      }
+      var t = asTexture(c.canvas);
+      t.wrapS = t.wrapT = THREE.RepeatWrapping;
+      return t;
     }
-    var g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.BufferAttribute(pos0, 3));
-    dust = new THREE.Points(g, new THREE.PointsMaterial({
-      color: 0xa79aff, size: 0.02, transparent: true, opacity: 0.42, blending: THREE.AdditiveBlending, depthWrite: false
-    }));
-    scene.add(dust);
+    [[0.22, 34, 0.05, 0.0016, 0.0006], [0.42, 28, 0.07, -0.0011, 0.0014], [0.68, 38, 0.04, 0.0008, -0.001]].forEach(function (lyr) {
+      var tex = mistTexture();
+      var m = new THREE.Mesh(
+        new THREE.PlaneGeometry(lyr[1], lyr[1] * 0.62),
+        new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: lyr[2], depthWrite: false })
+      );
+      m.rotation.x = -Math.PI / 2;
+      m.position.y = lyr[0];
+      scene.add(m);
+      fogLayers.push({ mesh: m, tex: tex, sx: lyr[3], sy: lyr[4], base: lyr[2] });
+    });
   })();
 
   /* a soft pool of light follows the visitor across the stone */
@@ -2650,6 +2779,7 @@
     hoverArt = art;
     if (art) {
       crosshair.classList.add('hot');
+      if (window.ORBO_SOUND) ORBO_SOUND.sfx('hover');
       if (art._live && art._live.embedActive) {
         showHint('זה האתר האמיתי, רץ בתוך המסך — לחצו כדי לגלוש בו');
       } else {
@@ -2676,6 +2806,7 @@
 
   function openPanel(art) {
     panelOpen = true;
+    if (window.ORBO_SOUND) ORBO_SOUND.sfx('open');
     panelTag.textContent = art.tag;
     panelTitle.textContent = art.title;
     panelBody.textContent = art.body;
@@ -2699,6 +2830,7 @@
   }
   function closePanel(relock) {
     panelOpen = false;
+    if (window.ORBO_SOUND) ORBO_SOUND.sfx('close');
     panel.classList.remove('open');
     panel.setAttribute('aria-hidden', 'true');
     if (relock && !isTouch) requestLock();
@@ -2712,6 +2844,10 @@
 
   /* ---------- entry ---------- */
   enterBtn.addEventListener('click', function () {
+    if (window.ORBO_SOUND) {
+      ORBO_SOUND.start();      /* the gesture that wakes the hall's score */
+      ORBO_SOUND.sfx('enter');
+    }
     enterEl.classList.add('gone');
     hud.classList.add('on');
     hud.setAttribute('aria-hidden', 'false');
@@ -2819,12 +2955,158 @@
   var liveWp = new THREE.Vector3();
   var gazeRay = new THREE.Raycaster();
 
+  /* ---------- GPU painters: FLUX's shaders, hung on the wall ----------
+     JULIA and MOSAIC render on a dedicated WebGL2 canvas with the same
+     fragment programs that power the FLUX room (orbit-trap julia, true-
+     border voronoi), recolored for the hall's violet. the 2D canvases
+     become plain blits. CPU versions below remain as fallback. */
+  var GLP = (function () {
+    var cv2 = document.createElement('canvas');
+    cv2.width = 512;
+    cv2.height = 320;
+    var gl;
+    try { gl = cv2.getContext('webgl2', { antialias: false, depth: false, alpha: false }); } catch (e) { gl = null; }
+    if (!gl) return null;
+    var VERT = [
+      '#version 300 es',
+      'void main(){',
+      '  vec2 p = vec2(gl_VertexID == 1 ? 3.0 : -1.0, gl_VertexID == 2 ? 3.0 : -1.0);',
+      '  gl_Position = vec4(p, 0.0, 1.0);',
+      '}'
+    ].join('\n');
+    var JULIA_FS = [
+      '#version 300 es',
+      '// FLUX 003 JULIA - escape-time fractal with orbit traps, hall palette',
+      'precision highp float;',
+      'uniform float u_time;',
+      'uniform vec2 u_mouse;',
+      'uniform vec2 u_resolution;',
+      'out vec4 fragColor;',
+      'void main(){',
+      '  vec2 uv = (gl_FragCoord.xy * 2.0 - u_resolution) / min(u_resolution.x, u_resolution.y);',
+      '  vec2 z = uv * 1.4;',
+      '  float t = u_time * 0.12;',
+      '  vec2 c = vec2(-0.78, 0.155) + vec2(0.095 * cos(t), 0.060 * sin(t * 1.6)) + (u_mouse - 0.5) * 0.06;',
+      '  float trapP = 1e5;',
+      '  float trapL = 1e5;',
+      '  float n = 0.0;',
+      '  bool escaped = false;',
+      '  for (int i = 0; i < 150; i++){',
+      '    z = vec2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y) + c;',
+      '    trapP = min(trapP, length(z - vec2(0.0, 0.66)));',
+      '    trapL = min(trapL, abs(z.x));',
+      '    if (dot(z, z) > 64.0){ escaped = true; break; }',
+      '    n += 1.0;',
+      '  }',
+      '  float sn = escaped ? n - log2(log2(dot(z, z))) + 4.0 : n;',
+      '  float g = clamp(sn / 150.0, 0.0, 1.0);',
+      '  vec3 col = vec3(0.012, 0.010, 0.026);',
+      '  col += vec3(0.78, 0.76, 0.95) * exp(-2.6 * trapL) * 0.45;',
+      '  col += vec3(0.56, 0.44, 1.0) * exp(-3.2 * trapP) * 0.95;',
+      '  if (escaped){',
+      '    col += vec3(0.72, 0.66, 0.92) * pow(g, 1.6);',
+      '    col += vec3(0.05, 0.045, 0.08) * (0.5 + 0.5 * cos(6.28318 * sn * 0.35));',
+      '  }',
+      '  col *= 1.0 - 0.30 * dot(uv, uv);',
+      '  fragColor = vec4(col, 1.0);',
+      '}'
+    ].join('\n');
+    var CELLS_FS = [
+      '#version 300 es',
+      '// FLUX 006 CELLS - animated voronoi with true border distance, hall palette',
+      'precision highp float;',
+      'uniform float u_time;',
+      'uniform vec2 u_mouse;',
+      'uniform vec2 u_resolution;',
+      'out vec4 fragColor;',
+      'vec2 hash2(vec2 p){',
+      '  p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));',
+      '  return fract(sin(p) * 43758.5453);',
+      '}',
+      'void main(){',
+      '  float mn = min(u_resolution.x, u_resolution.y);',
+      '  vec2 p = gl_FragCoord.xy / mn * 5.5;',
+      '  vec2 mpt = u_mouse * u_resolution / mn * 5.5;',
+      '  vec2 n = floor(p), f = fract(p);',
+      '  vec2 mg = vec2(0.0), mr = vec2(0.0), mid = vec2(0.0);',
+      '  float md = 8.0;',
+      '  for (int j = -1; j <= 1; j++)',
+      '  for (int i = -1; i <= 1; i++){',
+      '    vec2 g = vec2(float(i), float(j));',
+      '    vec2 id = n + g;',
+      '    vec2 o = 0.5 + 0.42 * sin(u_time * 0.8 + 6.28318 * hash2(id));',
+      '    vec2 r = g + o - f;',
+      '    float d = dot(r, r);',
+      '    if (d < md){ md = d; mr = r; mg = g; mid = id; }',
+      '  }',
+      '  float ed = 8.0;',
+      '  for (int j = -2; j <= 2; j++)',
+      '  for (int i = -2; i <= 2; i++){',
+      '    vec2 g = mg + vec2(float(i), float(j));',
+      '    vec2 id = n + g;',
+      '    vec2 o = 0.5 + 0.42 * sin(u_time * 0.8 + 6.28318 * hash2(id));',
+      '    vec2 r = g + o - f;',
+      '    if (dot(mr - r, mr - r) > 0.00001)',
+      '      ed = min(ed, dot(0.5 * (mr + r), normalize(r - mr)));',
+      '  }',
+      '  float idh = hash2(mid + 31.7).x;',
+      '  float pulse = 0.5 + 0.5 * sin(u_time * 1.6 + idh * 6.28318);',
+      '  vec3 col = vec3(0.022, 0.019, 0.042) + vec3(0.05, 0.045, 0.09) * pulse;',
+      '  float marked = step(0.88, idh);',
+      '  col = mix(col, vec3(0.56, 0.44, 1.0) * (0.25 + 0.45 * pulse), marked * 0.85);',
+      '  float edge = 1.0 - smoothstep(0.0, 0.045, ed);',
+      '  col += vec3(0.88, 0.86, 0.98) * edge;',
+      '  col += vec3(0.95) * (1.0 - smoothstep(0.02, 0.05, length(mr))) * 0.9;',
+      '  float dm = length(p - mpt);',
+      '  col += vec3(0.62, 0.5, 1.0) * edge * exp(-dm * 1.1) * 0.9;',
+      '  fragColor = vec4(col, 1.0);',
+      '}'
+    ].join('\n');
+    function prog(src) {
+      function sh(type, s2) {
+        var s = gl.createShader(type);
+        gl.shaderSource(s, s2);
+        gl.compileShader(s);
+        return gl.getShaderParameter(s, gl.COMPILE_STATUS) ? s : null;
+      }
+      var v = sh(gl.VERTEX_SHADER, VERT);
+      var f = sh(gl.FRAGMENT_SHADER, src);
+      if (!v || !f) return null;
+      var p = gl.createProgram();
+      gl.attachShader(p, v);
+      gl.attachShader(p, f);
+      gl.linkProgram(p);
+      if (!gl.getProgramParameter(p, gl.LINK_STATUS)) return null;
+      return { p: p, t: gl.getUniformLocation(p, 'u_time'), m: gl.getUniformLocation(p, 'u_mouse'), r: gl.getUniformLocation(p, 'u_resolution') };
+    }
+    var programs = { julia: prog(JULIA_FS), cells: prog(CELLS_FS) };
+    if (!programs.julia || !programs.cells) return null;
+    gl.viewport(0, 0, 512, 320);
+    return {
+      render: function (kind, t, mx, my) {
+        var P = programs[kind];
+        if (!P) return null;
+        gl.useProgram(P.p);
+        gl.uniform1f(P.t, t);
+        gl.uniform2f(P.m, mx, 1 - my);
+        gl.uniform2f(P.r, 512, 320);
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+        return cv2;
+      }
+    };
+  })();
+
   /* museum-local live painters (kinds ORBO_LAB doesn't know):
      the generative pieces, reborn as slow-breathing living works */
   var LOCAL_LIVE = {
-    /* MOSAIC — the voronoi cells breathe and answer the gaze.
-       cell ownership is computed once; frames only recolor. */
+    /* MOSAIC — FLUX's living voronoi: seeds orbit inside their cells,
+       true-width walls, walls ignite under the gaze. GPU when we have
+       it; the CPU recolor below is the fallback. */
     mosaic: function (s) {
+      if (GLP) {
+        var srcM = GLP.render('cells', s.t, s.mx === undefined ? 0.5 : s.mx, s.my === undefined ? 0.5 : s.my);
+        if (srcM) { s.ctx.drawImage(srcM, 0, 0, s.w, s.h); return; }
+      }
       var w = s.w, h = s.h, c = s.ctx;
       if (!s.cache) {
         var N = 46;
@@ -2901,10 +3183,14 @@
         c.stroke();
       }
     },
-    /* JULIA — the set is computed once; waves of light then FLOW
-       through its bands, colors slowly revolve, and the gaze ignites
-       the region it rests on. all per-frame work is cached lookups. */
+    /* JULIA — FLUX's orbit-trap julia: c orbits the seahorse valley so
+       the whole set MORPHS, filaments glow, the gaze nudges c. GPU when
+       we have it; the cached CPU recolor below is the fallback. */
     julia: function (s) {
+      if (GLP) {
+        var srcJ = GLP.render('julia', s.t, s.mx === undefined ? 0.5 : s.mx, s.my === undefined ? 0.5 : s.my);
+        if (srcJ) { s.ctx.drawImage(srcJ, 0, 0, s.w, s.h); return; }
+      }
       var w = s.w, h = s.h, c = s.ctx;
       if (!s.cache) {
         var cr = -0.79, ci2 = 0.15;
@@ -3184,6 +3470,7 @@
   function enterBrowse() {
     if (!activeScreen) return;
     browsing = true;
+    if (window.ORBO_SOUND) ORBO_SOUND.sfx('browse');
     document.body.classList.add('browsing');
     screenExit.hidden = false;
     if (locked && document.exitPointerLock) document.exitPointerLock();
@@ -3191,6 +3478,7 @@
   }
   function exitBrowse(relock) {
     browsing = false;
+    if (window.ORBO_SOUND) ORBO_SOUND.sfx('browseExit');
     document.body.classList.remove('browsing');
     screenExit.hidden = true;
     hintWrap.classList.remove('show');
@@ -3306,9 +3594,14 @@
       billboards[i].lookAt(pos.x, billboards[i].position.y, pos.z);
     }
 
-    if (dust && !reduced) {
-      dust.rotation.y += dt * 0.004;
-      dust.position.y = Math.sin(t * 0.16) * 0.05;
+    if (!reduced) {
+      for (var fg = 0; fg < fogLayers.length; fg++) {
+        var F = fogLayers[fg];
+        F.tex.offset.x += F.sx * dt * 60 * 0.016;
+        F.tex.offset.y += F.sy * dt * 60 * 0.016;
+        F.mesh.material.opacity = F.base + Math.sin(t * 0.4 + fg * 2.1) * F.base * 0.35;
+      }
+      if (doorGlowMat) doorGlowMat.opacity = 0.45 + Math.sin(t * 1.1) * 0.18;
     }
 
     pickTick++;

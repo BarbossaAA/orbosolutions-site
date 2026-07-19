@@ -221,6 +221,9 @@
     transition: border-color 0.3s, color 0.3s;
   }
   .hud-chip:hover { border-color: var(--g-accent); color: var(--g-accent); }
+  #audioChip .ac-on { opacity: 0.25; transition: opacity 0.3s; }
+  #audioChip[aria-pressed="true"] .ac-on { opacity: 1; }
+  #audioChip[aria-pressed="true"] { color: var(--g-accent); border-color: var(--g-accent); }
   .hud-brand {
     font-weight: 700;
     letter-spacing: 0.14em;
@@ -428,10 +431,15 @@ if ('ontouchstart' in window && matchMedia('(pointer: coarse)').matches) documen
 <!-- HUD -->
 <div class="hud" id="hud" aria-hidden="true">
   <div class="hud-top">
-    <a class="hud-chip" href="work.html">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg>
-      יציאה
-    </a>
+    <div style="display:flex; gap:10px">
+      <a class="hud-chip" href="work.html">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5.4"/><path d="M11.4 6l-6 6 6 6"/></svg>
+        יציאה
+      </a>
+      <button class="hud-chip" id="audioChip" aria-pressed="false" aria-label="מוזיקת רקע">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11.5 5.5 7 9H3.8v6H7l4.5 3.5z"/><path class="ac-on" d="M14.8 9.4a4 4 0 0 1 0 5.2"/><path class="ac-on" d="M17.4 7a7.4 7.4 0 0 1 0 10"/></svg>
+      </button>
+    </div>
     <span class="hud-brand">ORBO<i>·</i>GALLERY</span>
   </div>
   <div class="crosshair" id="crosshair"></div>
@@ -512,6 +520,7 @@ if ('ontouchstart' in window && matchMedia('(pointer: coarse)').matches) documen
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script src="assets/js/gallery-audio.js"></script>
 <script src="assets/js/work-gl.js"></script>
 <script src="assets/js/gallery.js"></script>
 </body>
