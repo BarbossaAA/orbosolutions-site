@@ -386,12 +386,26 @@
     return t;
   }
 
-  /* gallery card: warm white, ink text, bronze pin line, and since v9 a
-     bronze station numeral + a "מדגים" line that says what the piece proves */
+  /* museum label: a wide warm-white card that hangs UNDER each piece —
+     bronze station numeral, title, wing line, what it proves, and a
+     short curator's description. under the art there is always room,
+     so no label can ever be swallowed by a neighboring panel again. */
   function plaqueTexture(art) {
-    var W = 512, H = 384;
+    var W = 768, H = 396;
     var c = ctx2d(W, H);
     var accent = art.accent || '#5B4CF5';
+    var wrap = function (text, maxW, font) {
+      c.font = font;
+      var words = text.split(' ');
+      var lines = [], cur = '';
+      for (var i = 0; i < words.length; i++) {
+        var t2 = cur ? cur + ' ' + words[i] : words[i];
+        if (c.measureText(t2).width > maxW && cur) { lines.push(cur); cur = words[i]; }
+        else cur = t2;
+      }
+      if (cur) lines.push(cur);
+      return lines.slice(0, 2);
+    };
     var redraw = function () {
       c.fillStyle = '#FBFAF6';
       c.fillRect(0, 0, W, H);
@@ -399,37 +413,44 @@
       c.lineWidth = 2;
       c.strokeRect(4, 4, W - 8, H - 8);
       c.fillStyle = '#9a7b52';
-      c.fillRect(W - 14, 18, 4, H - 36);
+      c.fillRect(W - 12, 18, 4, H - 36);
       if (art.num) {
-        /* the station numeral, bronze, with its little underline */
         c.textAlign = 'left';
         c.direction = 'ltr';
-        var ng = c.createLinearGradient(0, 20, 0, 96);
+        var ng = c.createLinearGradient(0, 40, 0, 130);
         ng.addColorStop(0, '#c9a05c');
         ng.addColorStop(1, '#9a7b52');
         c.fillStyle = ng;
-        c.font = '800 74px ' + FONT;
-        c.fillText(art.num, 36, 96);
+        c.font = '800 86px ' + FONT;
+        c.fillText(art.num, 42, 130);
         c.fillStyle = 'rgba(154, 123, 82, 0.55)';
-        c.fillRect(38, 112, 96, 3);
-        c.textAlign = 'right';
-        c.direction = 'rtl';
-        c.fillStyle = 'rgba(90, 86, 104, 0.85)';
-        c.font = '500 25px ' + FONT;
-        c.fillText('תחנה', W - 42, 66);
+        c.fillRect(44, 152, 110, 3);
+        c.fillStyle = 'rgba(90, 86, 104, 0.8)';
+        c.font = '500 24px ' + FONT;
+        c.fillText('תחנה', 46, 192);
       }
+      var RX = W - 44, TXW = W - 260;
       c.textAlign = 'right';
       c.direction = 'rtl';
       c.fillStyle = '#17141F';
-      c.font = '700 46px ' + FONT;
-      c.fillText(art.title, W - 42, 196, W - 80);
+      c.font = '700 48px ' + FONT;
+      c.fillText(art.title, RX, 84, TXW);
       c.fillStyle = accent;
-      c.font = '500 29px ' + FONT;
-      c.fillText(art.tag, W - 42, 252, W - 80);
+      c.font = '500 27px ' + FONT;
+      c.fillText(art.tag, RX, 134, TXW);
       if (art.demo) {
         c.fillStyle = '#6b657a';
-        c.font = '400 25px ' + FONT;
-        c.fillText(art.demo, W - 42, 316, W - 80);
+        c.font = '500 24px ' + FONT;
+        c.fillText(art.demo, RX, 186, TXW);
+      }
+      if (art.desc) {
+        c.fillStyle = 'rgba(154, 123, 82, 0.4)';
+        c.fillRect(W - 44 - 150, 216, 150, 2);
+        c.fillStyle = '#4a4658';
+        var lines = wrap(art.desc, W - 110, '400 26px ' + FONT);
+        for (var li = 0; li < lines.length; li++) {
+          c.fillText(lines[li], RX, 268 + li * 42, W - 100);
+        }
       }
     };
     redraw();
@@ -530,7 +551,7 @@
     c.fillStyle = '#0e0a18';
     c.fillRect(0, 0, W, H);
     var cols = ['rgba(157, 140, 255,', 'rgba(255, 176, 128,', 'rgba(120, 170, 255,', 'rgba(201, 175, 255,'];
-    for (var p = 0; p < 300; p++) {
+    for (var p = 0; p < 340; p++) {
       var x = Math.random() * W, y = Math.random() * H;
       var col = cols[p % 4];
       c.beginPath();
@@ -541,8 +562,10 @@
         y += Math.sin(a) * 3;
         c.lineTo(x, y);
       }
-      c.strokeStyle = col + (0.05 + Math.random() * 0.1) + ')';
-      c.lineWidth = 0.8;
+      /* bright enough to read across the hall — the piece used to vanish
+         into the linen from a few meters away */
+      c.strokeStyle = col + (0.14 + Math.random() * 0.16) + ')';
+      c.lineWidth = 1.1;
       c.stroke();
     }
   }
@@ -1891,7 +1914,7 @@
     for (i = 0; i < 40; i++) c.fillRect((i * 173.3) % 1024, (i * 97.7) % 640, 1.3, 1.3);
 
     /* isometric mapping: plate space (u,v) -> screen; e = elevation */
-    var OX = 360, OY = 150, AU = 0.8, AV = 0.38;
+    var OX = 360, OY = 136, AU = 0.8, AV = 0.38;
     function P(u, v, e) { return [OX + (u - v) * AU, OY + (u + v) * AV - e]; }
     var PW = 300, PD = 190, TH = 14;   /* plate footprint + thickness */
 
@@ -2045,6 +2068,204 @@
     anatomy: drawCaseAnatomy
   };
 
+  /* ---------- the displays LIVE ----------
+     every case display carries a transparent overlay plane where its
+     dynamic life plays: a chart cursor sweeping real data, pipeline
+     dots flowing, thrusters flickering — the screens read as working
+     products, not stills. plus one pulsing, unmissable CTA each. */
+  var liveDisplays = [];
+  function rrp(c, x, y, w, h, r) {
+    c.beginPath();
+    if (c.roundRect) c.roundRect(x, y, w, h, r); else c.rect(x, y, w, h);
+  }
+  var DISP_CTA = {
+    bisomna: [500, 596], orbo: [512, 606], crm: [512, 600],
+    ai: [512, 484], game: [230, 600], anatomy: [210, 600]
+  };
+  function ctaPulse(c, x, y, accent, t) {
+    var text = 'רוצים כזה? דברו איתנו';
+    c.font = '700 30px ' + FONT;
+    c.direction = 'rtl';
+    c.textBaseline = 'middle';
+    var w = c.measureText(text).width + 104, h = 58;
+    var pulse = 0.5 + 0.5 * Math.sin(t * 2.2);
+    c.save();
+    c.shadowColor = accent;
+    c.shadowBlur = 16 + pulse * 24;
+    c.fillStyle = accent;
+    rrp(c, x - w / 2, y - h / 2, w, h, 29);
+    c.fill();
+    c.restore();
+    c.fillStyle = 'rgba(255, 255, 255, ' + (0.22 + pulse * 0.18).toFixed(3) + ')';
+    rrp(c, x - w / 2 + 12, y - h / 2 + 5, w - 24, 2, 1);
+    c.fill();
+    c.fillStyle = '#0e0c18';
+    c.textAlign = 'center';
+    c.fillText(text, x + 17, y + 2);
+    var ax = x - w / 2 + 24 - pulse * 5;
+    c.strokeStyle = '#0e0c18';
+    c.lineWidth = 3.5;
+    c.lineCap = 'round';
+    c.beginPath();
+    c.moveTo(ax + 17, y); c.lineTo(ax, y);
+    c.moveTo(ax + 8, y - 7); c.lineTo(ax, y); c.lineTo(ax + 8, y + 7);
+    c.stroke();
+    c.lineCap = 'butt';
+    c.textBaseline = 'alphabetic';
+  }
+  var DISP_ANIM = {
+    crm: function (c, t) {
+      /* the revenue chart is being read RIGHT NOW: a scanline + cursor
+         dot ride the teal line across real plot coordinates */
+      var xs = [396, 493.6, 591.2, 688.8, 786.4, 884];
+      var vt = [40, 56, 48, 64, 72, 86];
+      var ph = (t * 0.14) % 1;
+      var fx = 396 + ph * 488;
+      var seg = Math.min(4, Math.floor(ph * 5));
+      var k = ph * 5 - seg;
+      var fy = 352 - (vt[seg] + (vt[seg + 1] - vt[seg]) * k) * 1.35;
+      c.fillStyle = 'rgba(15, 168, 140, 0.08)';
+      c.fillRect(fx - 1, 232, 2, 120);
+      c.save();
+      c.shadowColor = '#3AD0AF';
+      c.shadowBlur = 14;
+      c.fillStyle = '#3AD0AF';
+      c.beginPath(); c.arc(fx, fy, 5, 0, 6.2832); c.fill();
+      c.restore();
+      /* a live notification blinking by the avatar */
+      c.fillStyle = 'rgba(58, 208, 175, ' + (0.35 + 0.55 * Math.max(0, Math.sin(t * 3.1))).toFixed(3) + ')';
+      c.beginPath(); c.arc(58, 28, 5, 0, 6.2832); c.fill();
+      /* the table is being worked: a row highlight steps through */
+      var row = Math.floor(t * 0.55) % 4;
+      c.fillStyle = 'rgba(15, 168, 140, 0.07)';
+      rrp(c, 40, 470 + row * 35, 850, 33, 6);
+      c.fill();
+      c.fillStyle = 'rgba(58, 208, 175, 0.7)';
+      c.fillRect(886, 472 + row * 35, 3, 29);
+      /* one KPI refreshes at a time — soft pulse line under it */
+      var kpi = Math.floor(t * 0.8) % 4;
+      c.fillStyle = 'rgba(58, 208, 175, ' + (0.2 + 0.3 * Math.sin(t * 4)).toFixed(3) + ')';
+      rrp(c, 50 + kpi * 224, 158, 160, 3, 1.5);
+      c.fill();
+    },
+    ai: function (c, t) {
+      /* work flows right-to-left through the pipeline, card by card */
+      var segs = [[779, 721], [541, 483], [303, 245]];
+      c.save();
+      c.shadowColor = '#9D8CFF';
+      c.shadowBlur = 10;
+      for (var s = 0; s < 3; s++) {
+        for (var d = 0; d < 3; d++) {
+          var ph = (t * 0.45 + d * 0.34 + s * 0.13) % 1;
+          var x2 = segs[s][0] - ph * (segs[s][0] - segs[s][1]);
+          c.fillStyle = 'rgba(157, 140, 255, ' + (0.85 * Math.sin(ph * Math.PI)).toFixed(3) + ')';
+          c.beginPath(); c.arc(x2, 320, 3.6, 0, 6.2832); c.fill();
+        }
+      }
+      c.restore();
+      var xs = [779, 541, 303, 65];
+      var act = Math.floor(t * 0.7) % 4;
+      c.strokeStyle = 'rgba(108, 92, 255, ' + (0.3 + 0.28 * Math.sin(t * 3)).toFixed(3) + ')';
+      c.lineWidth = 2.5;
+      rrp(c, xs[act] - 3, 197, 186, 246, 16);
+      c.stroke();
+    },
+    game: function (c, t) {
+      /* thrusters flicker, sparks drift, the try-me button beckons */
+      var fl = 0.2 + 0.16 * Math.abs(Math.sin(t * 11) + Math.sin(t * 17) * 0.5);
+      [[233, 261, 213, 281], [349, 377, 329, 397]].forEach(function (T2) {
+        var g2 = c.createLinearGradient(0, 374, 0, 452);
+        g2.addColorStop(0, 'rgba(255, 163, 102, ' + fl.toFixed(3) + ')');
+        g2.addColorStop(1, 'rgba(232, 114, 46, 0)');
+        c.fillStyle = g2;
+        c.beginPath();
+        c.moveTo(T2[0], 374); c.lineTo(T2[1], 374);
+        c.lineTo(T2[3], 452); c.lineTo(T2[2], 452);
+        c.closePath(); c.fill();
+      });
+      for (var i = 0; i < 5; i++) {
+        var a = t * (0.6 + i * 0.13) + i * 1.9;
+        c.fillStyle = 'rgba(255, 200, 150, ' + (0.3 + 0.3 * Math.sin(t * 5 + i)).toFixed(3) + ')';
+        c.beginPath();
+        c.arc(305 + Math.cos(a) * (95 + i * 9), 315 + Math.sin(a) * (46 + i * 5), 1.8, 0, 6.2832);
+        c.fill();
+      }
+      var p = (t * 0.9) % 1;
+      c.strokeStyle = 'rgba(255, 163, 102, ' + (0.55 * (1 - p)).toFixed(3) + ')';
+      c.lineWidth = 2.5;
+      rrp(c, 584 - p * 16, 492 - p * 12, 390 + p * 32, 64 + p * 24, 18 + p * 12);
+      c.stroke();
+    },
+    bisomna: function (c, t) {
+      /* the site scrolls: chevron breathes, a video progress line runs */
+      var bob = Math.sin(t * 2.6) * 5;
+      c.strokeStyle = 'rgba(31, 143, 216, ' + (0.5 + 0.3 * Math.sin(t * 2.6 + 1)).toFixed(3) + ')';
+      c.lineWidth = 2.5;
+      c.lineCap = 'round';
+      c.beginPath();
+      c.moveTo(347, 446 + bob); c.lineTo(354, 453 + bob); c.lineTo(361, 446 + bob);
+      c.stroke();
+      c.lineCap = 'butt';
+      var vp = (t * 0.18) % 1;
+      c.fillStyle = 'rgba(31, 143, 216, 0.55)';
+      c.fillRect(44, 542, 620 * vp, 3);
+      /* phone sheen sweeping every few seconds */
+      var sp = (t * 0.22) % 1;
+      if (sp < 0.35) {
+        var sx2 = 730 + (sp / 0.35) * 184;
+        var g3 = c.createLinearGradient(sx2 - 26, 0, sx2 + 26, 0);
+        g3.addColorStop(0, 'rgba(255, 255, 255, 0)');
+        g3.addColorStop(0.5, 'rgba(255, 255, 255, 0.10)');
+        g3.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        c.fillStyle = g3;
+        c.fillRect(sx2 - 26, 140, 52, 366);
+      }
+    },
+    orbo: function (c, t) {
+      /* the galaxy breathes and twinkles; the scroll rail advances */
+      var g4 = c.createRadialGradient(560, 330, 0, 560, 330, 62);
+      g4.addColorStop(0, 'rgba(201, 175, 255, ' + (0.18 + 0.14 * Math.sin(t * 1.4)).toFixed(3) + ')');
+      g4.addColorStop(1, 'rgba(201, 175, 255, 0)');
+      c.fillStyle = g4;
+      c.fillRect(498, 268, 124, 124);
+      for (var i = 0; i < 8; i++) {
+        var tx2 = 190 + (i * 173.7) % 640;
+        var ty = 150 + (i * 97.3) % 380;
+        c.fillStyle = 'rgba(230, 225, 255, ' + Math.max(0, Math.sin(t * 1.8 + i * 2.3) * 0.8).toFixed(3) + ')';
+        c.fillRect(tx2, ty, 2.4, 2.4);
+      }
+      var rp = (t * 0.1) % 1;
+      c.fillStyle = 'rgba(157, 140, 255, 0.8)';
+      c.beginPath(); c.arc(132, 150 + rp * 370, 3.4, 0, 6.2832); c.fill();
+    },
+    anatomy: function (c, t) {
+      /* a build-pulse travels down the spine; each layer answers */
+      var ph = (t * 0.32) % 1;
+      var sy = 202 + ph * 400;
+      c.save();
+      c.shadowColor = '#1F8FD8';
+      c.shadowBlur = 12;
+      c.fillStyle = 'rgba(31, 143, 216, ' + (0.9 * Math.sin(ph * Math.PI)).toFixed(3) + ')';
+      c.beginPath(); c.arc(600, sy, 4, 0, 6.2832); c.fill();
+      c.restore();
+      var ys = [267, 373, 479, 585];
+      var act = Math.floor(t * 0.7) % 4;
+      c.strokeStyle = 'rgba(31, 143, 216, ' + (0.35 + 0.3 * Math.sin(t * 3)).toFixed(3) + ')';
+      c.lineWidth = 2;
+      c.beginPath(); c.arc(854, ys[act], 17, 0, 6.2832); c.stroke();
+    }
+  };
+  function paintDisplayOverlay(L, adv) {
+    L.t += adv;
+    var c = L.ctx;
+    c.clearRect(0, 0, 1024, 640);
+    c.textAlign = 'left';
+    c.direction = 'ltr';
+    if (DISP_ANIM[L.key]) DISP_ANIM[L.key](c, L.t);
+    ctaPulse(c, DISP_CTA[L.key][0], DISP_CTA[L.key][1], L.accent, L.t);
+    L.tex.needsUpdate = true;
+  }
+
   /* the collection, curated as a walk: stations 01-14 counterclockwise
      from the door. each straight-wall zone belongs to the pedestal wing
      it faces — websites NW, systems NE, AI SW, games SE — and carries
@@ -2052,39 +2273,39 @@
      1024x640 by the display functions above. */
   var ART = [
     /* near curve, left of the door — the walk begins */
-    { id: 'prism', num: '01', px: nearL.px, pz: nearL.pz, ry: nearL.ry, live: 'prism', title: 'PRISM', tag: 'ציור חי · המעבדה', demo: 'מדגים: תלת־ממד חי בדפדפן', accent: '#7A5CFF', link: 'lab/03-prism-r3f/',
+    { id: 'prism', num: '01', desc: 'שבירת אור חיה על גאומטריה מסתובבת, מצוירת בזמן אמת', px: nearL.px, pz: nearL.pz, ry: nearL.ry, live: 'prism', title: 'PRISM', tag: 'ציור חי · המעבדה', demo: 'מדגים: תלת־ממד חי בדפדפן', accent: '#7A5CFF', link: 'lab/03-prism-r3f/',
       body: 'אלומת אור נשברת דרך גאומטריה ומתפצלת לספקטרום — נצבע מחדש עשרות פעמים בשנייה, ממש עכשיו. ככה נראה תלת־ממד שרץ בדפדפן בלי להתקין כלום; בגרסה המלאה מפסלים כרום, זכוכית, הולוגרמה וחימר — חיים.' },
-    { id: 'aurora', num: '02', px: nearLL.px, pz: nearLL.pz, ry: nearLL.ry, live: 'aurora', title: 'AURORA', tag: 'ציור חי · המעבדה', demo: 'מדגים: אנימציה ותנועה באתר', accent: '#86B32B', link: 'lab/01-aurora-gsap/',
+    { id: 'aurora', num: '02', desc: 'סרטי אור נצבעים על הקנבס הזה עשרות פעמים בשנייה', px: nearLL.px, pz: nearLL.pz, ry: nearLL.ry, live: 'aurora', title: 'AURORA', tag: 'ציור חי · המעבדה', demo: 'מדגים: אנימציה ותנועה באתר', accent: '#86B32B', link: 'lab/01-aurora-gsap/',
       body: 'סרטי אור שנעים בזרם, נצבעים בזמן אמת על הקיר הזה. בגרסה המלאה — אתר סטודיו שלם שכולו כוריאוגרפיית גלילה. תנועה כזאת אפשר לשלב גם באתר שלכם, בלי קובצי וידאו כבדים.' },
     /* left straight wall — AI wing (south), websites wing (north) */
-    { id: 'ai', num: '03', px: -(ROOM.hw - 0.06), pz: 4.6, ry: Math.PI / 2, disp: 'ai', wide: true, title: 'העוזר שלא ישן', tag: 'תצוגת יכולת · AI', demo: 'מדגים: AI ואוטומציה לעסק', accent: '#6C5CFF', contact: true,
+    { id: 'ai', num: '03', desc: 'מסלול של פנייה עסקית: מיון חכם, טיוטה, ואישור אנושי בסוף', px: -(ROOM.hw - 0.06), pz: 4.6, ry: Math.PI / 2, disp: 'ai', wide: true, title: 'העוזר שלא ישן', tag: 'תצוגת יכולת · AI', demo: 'מדגים: AI ואוטומציה לעסק', accent: '#6C5CFF', contact: true,
       body: 'ככה נראית אוטומציה חכמה בעסק אמיתי: פנייה נכנסת, ממוינת לפי תוכן, מקבלת טיוטת מענה — ואדם מאשר בסוף. המערכת ערה כל הלילה; ההחלטות נשארות אצלכם. רוצים תהליך כזה אצלכם? דברו איתנו.' },
-    { id: 'anatomy', num: '04', px: -(ROOM.hw - 0.06), pz: 0, ry: Math.PI / 2, disp: 'anatomy', wide: true, title: 'אנטומיה של אתר', tag: 'תצוגת יכולת · אתרים', demo: 'מדגים: איך נבנה אתר אצלנו', accent: '#1F8FD8', link: 'services.html', linkText: 'מה עוד אנחנו בונים',
+    { id: 'anatomy', num: '04', desc: 'ארבע השכבות שמהן בנוי כל אתר שיוצא מהסטודיו', px: -(ROOM.hw - 0.06), pz: 0, ry: Math.PI / 2, disp: 'anatomy', wide: true, title: 'אנטומיה של אתר', tag: 'תצוגת יכולת · אתרים', demo: 'מדגים: איך נבנה אתר אצלנו', accent: '#1F8FD8', link: 'services.html', linkText: 'מה עוד אנחנו בונים',
       body: 'ממה עשוי אתר שמרגיש כמו מקום? ארבע שכבות: תוכן שנכתב ללקוח, עיצוב עם שפה אחת, תנועה שמפיחה חיים, וקוד שמחזיק הכול יציב ומהיר. אצלנו כולן נבנות באותו שולחן — ולכן הן נפגשות מדויק.' },
-    { id: 'bisomna', num: '05', px: -(ROOM.hw - 0.06), pz: -4.6, ry: Math.PI / 2, disp: 'bisomna', wide: true, title: 'BISOMNA', tag: 'הקייס המרכזי · באוויר', demo: 'מדגים: אתר תדמית ומסחר', accent: '#1F8FD8', link: 'https://bisomna.com', linkText: 'לאתר החי',
+    { id: 'bisomna', num: '05', desc: 'אתר המסחר של מיזם שינה ישראלי — הקייס המרכזי שלנו', px: -(ROOM.hw - 0.06), pz: -4.6, ry: Math.PI / 2, disp: 'bisomna', wide: true, title: 'BISOMNA', tag: 'הקייס המרכזי · באוויר', demo: 'מדגים: אתר תדמית ומסחר', accent: '#1F8FD8', link: 'https://bisomna.com', linkText: 'לאתר החי',
       body: 'הקייס המרכזי שלנו: מיזם שינה ישראלי שנכנס עם רעיון ויצא עם בית שלם — שישה־עשר עמודים, וידאו שנע עם הגלילה, תצוגת מוצר שנפתחת לשכבות וחנות. והכול טס גם בנייד. רוצים סטנדרט כזה? דברו איתנו.' },
     /* far curve: our own home, two living paintings, the finale, a mosaic */
-    { id: 'orbo', num: '06', px: farLL.px, pz: farLL.pz, ry: farLL.ry, disp: 'orbo', title: 'orbosolutions.com', tag: 'הבית שלנו', demo: 'מדגים: אתר כחוויית מסע', accent: '#6C5CFF', link: 'index.html', self: true,
+    { id: 'orbo', num: '06', desc: 'דף הבית שלנו: מסע חלקיקים שנבנה כולו בקוד', px: farLL.px, pz: farLL.pz, ry: farLL.ry, disp: 'orbo', title: 'orbosolutions.com', tag: 'הבית שלנו', demo: 'מדגים: אתר כחוויית מסע', accent: '#6C5CFF', link: 'index.html', self: true,
       body: 'דף הבית שלנו הוא מסע: גוללים, והמצלמה עפה דרך עולם חלקיקים שמתגבש לצורות — בלי אף קובץ גרפיקה. כשהבית שלך בנוי ככה, הוא גם תיק העבודות.' },
-    { id: 'nebula', num: '07', px: farL.px, pz: farL.pz, ry: farL.ry, live: 'nebula', title: 'NEBULA', tag: 'ציור חי · המעבדה', demo: 'מדגים: גרפיקה בזמן אמת', accent: '#1F8FD8', link: 'lab/02-nebula-three/',
+    { id: 'nebula', num: '07', desc: 'גלקסיה פרוצדורלית — שישים אלף שמשות במסע גלילה', px: farL.px, pz: farL.pz, ry: farL.ry, live: 'nebula', title: 'NEBULA', tag: 'ציור חי · המעבדה', demo: 'מדגים: גרפיקה בזמן אמת', accent: '#1F8FD8', link: 'lab/02-nebula-three/',
       body: 'גלקסיה שמסתחררת לאט, מחושבת חיה מול עיניכם. בגרסה המלאה — מסע גלילה בין שישים אלף שמשות, עד לב הגלקסיה.' },
     { id: 'star', px: 0, pz: -(ROOM.straight + CURVE_R), ry: 0, title: 'ORBO', tag: 'הסטודיו', style: 'dark', big: true, sub: 'רעיונות יש לכולם. אנחנו הופכים אותם למציאות.', accent: '#6C5CFF',
       body: 'תודה שביקרתם. אם משהו כאן הדליק לכם רעיון — נשמח לשמוע עליו.', contact: true },
-    { id: 'terra', num: '08', px: farR.px, pz: farR.pz, ry: farR.ry, live: 'terra', title: 'TERRA', tag: 'ציור חי · המעבדה', demo: 'מדגים: עולמות מקוד טהור', accent: '#C9A05C', link: 'lab/05-terra-webgl/',
+    { id: 'terra', num: '08', desc: 'נופים מחושבים מרעש טהור: חול, טחב, חימר, קרח ואבן', px: farR.px, pz: farR.pz, ry: farR.ry, live: 'terra', title: 'TERRA', tag: 'ציור חי · המעבדה', demo: 'מדגים: עולמות מקוד טהור', accent: '#C9A05C', link: 'lab/05-terra-webgl/',
       body: 'רכסי הרים שמחושבים מרעש מתמטי טהור, תחת שמש נמוכה. בגרסה המלאה — חמישה מחקרי נוף: חול, טחב, חימר, קרח ואבן.' },
-    { id: 'mosaic', num: '09', px: farRR.px, pz: farRR.pz, ry: farRR.ry, gen: mosaicArt, title: 'MOSAIC', tag: 'אמנות גנרטיבית', demo: 'מדגים: אלגוריתם כמעצב', accent: '#6C5CFF',
+    { id: 'mosaic', num: '09', desc: 'פסיפס וורונוי שנולד מחדש בכל כניסה למוזיאון', px: farRR.px, pz: farRR.pz, ry: farRR.ry, gen: mosaicArt, title: 'MOSAIC', tag: 'אמנות גנרטיבית', demo: 'מדגים: אלגוריתם כמעצב', accent: '#6C5CFF',
       body: 'פסיפס שנבנה מחלוקת המרחב בין ארבעים ושש נקודות אקראיות. כל כניסה למוזיאון מייצרת פסיפס שלא היה קיים מעולם.' },
     /* right straight wall — systems wing (north), games wing (south) */
-    { id: 'crm', num: '10', px: ROOM.hw - 0.06, pz: -4.6, ry: -Math.PI / 2, disp: 'crm', wide: true, title: 'חדר הבקרה', tag: 'תצוגת יכולת · מערכות', demo: 'מדגים: מערכות ניהול ו־BI', accent: '#0FA88C', contact: true,
+    { id: 'crm', num: '10', desc: 'לוח בקרה עסקי חי — כך נראית מערכת שנתפרת לעסק', px: ROOM.hw - 0.06, pz: -4.6, ry: -Math.PI / 2, disp: 'crm', wide: true, title: 'חדר הבקרה', tag: 'תצוגת יכולת · מערכות', demo: 'מדגים: מערכות ניהול ו־BI', accent: '#0FA88C', contact: true,
       body: 'חדר הבקרה של עסק: לוח מחוונים שמראה בדיוק מה שחשוב הבוקר, לקוחות, גרפים וטבלאות שמתעדכנים לבד. בלי אקסלים אבודים ובלי ״רגע, אבדוק ואחזור אליך״. כל עסק מקבל חדר בקרה משלו — דברו איתנו.' },
-    { id: 'genesis', num: '11', px: ROOM.hw - 0.06, pz: 0, ry: -Math.PI / 2, gen: genesisArt, title: 'GENESIS', tag: 'אמנות גנרטיבית', demo: 'מדגים: אמנות מקוד', accent: '#0FA88C',
+    { id: 'genesis', num: '11', desc: 'שלוש מאות קווים בשדה זרימה מתמטי, חושבו בכניסתכם', px: ROOM.hw - 0.06, pz: 0, ry: -Math.PI / 2, gen: genesisArt, title: 'GENESIS', tag: 'אמנות גנרטיבית', demo: 'מדגים: אמנות מקוד', accent: '#0FA88C',
       body: 'שלוש מאות קווים ששוחררו לשדה זרימה מתמטי. אף אחד לא צייר את היצירה הזאת — היא חושבה, קו אחרי קו, ברגע שנכנסתם.' },
-    { id: 'game', num: '12', px: ROOM.hw - 0.06, pz: 4.6, ry: -Math.PI / 2, disp: 'game', wide: true, title: 'המגרש', tag: 'תצוגת יכולת · משחקים', demo: 'מדגים: משחקים וקונפיגורטורים', accent: '#E8722E', contact: true,
+    { id: 'game', num: '12', desc: 'קונפיגורטור אינטראקטיבי — מוצר שמרכיבים תוך כדי משחק', px: ROOM.hw - 0.06, pz: 4.6, ry: -Math.PI / 2, disp: 'game', wide: true, title: 'המגרש', tag: 'תצוגת יכולת · משחקים', demo: 'מדגים: משחקים וקונפיגורטורים', accent: '#E8722E', contact: true,
       body: 'הדרך הכי מהירה להבין מוצר היא לשחק בו: קונפיגורטור שמרכיב מוצר בלייב, סימולטור שמלמד תהליך, משחק שמשאיר מבקרים עוד דקה. אינטראקציה הופכת סקרנות להחלטה — בואו נבנה אחת לשלכם.' },
     /* near curve, right of the door — the walk ends */
-    { id: 'flux', num: '13', px: nearRR.px, pz: nearRR.pz, ry: nearRR.ry, live: 'flux', title: 'FLUX', tag: 'ציור חי · המעבדה', demo: 'מדגים: שיידרים על ה־GPU', accent: '#E0402F', link: 'lab/04-flux-shaders/',
+    { id: 'flux', num: '13', desc: 'שמונה תוכניות שיידר, ביניהן נוזל שנצבע עם הסמן', px: nearRR.px, pz: nearRR.pz, ry: nearRR.ry, live: 'flux', title: 'FLUX', tag: 'ציור חי · המעבדה', demo: 'מדגים: שיידרים על ה־GPU', accent: '#E0402F', link: 'lab/04-flux-shaders/',
       body: 'שדות צבע שזורמים לפי כללים מתמטיים, ישר מול המעבד הגרפי. בגרסה המלאה — שמונה יצירות, כולל נוזל שמציירים בו עם הסמן.' },
-    { id: 'fractal', num: '14', px: nearR.px, pz: nearR.pz, ry: nearR.ry, gen: fractalArt, title: 'JULIA', tag: 'אמנות גנרטיבית', demo: 'מדגים: מתמטיקה חיה', accent: '#7A5CFF',
+    { id: 'fractal', num: '14', desc: 'קבוצת ז׳וליה: נוסחה אחת קצרה, אינסוף עולמות', px: nearR.px, pz: nearR.pz, ry: nearR.ry, gen: fractalArt, title: 'JULIA', tag: 'אמנות גנרטיבית', demo: 'מדגים: מתמטיקה חיה', accent: '#7A5CFF',
       body: 'קבוצת ז׳וליה — נוסחה אחת קצרה שמכילה אינסוף. חושבה פיקסל־פיקסל בכניסתכם. לפעמים הקסם הוא פשוט מתמטיקה עם טעם טוב.' }
   ];
 
@@ -2172,12 +2393,27 @@
       liveArts.push(liveState);
     }
 
+    /* case displays get their transparent life-layer on top */
+    if (art.disp && DISPLAYS[art.disp]) {
+      var ovC = ctx2d(512, 320);
+      ovC.scale(0.5, 0.5);
+      var ovTex = asTexture(ovC.canvas);
+      var ovPlane = new THREE.Mesh(
+        new THREE.PlaneGeometry(W, H),
+        new THREE.MeshBasicMaterial({ map: ovTex, transparent: true, depthWrite: false })
+      );
+      ovPlane.position.set(0, AY, off + 0.004);
+      group.add(ovPlane);
+      liveDisplays.push({ key: art.disp, ctx: ovC, tex: ovTex, plane: plane, accent: art.accent || '#6C5CFF', t: Math.random() * 20, _d: 99 });
+    }
+
     if (!art.big) {
       var plq = new THREE.Mesh(
-        new THREE.PlaneGeometry(0.56, 0.42),
+        new THREE.PlaneGeometry(0.66, 0.34),
         new THREE.MeshBasicMaterial({ map: plaqueTexture(art) })
       );
-      plq.position.set(W / 2 + 0.95, 1.42, 0.02);
+      /* under the artwork, on the linen — like a real museum mount card */
+      plq.position.set(0, art.wide ? 1.06 : 1.14, 0.062);
       group.add(plq);
     }
 
@@ -2571,6 +2807,7 @@
     g.drawImage(L.art.canvas, 0, 0);
     L.texture.needsUpdate = true;
   }
+  var liveIdle = 0;
   function paintLive(dt) {
     liveTick++;
     if (liveTick % 3) return;
@@ -2580,21 +2817,70 @@
     for (var i = 0; i < liveArts.length; i++) {
       var L = liveArts[i];
       L.plane.getWorldPosition(liveWp);
-      var d = liveWp.distanceTo(pos);
-      if (d > 10) continue;
+      L._d = liveWp.distanceTo(pos);
+      if (L._d > 12) continue;
       liveSphere.center.copy(liveWp);
       if (!liveFrustum.intersectsSphere(liveSphere)) continue;
-      if (d < d1) { d2 = d1; near2 = near1; d1 = d; near1 = L; }
-      else if (d < d2) { d2 = d; near2 = L; }
+      if (L._d < d1) { d2 = d1; near2 = near1; d1 = L._d; near1 = L; }
+      else if (L._d < d2) { d2 = L._d; near2 = L; }
     }
     /* dt*3 keeps on-canvas speed steady at the sparser paint rate */
     if (near1) paintOne(near1, dt * 3 * (1 + Math.max(0, 1 - d1 / 9) * 1.25));
     if (near2) paintOne(near2, dt * 3 * (1 + Math.max(0, 1 - d2 / 9) * 1.25));
+    /* one more painting refreshes in rotation every tick, so EVERY canvas
+       in the hall visibly lives (~4fps each) — a museum where nothing moves
+       is a museum of posters */
+    for (var k = 0; k < liveArts.length; k++) {
+      liveIdle = (liveIdle + 1) % liveArts.length;
+      var IL = liveArts[liveIdle];
+      if (IL !== near1 && IL !== near2 && IL._d < 26) {
+        paintOne(IL, dt * 3 * liveArts.length * 0.5);
+        break;
+      }
+    }
   }
-  /* first strokes for every living canvas, spread behind the overlay —
-     no piece is ever seen black */
+  /* warm-up: run each living canvas to a fully developed image behind the
+     entry overlay — FLUX needs dozens of frames to accumulate its trails,
+     the others settle in a few */
   liveArts.forEach(function (L, i) {
-    setTimeout(function () { paintOne(L, 0.001); }, 550 + i * 120);
+    setTimeout(function () {
+      var warm = L.kind === 'flux' ? 46 : 6;
+      for (var w = 0; w < warm; w++) paintOne(L, 0.05);
+    }, 450 + i * 130);
+  });
+
+  /* ---------- living display screens tick ----------
+     same rationing as the paintings, on the OTHER third of frames:
+     the two nearest on-screen displays run full rate, one more
+     refreshes in rotation so every screen in the hall stays alive */
+  var dispIdle = 0;
+  function paintDisplays(dt) {
+    if (liveTick % 3 !== 1) return;
+    var near1 = null, near2 = null, d1 = 1e9, d2 = 1e9;
+    for (var i = 0; i < liveDisplays.length; i++) {
+      var L = liveDisplays[i];
+      L.plane.getWorldPosition(liveWp);
+      L._d = liveWp.distanceTo(pos);
+      if (L._d > 12) continue;
+      liveSphere.center.copy(liveWp);
+      if (!liveFrustum.intersectsSphere(liveSphere)) continue;
+      if (L._d < d1) { d2 = d1; near2 = near1; d1 = L._d; near1 = L; }
+      else if (L._d < d2) { d2 = L._d; near2 = L; }
+    }
+    if (near1) paintDisplayOverlay(near1, dt * 3);
+    if (near2) paintDisplayOverlay(near2, dt * 3);
+    for (var k = 0; k < liveDisplays.length; k++) {
+      dispIdle = (dispIdle + 1) % liveDisplays.length;
+      var IL = liveDisplays[dispIdle];
+      if (IL !== near1 && IL !== near2 && IL._d < 26) {
+        paintDisplayOverlay(IL, dt * 3 * liveDisplays.length * 0.5);
+        break;
+      }
+    }
+  }
+  /* first frame for every overlay so the CTA is there from the start */
+  liveDisplays.forEach(function (L, i) {
+    setTimeout(function () { paintDisplayOverlay(L, 0.001); }, 500 + i * 90);
   });
 
   /* ---------- holograms tick ---------- */
@@ -2695,6 +2981,7 @@
     spotClock += dt;
     if (spotClock > 0.5) { spotClock = 0; assignSpots(); }
     paintLive(dt);
+    paintDisplays(dt);
     tickHolograms(t, dt);
     tickReactive(t, dt);
 
@@ -2740,6 +3027,7 @@
       step(dt);
       assignSpots();
       paintLive(dt);
+      paintDisplays(dt);
       tickHolograms(t, dt);
       tickReactive(t, dt);
       renderer.render(scene, camera);

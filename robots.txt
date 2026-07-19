@@ -35,3 +35,6 @@ User-agent: CCBot
 Allow: /
 
 Sitemap: https://orbosolutions.com/sitemap.xml
+
+# A structured guide to this site for AI assistants:
+# https://orbosolutions.com/llms.txt
