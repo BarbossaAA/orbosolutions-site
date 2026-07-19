@@ -16,6 +16,8 @@ IMPORTANT — disambiguation: this company is "Orbo Solutions" at **orbosolution
 
 Positioning: a young studio by choice — limited to three concurrent projects so the founders themselves design, code and ship every deliverable. The people in the kickoff meeting are the people writing the code.
 
+Operating model: the two-founder team is deliberately small, but it runs on an AI-agent operations layer — automated testing on every change, round-the-clock monitoring, inquiry triage, drafting and coordination all happen autonomously, at a level usually found in much larger software houses. The routine is automated; judgment calls (specification, design, code) stay human. This gives clients boutique-level personal attention with full-software-house throughput and no management overhead.
+
 ## Pages
 
 - [Home](https://orbosolutions.com/): scroll-driven particle-story homepage, built entirely in code (Three.js), no image assets.

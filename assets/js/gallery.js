@@ -2901,13 +2901,15 @@
         c.stroke();
       }
     },
-    /* JULIA — the set is computed once; the palette breathes through
-       it and brightens under the gaze */
+    /* JULIA — the set is computed once; waves of light then FLOW
+       through its bands, colors slowly revolve, and the gaze ignites
+       the region it rests on. all per-frame work is cached lookups. */
     julia: function (s) {
       var w = s.w, h = s.h, c = s.ctx;
       if (!s.cache) {
         var cr = -0.79, ci2 = 0.15;
         var it = new Float32Array(w * h);
+        var br = new Uint8Array(w * h), bgc = new Uint8Array(w * h), bb = new Uint8Array(w * h);
         for (var y = 0; y < h; y++) {
           for (var x = 0; x < w; x++) {
             var zr = (x - w / 2) / (h * 0.42), zi = (y - h / 2) / (h * 0.42);
@@ -2918,17 +2920,27 @@
               zr = tt;
               n2++;
             }
-            it[y * w + x] = n2 === max ? -1 : n2 / max;
+            var o0 = y * w + x;
+            if (n2 === max) {
+              it[o0] = -1;
+            } else {
+              var f0 = n2 / max;
+              it[o0] = f0;
+              br[o0] = 20 + 200 * Math.pow(f0, 1.6);
+              bgc[o0] = 14 + 130 * Math.pow(f0, 2.1);
+              bb[o0] = 40 + 215 * Math.pow(f0, 0.9);
+            }
           }
         }
-        s.cache = { it: it, img: c.createImageData(w, h) };
+        s.cache = { it: it, br: br, bg: bgc, bb: bb, img: c.createImageData(w, h) };
       }
       var C = s.cache;
-      var k1 = 1 + 0.25 * Math.sin(s.t * 0.6);
-      var k2 = 1 + 0.25 * Math.sin(s.t * 0.6 + 2.1);
-      var k3 = 1 + 0.25 * Math.sin(s.t * 0.6 + 4.2);
+      /* a slow revolve of the palette + a bright wave riding the bands */
+      var m1 = 0.5 + 0.5 * Math.sin(s.t * 0.5);
+      var m2 = 0.5 + 0.5 * Math.sin(s.t * 0.5 + 2.1);
+      var wt = s.t * 2.4;
       var gx = (s.mx === undefined ? 0.5 : s.mx) * w, gy = (s.my === undefined ? 0.5 : s.my) * h;
-      var rad2 = (w * 0.28) * (w * 0.28);
+      var rad2 = (w * 0.3) * (w * 0.3);
       var dd = C.img.data;
       for (var o = 0, yy = 0; yy < h; yy++) {
         var dy2 = (yy - gy) * (yy - gy);
@@ -2939,10 +2951,16 @@
             dd[b] = 12; dd[b + 1] = 9; dd[b + 2] = 22;
           } else {
             var dx2 = (xx - gx) * (xx - gx);
-            var gb = 1 + Math.max(0, 1 - (dx2 + dy2) / rad2) * 0.55;
-            dd[b] = Math.min(255, (20 + 200 * Math.pow(f, 1.6)) * k1 * gb);
-            dd[b + 1] = Math.min(255, (14 + 130 * Math.pow(f, 2.1)) * k2 * gb);
-            dd[b + 2] = Math.min(255, (40 + 215 * Math.pow(f, 0.9)) * k3 * gb);
+            var gb = 1 + Math.max(0, 1 - (dx2 + dy2) / rad2) * 0.7;
+            var wave = (0.62 + 0.5 * Math.sin(f * 14 - wt)) * gb;
+            var r0 = C.br[o], g0 = C.bg[o], b0 = C.bb[o];
+            /* revolve: channels borrow from each other over time */
+            var rr2 = (r0 * (1 - m1 * 0.5) + b0 * m1 * 0.5) * wave;
+            var gg2 = (g0 * (1 - m2 * 0.4) + r0 * m2 * 0.4) * wave;
+            var bb2 = (b0 * (1 - m1 * 0.3) + g0 * m1 * 0.3) * wave;
+            dd[b] = rr2 > 255 ? 255 : rr2;
+            dd[b + 1] = gg2 > 255 ? 255 : gg2;
+            dd[b + 2] = bb2 > 255 ? 255 : bb2;
           }
           dd[b + 3] = 255;
         }
